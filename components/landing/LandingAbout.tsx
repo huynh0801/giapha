@@ -4,9 +4,20 @@ import { ArrowRight } from "lucide-react";
 
 export default function LandingAbout() {
   return (
-    <div className="relative overflow-hidden rounded-3xl bg-[#fcf5e5] border border-[#e2d0a8] shadow-[0_4px_20px_rgba(44,26,17,0.05)] flex flex-col md:flex-row items-stretch h-full">
+    <div className="relative overflow-hidden rounded-3xl border border-[#e2d0a8] shadow-[0_4px_20px_rgba(44,26,17,0.05)] flex flex-col md:flex-row items-stretch h-full bg-[#fdf6e7]">
+      {/* Authentic parchment background with built-in cloud watermark */}
+      <div className="pointer-events-none absolute inset-0 z-0 select-none">
+        <Image
+          src="/images/landing/about-parchment.png"
+          alt="Nền giấy dó"
+          fill
+          sizes="(max-width: 768px) 100vw, 55vw"
+          className="object-cover object-right"
+        />
+      </div>
+
       {/* Temple Artwork on the Left - Full bleed to top, bottom, and left */}
-      <div className="relative w-full md:w-[46%] min-h-[220px] md:min-h-full shrink-0 overflow-hidden">
+      <div className="relative z-10 w-full md:w-[46%] min-h-[220px] md:min-h-full shrink-0 overflow-hidden">
         <Image
           src="/images/landing/about-temple.png"
           alt="Nhà thờ từ đường dòng họ"
@@ -44,17 +55,6 @@ export default function LandingAbout() {
             <ArrowRight className="size-3.5 sm:size-4 transition-transform duration-200 group-hover:translate-x-1" />
           </Link>
         </div>
-      </div>
-
-      {/* Decorative Cloud Ornament at bottom right */}
-      <div className="pointer-events-none absolute bottom-0 right-0 w-28 sm:w-36 h-20 sm:h-24 opacity-80 z-0">
-        <Image
-          src="/images/landing/cloud-ornament.png"
-          alt="Họa tiết mây trang trí"
-          fill
-          sizes="144px"
-          className="object-contain object-bottom-right"
-        />
       </div>
     </div>
   );
