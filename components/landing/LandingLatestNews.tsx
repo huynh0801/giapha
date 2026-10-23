@@ -71,6 +71,7 @@ export default function LandingLatestNews({ news }: LandingLatestNewsProps) {
                   src={item.imageUrl}
                   alt={item.title}
                   fill
+                  unoptimized={item.imageUrl.startsWith("http")}
                   className="object-cover transition-transform duration-300 group-hover:scale-105"
                 />
               ) : (
