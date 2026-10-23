@@ -207,3 +207,43 @@ export async function signOutAction(): Promise<{ success: boolean; error?: strin
     };
   }
 }
+
+
+export interface HeaderAuthUser {
+  id: string;
+  email?: string | null;
+  fullName?: string | null;
+  role: "system_admin" | "member";
+  avatarUrl?: string | null;
+}
+
+export async function getCurrentUserAction(): Promise<HeaderAuthUser | null> {
+  try {
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) return null;
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("id, full_name, role, avatar_url, is_active")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (!profile || !profile.is_active) return null;
+
+    return {
+      id: user.id,
+      email: user.email || null,
+      fullName: profile.full_name || null,
+      role: profile.role || "member",
+      avatarUrl: profile.avatar_url || null,
+    };
+  } catch (error) {
+    console.error("Error in getCurrentUserAction:", error);
+    return null;
+  }
+}

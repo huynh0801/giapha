@@ -7,6 +7,7 @@ import LandingFooter from "@/components/landing/LandingFooter";
 import type { LandingNewsItem } from "@/components/landing/types";
 import { BlogPost } from "@/types";
 import { getPublicSupabase } from "@/utils/supabase/queries";
+import { getCurrentUserAction } from "@/app/actions/auth";
 import { unstable_cache } from "next/cache";
 import Link from "next/link";
 
@@ -73,12 +74,15 @@ const getLatestSystemNews = unstable_cache(
 );
 
 export default async function GiaPhaHomePage() {
-  const newsItems = await getLatestSystemNews();
+  const [newsItems, currentUser] = await Promise.all([
+    getLatestSystemNews(),
+    getCurrentUserAction(),
+  ]);
 
   return (
     <div className="min-h-screen flex flex-col bg-[#f5e7c7] text-[#2c1a11] selection:bg-[#8c1d1d] selection:text-white">
       {/* 1. Header Navigation */}
-      <LandingHeader />
+      <LandingHeader currentUser={currentUser} />
 
       <main className="flex-1 flex flex-col">
         {/* 2. Hero Section */}

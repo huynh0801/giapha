@@ -2,9 +2,31 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Search, Menu, X } from "lucide-react";
-import { useState } from "react";
-import { usePathname } from "next/navigation";
+import {
+  Building2,
+  ChevronDown,
+  FileText,
+  FolderTree,
+  Info,
+  KeyRound,
+  LayoutDashboard,
+  LogIn,
+  LogOut,
+  Menu,
+  Newspaper,
+  Search,
+  ShieldCheck,
+  User,
+  Users,
+  X,
+} from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import {
+  getCurrentUserAction,
+  signOutAction,
+  type HeaderAuthUser,
+} from "@/app/actions/auth";
 
 const navItems = [
   { label: "Trang chủ", href: "/" },
@@ -15,14 +37,80 @@ const navItems = [
   { label: "Liên hệ", href: "/about" },
 ];
 
-export default function LandingHeader() {
+export interface LandingHeaderProps {
+  currentUser?: HeaderAuthUser | null;
+}
+
+export default function LandingHeader({ currentUser: initialUser }: LandingHeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const [user, setUser] = useState<HeaderAuthUser | null | undefined>(initialUser);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
   const pathname = usePathname();
+  const router = useRouter();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Sync if prop changes or fetch client-side if not passed
+  useEffect(() => {
+    if (initialUser !== undefined) {
+      setUser(initialUser);
+      return;
+    }
+    let mounted = true;
+    getCurrentUserAction().then((fetched) => {
+      if (mounted) setUser(fetched);
+    });
+    return () => {
+      mounted = false;
+    };
+  }, [initialUser]);
+
+  // Close dropdown on outside click or Esc
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setUserDropdownOpen(false);
+      }
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setUserDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await signOutAction();
+      setUser(null);
+      setUserDropdownOpen(false);
+      setMobileMenuOpen(false);
+      router.push("/");
+      router.refresh();
+    } catch (err) {
+      console.error("Lỗi đăng xuất:", err);
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
 
   const isItemActive = (href: string, label: string) => {
     if (!pathname) return href === "/";
     if (href === "/") return pathname === "/";
-    if (href === "/news") return pathname.startsWith("/news") || pathname.startsWith("/blog");
+    if (href === "/news") {
+      return pathname.startsWith("/news") || pathname.startsWith("/blog");
+    }
     if (href === "/about") {
       if (label === "Liên hệ") return false;
       return pathname.startsWith("/about");
@@ -31,12 +119,17 @@ export default function LandingHeader() {
     return pathname === href;
   };
 
+  const userInitial = (
+    user?.fullName?.[0] ||
+    user?.email?.[0] ||
+    "U"
+  ).toUpperCase();
+
   return (
     <header className="relative z-30 w-full bg-[#f5e7c7] border-b border-[#e2d0a8]/70">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Brand / Logo */}
         <Link href="/" className="flex items-center gap-3.5 group">
-          {/* Logo from icon folder */}
           <div className="relative size-12 shrink-0 overflow-hidden rounded-xl">
             <Image
               src="/images/landing/logo.png"
@@ -51,7 +144,10 @@ export default function LandingHeader() {
           <div className="flex flex-col">
             <span
               className="text-2xl sm:text-3xl lg:text-[2rem] font-bold tracking-tight text-[#183b28] group-hover:text-[#8c1d1d] transition-colors leading-tight"
-              style={{ fontFamily: '"SVN-Studio Brush", "Playfair Display", Georgia, serif' }}
+              style={{
+                fontFamily:
+                  '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
+              }}
             >
               Gia Phả Dòng Họ
             </span>
@@ -84,7 +180,7 @@ export default function LandingHeader() {
           })}
         </nav>
 
-        {/* Right Actions: Search & Ornamental cloud / Admin */}
+        {/* Right Actions: Search & Auth / Profile */}
         <div className="flex items-center gap-3 sm:gap-4">
           <Link
             href="/news"
@@ -106,12 +202,191 @@ export default function LandingHeader() {
             />
           </div>
 
-          <Link
-            href="/admin"
-            className="hidden sm:inline-flex items-center rounded-full bg-[#f4ece0] border border-[#d8cbbb] px-4 py-2 font-sans text-xs sm:text-sm font-bold text-[#6a4f3b] hover:bg-[#8c1d1d] hover:text-white hover:border-[#8c1d1d] transition-all shadow-xs"
-          >
-            Quản trị
-          </Link>
+          {/* Desktop Auth State: Login button or Profile Dropdown */}
+          {user === undefined ? (
+            // Placeholder while resolving to prevent layout flicker
+            <div className="hidden sm:inline-block size-9" />
+          ) : user === null ? (
+            <Link
+              href="/login"
+              className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-[#8c1d1d] hover:bg-[#a62424] active:scale-[0.98] text-[#fffcf5] px-4 py-2 font-sans text-xs sm:text-sm font-bold shadow-xs transition-all duration-200"
+            >
+              <LogIn className="size-4" />
+              <span>Đăng nhập</span>
+            </Link>
+          ) : (
+            <div className="relative" ref={dropdownRef}>
+              <button
+                type="button"
+                onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                className="hidden sm:inline-flex items-center gap-2 rounded-full border border-[#d8cbbb] bg-[#fbf7ee] py-1 pl-1 pr-3 hover:border-[#8c1d1d] hover:bg-white transition-all shadow-xs group"
+                aria-label="Tài khoản người dùng"
+              >
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#800000] text-white font-bold text-xs overflow-hidden shadow-xs">
+                  {user.avatarUrl ? (
+                    <img
+                      src={user.avatarUrl}
+                      alt="Avatar"
+                      className="size-full object-cover"
+                    />
+                  ) : (
+                    userInitial
+                  )}
+                </div>
+                <span className="max-w-[120px] truncate text-xs font-bold text-[#3c2f25] group-hover:text-[#800000]">
+                  {user.fullName || user.email?.split("@")[0] || "Tài khoản"}
+                </span>
+                <ChevronDown
+                  className={`size-3.5 text-[#7d6c5d] transition-transform duration-200 ${
+                    userDropdownOpen ? "rotate-180 text-[#800000]" : ""
+                  }`}
+                />
+              </button>
+
+              {/* Profile Dropdown Menu */}
+              {userDropdownOpen && (
+                <div className="absolute right-0 top-full mt-2 w-72 rounded-2xl bg-[#fffdf8] border border-[#e2d0a8] shadow-[0_16px_40px_rgba(58,31,19,0.14)] overflow-hidden z-50 text-[#2c1a11] animate-in fade-in zoom-in-95 duration-150">
+                  {/* Dropdown Header */}
+                  <div className="bg-[#f5e7c7]/60 border-b border-[#e2d0a8]/70 px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#800000] text-white font-bold text-sm shadow-xs overflow-hidden">
+                        {user.avatarUrl ? (
+                          <img
+                            src={user.avatarUrl}
+                            alt="Avatar"
+                            className="size-full object-cover"
+                          />
+                        ) : (
+                          userInitial
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-bold text-[#2c1a11]">
+                          {user.fullName || user.email}
+                        </p>
+                        {user.fullName && user.email && (
+                          <p className="truncate text-xs text-[#7d6c5d]">
+                            {user.email}
+                          </p>
+                        )}
+                        <div className="mt-1 flex items-center gap-1.5">
+                          {user.role === "system_admin" ? (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-[#800000]">
+                              <ShieldCheck className="size-3" />
+                              Quản trị hệ thống
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-amber-800">
+                              <User className="size-3" />
+                              Thành viên dòng họ
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Menu Items according to Role */}
+                  <div className="p-2 space-y-0.5 text-xs sm:text-sm font-sans font-semibold">
+                    {user.role === "system_admin" ? (
+                      <>
+                        <Link
+                          href="/dashboard"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[#3c2f25] hover:bg-[#f5e7c7] hover:text-[#800000] transition-colors"
+                        >
+                          <FolderTree className="size-4 text-[#800000]" />
+                          <span>Không gian gia phả</span>
+                        </Link>
+                        <Link
+                          href="/admin"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[#3c2f25] hover:bg-[#f5e7c7] hover:text-[#800000] transition-colors"
+                        >
+                          <LayoutDashboard className="size-4 text-[#800000]" />
+                          <span>Bảng quản trị hệ thống</span>
+                        </Link>
+                        <Link
+                          href="/admin/families"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[#3c2f25] hover:bg-[#f5e7c7] hover:text-[#800000] transition-colors"
+                        >
+                          <Building2 className="size-4 text-[#800000]" />
+                          <span>Quản trị dòng họ</span>
+                        </Link>
+                        <Link
+                          href="/admin/users"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[#3c2f25] hover:bg-[#f5e7c7] hover:text-[#800000] transition-colors"
+                        >
+                          <Users className="size-4 text-[#800000]" />
+                          <span>Quản lý người dùng</span>
+                        </Link>
+                        <Link
+                          href="/admin/blog"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[#3c2f25] hover:bg-[#f5e7c7] hover:text-[#800000] transition-colors"
+                        >
+                          <FileText className="size-4 text-[#800000]" />
+                          <span>Bài viết & Tin tức</span>
+                        </Link>
+                        <Link
+                          href="/admin/change-password"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[#3c2f25] hover:bg-[#f5e7c7] hover:text-[#800000] transition-colors"
+                        >
+                          <KeyRound className="size-4 text-[#800000]" />
+                          <span>Đổi mật khẩu</span>
+                        </Link>
+                      </>
+                    ) : (
+                      <>
+                        <Link
+                          href="/dashboard"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[#3c2f25] hover:bg-[#f5e7c7] hover:text-[#800000] transition-colors"
+                        >
+                          <FolderTree className="size-4 text-[#800000]" />
+                          <span>Không gian gia phả</span>
+                        </Link>
+                        <Link
+                          href="/dashboard/about"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[#3c2f25] hover:bg-[#f5e7c7] hover:text-[#800000] transition-colors"
+                        >
+                          <Info className="size-4 text-[#800000]" />
+                          <span>Hồ sơ dòng họ</span>
+                        </Link>
+                        <Link
+                          href="/news"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[#3c2f25] hover:bg-[#f5e7c7] hover:text-[#800000] transition-colors"
+                        >
+                          <Newspaper className="size-4 text-[#800000]" />
+                          <span>Tin tức & Sự kiện</span>
+                        </Link>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Dropdown Footer: Logout button */}
+                  <div className="border-t border-[#e2d0a8]/70 p-2 bg-[#fbf7ee]">
+                    <button
+                      type="button"
+                      onClick={handleLogout}
+                      disabled={isLoggingOut}
+                      className="flex w-full items-center gap-2.5 px-3 py-2 rounded-xl text-rose-700 hover:bg-rose-50 font-bold text-xs sm:text-sm transition-colors disabled:opacity-60"
+                    >
+                      <LogOut className="size-4" />
+                      <span>
+                        {isLoggingOut ? "Đang đăng xuất..." : "Đăng xuất"}
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Mobile hamburger */}
           <button
@@ -120,7 +395,11 @@ export default function LandingHeader() {
             aria-label="Menu"
             className="md:hidden flex size-9 items-center justify-center rounded-lg text-[#2c1a11] hover:bg-[#ede5d5]"
           >
-            {mobileMenuOpen ? <X className="size-6" /> : <Menu className="size-6" />}
+            {mobileMenuOpen ? (
+              <X className="size-6" />
+            ) : (
+              <Menu className="size-6" />
+            )}
           </button>
         </div>
       </div>
@@ -145,15 +424,130 @@ export default function LandingHeader() {
               </Link>
             );
           })}
-          <div className="pt-2 border-t border-[#e8dfcf]/60 flex gap-2">
-            <Link
-              href="/admin"
-              onClick={() => setMobileMenuOpen(false)}
-              className="w-full text-center py-2.5 rounded-xl bg-[#8c1d1d] text-white font-sans font-bold text-sm"
-            >
-              Đăng nhập Quản trị
-            </Link>
-          </div>
+
+          {/* Mobile Auth Section */}
+          {user ? (
+            <div className="pt-3 border-t border-[#e2d0a8]/80 space-y-2">
+              <div className="flex items-center gap-3 px-3 py-2 rounded-xl bg-[#fffdf8] border border-[#e2d0a8]/60">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#800000] text-white font-bold text-sm shadow-xs overflow-hidden">
+                  {user.avatarUrl ? (
+                    <img
+                      src={user.avatarUrl}
+                      alt="Avatar"
+                      className="size-full object-cover"
+                    />
+                  ) : (
+                    userInitial
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-bold text-[#2c1a11]">
+                    {user.fullName || user.email}
+                  </p>
+                  <span className="inline-block mt-0.5 text-[10px] font-extrabold uppercase tracking-wide text-[#800000]">
+                    {user.role === "system_admin"
+                      ? "Quản trị hệ thống"
+                      : "Thành viên dòng họ"}
+                  </span>
+                </div>
+              </div>
+
+              {user.role === "system_admin" ? (
+                <>
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-lg font-sans text-sm font-bold text-[#3c2f25] hover:bg-[#ede5d5]"
+                  >
+                    <FolderTree className="size-4 text-[#800000]" />
+                    Không gian gia phả
+                  </Link>
+                  <Link
+                    href="/admin"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-lg font-sans text-sm font-bold text-[#3c2f25] hover:bg-[#ede5d5]"
+                  >
+                    <LayoutDashboard className="size-4 text-[#800000]" />
+                    Bảng quản trị hệ thống
+                  </Link>
+                  <Link
+                    href="/admin/families"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-lg font-sans text-sm font-bold text-[#3c2f25] hover:bg-[#ede5d5]"
+                  >
+                    <Building2 className="size-4 text-[#800000]" />
+                    Quản trị dòng họ
+                  </Link>
+                  <Link
+                    href="/admin/users"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-lg font-sans text-sm font-bold text-[#3c2f25] hover:bg-[#ede5d5]"
+                  >
+                    <Users className="size-4 text-[#800000]" />
+                    Quản lý người dùng
+                  </Link>
+                  <Link
+                    href="/admin/blog"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-lg font-sans text-sm font-bold text-[#3c2f25] hover:bg-[#ede5d5]"
+                  >
+                    <FileText className="size-4 text-[#800000]" />
+                    Bài viết & Tin tức
+                  </Link>
+                  <Link
+                    href="/admin/change-password"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-lg font-sans text-sm font-bold text-[#3c2f25] hover:bg-[#ede5d5]"
+                  >
+                    <KeyRound className="size-4 text-[#800000]" />
+                    Đổi mật khẩu
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-lg font-sans text-sm font-bold text-[#3c2f25] hover:bg-[#ede5d5]"
+                  >
+                    <FolderTree className="size-4 text-[#800000]" />
+                    Không gian gia phả
+                  </Link>
+                  <Link
+                    href="/dashboard/about"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-lg font-sans text-sm font-bold text-[#3c2f25] hover:bg-[#ede5d5]"
+                  >
+                    <Info className="size-4 text-[#800000]" />
+                    Hồ sơ dòng họ
+                  </Link>
+                </>
+              )}
+
+              <button
+                type="button"
+                onClick={handleLogout}
+                disabled={isLoggingOut}
+                className="flex w-full items-center justify-center gap-2 py-2.5 rounded-xl bg-rose-50 text-rose-700 font-sans font-bold text-sm border border-rose-200 transition hover:bg-rose-100 disabled:opacity-60"
+              >
+                <LogOut className="size-4" />
+                <span>
+                  {isLoggingOut ? "Đang đăng xuất..." : "Đăng xuất"}
+                </span>
+              </button>
+            </div>
+          ) : (
+            <div className="pt-2 border-t border-[#e8dfcf]/60 flex gap-2">
+              <Link
+                href="/login"
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#8c1d1d] text-white font-sans font-bold text-sm shadow-xs transition hover:bg-[#a62424]"
+              >
+                <LogIn className="size-4" />
+                <span>Đăng nhập</span>
+              </Link>
+            </div>
+          )}
         </div>
       )}
     </header>

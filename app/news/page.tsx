@@ -4,6 +4,7 @@ import { CalendarDays } from "lucide-react";
 import Link from "next/link";
 import LandingHeader from "@/components/landing/LandingHeader";
 import LandingFooter from "@/components/landing/LandingFooter";
+import { getCurrentUserAction } from "@/app/actions/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -33,7 +34,10 @@ export const metadata = {
 };
 
 export default async function NewsPage() {
-  const supabase = await getSupabase();
+  const [supabase, currentUser] = await Promise.all([
+    getSupabase(),
+    getCurrentUserAction(),
+  ]);
   const { data } = await supabase
     .from("blog_posts")
     .select(
@@ -48,7 +52,7 @@ export default async function NewsPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#f5e7c7] text-[#2c1a11]">
-      <LandingHeader />
+      <LandingHeader currentUser={currentUser} />
 
       <main className="flex-1">
         <section className="mx-auto max-w-6xl px-4 pb-16 pt-10 sm:px-6 md:pt-14 lg:px-8">

@@ -10,6 +10,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import LandingHeader from "@/components/landing/LandingHeader";
 import LandingFooter from "@/components/landing/LandingFooter";
+import { getCurrentUserAction } from "@/app/actions/auth";
 
 // Prevent Next.js from caching this page — always fetch fresh data.
 // Fixes: soft reload (F5) serving stale RSC payload that causes CSS/image mismatches.
@@ -96,7 +97,10 @@ export async function generateMetadata({ params }: PageProps) {
 
 export default async function BlogDetailPage({ params }: PageProps) {
   const { slug } = await params;
-  const supabase = await getSupabase();
+  const [supabase, currentUser] = await Promise.all([
+    getSupabase(),
+    getCurrentUserAction(),
+  ]);
 
   const { data, error } = await supabase
     .from("blog_posts")
@@ -128,7 +132,7 @@ export default async function BlogDetailPage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#f5e7c7] text-[#2c1a11]">
-      <LandingHeader />
+      <LandingHeader currentUser={currentUser} />
 
       <main className="flex-1">
         <article>
