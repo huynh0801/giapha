@@ -129,7 +129,7 @@ export default async function FamilyDirectoryDetailPage({ params }: PageProps) {
             </div>
             <p className="mt-5 max-w-3xl text-sm leading-6 text-stone-600">
               {family.public_description ||
-                "Dòng họ này đang để phần giới thiệu ở chế độ riêng tư. Bạn vẫn có thể gửi yêu cầu tham gia để Admin dòng họ xem xét."}
+                "Dòng họ này đang để phần giới thiệu ở chế độ riêng tư. Bạn vẫn có thể gửi yêu cầu tham gia để Người phụ trách dòng họ xem xét."}
             </p>
           </div>
 
@@ -169,7 +169,7 @@ export default async function FamilyDirectoryDetailPage({ params }: PageProps) {
           </div>
           <div className="rounded-2xl bg-stone-50 p-4">
             <p className="text-xs font-black uppercase text-stone-400">
-              Admin dòng họ
+              Người phụ trách
             </p>
             <p className="mt-1 whitespace-pre-line text-sm font-bold leading-6 text-stone-800">
               {family.admin_names || "Chưa cập nhật"}
@@ -179,7 +179,7 @@ export default async function FamilyDirectoryDetailPage({ params }: PageProps) {
                 href={`/dashboard/${family.slug}/admins`}
                 className="mt-3 inline-flex items-center justify-center rounded-full bg-white px-3 py-2 text-xs font-black text-[#800000] shadow-sm ring-1 ring-amber-200 transition hover:bg-amber-50"
               >
-                Xem danh sách quản trị viên
+                Xem ban phụ trách dòng họ
               </Link>
             )}
           </div>
@@ -243,8 +243,8 @@ export default async function FamilyDirectoryDetailPage({ params }: PageProps) {
         </div>
         <p>
           Dữ liệu cây gia phả, hồ sơ tổ tiên, sự kiện và tài liệu chỉ mở cho
-          thành viên active của đúng dòng họ này. Người ngoài chỉ xem được phần
-          thông tin mà Admin dòng họ cho phép công khai.
+          thành viên chính thức của đúng dòng họ này. Người ngoài chỉ xem được phần
+          thông tin mà Người phụ trách dòng họ cho phép công khai.
         </p>
       </section>
     </main>

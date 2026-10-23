@@ -36,7 +36,7 @@ const sectionMeta: Record<
   events: { label: "Sự kiện", icon: CalendarDays },
   about: { label: "Hồ sơ dòng họ", icon: FileText },
   blog: { label: "Bảng tin nội bộ", icon: BookOpen },
-  admins: { label: "Quản trị viên", icon: UserCog },
+  admins: { label: "Người phụ trách", icon: UserCog },
   trees: { label: "Quản lý cây", icon: FolderTree },
   requests: { label: "Yêu cầu tham gia", icon: Home },
   lineage: { label: "Thứ tự gia phả", icon: Home },
@@ -89,7 +89,7 @@ export default function WorkspaceBreadcrumb({
 
   return (
     <nav
-      aria-label="Điều hướng trong workspace dòng họ"
+      aria-label="Điều hướng trong không gian dòng họ"
       className="sticky top-20 z-20 border-b border-amber-100/80 bg-[#fffdf8]/94 shadow-[0_8px_24px_rgba(58,31,19,0.05)] backdrop-blur-xl"
     >
       <div className="mx-auto flex w-full max-w-7xl px-4 py-2 sm:px-6 lg:px-8">

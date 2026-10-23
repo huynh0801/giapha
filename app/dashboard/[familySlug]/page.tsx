@@ -191,9 +191,9 @@ export default async function FamilyDashboardPage({
       iconColor: "text-[#92540b]",
     },
     {
-      title: "Quản trị viên",
+      title: "Người phụ trách",
       description:
-        "Xem người phụ trách dòng họ; Quản trị chính có thể thêm hoặc bỏ Quản trị phụ.",
+        "Xem danh sách người phụ trách dòng họ; Phụ trách chính có thể thêm hoặc bớt người hỗ trợ.",
       href: `${base}/admins`,
       icon: <UserCog className="size-6" />,
       iconBg: "bg-[#f5e7c7]",
@@ -343,14 +343,14 @@ export default async function FamilyDashboardPage({
             </div>
             <div className="flex items-center gap-3">
               <HeritageBadge variant="amber">
-                {adminContacts.length} admin
+                {adminContacts.length} người phụ trách
               </HeritageBadge>
               <Link
                 href={`${base}/admins`}
                 className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#deb887] bg-[#fffdf7] px-4 py-2 text-xs sm:text-sm font-black text-[#5c4a3e] shadow-xs transition hover:bg-[#f5e7c7]/60 hover:text-[#8c1d1d]"
               >
                 <UserCog className="size-4 text-[#8c1d1d]" />
-                Mở quản trị viên
+                Xem ban phụ trách
               </Link>
             </div>
           </div>
@@ -358,7 +358,7 @@ export default async function FamilyDashboardPage({
           <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
             {adminContacts.length === 0 ? (
               <div className="rounded-xl border border-dashed border-[#deb887] bg-[#fffdf7] px-4 py-3 text-sm font-semibold text-[#7a6455]">
-                Chưa có quản trị viên active.
+                Chưa có người phụ trách.
               </div>
             ) : (
               adminContacts.map((admin) => (
@@ -368,14 +368,14 @@ export default async function FamilyDashboardPage({
                 >
                   <div className="flex items-start justify-between gap-3">
                     <p className="font-bold text-base text-[#183b28]">
-                      {admin.full_name || "Admin dòng họ"}
+                      {admin.full_name || "Người phụ trách"}
                     </p>
                     <HeritageBadge
                       variant={admin.is_primary_admin ? "crimson" : "jade"}
                     >
                       {admin.is_primary_admin
-                        ? "Quản trị chính"
-                        : "Quản trị phụ"}
+                        ? "Phụ trách chính"
+                        : "Phụ trách phụ"}
                     </HeritageBadge>
                   </div>
 
@@ -445,9 +445,9 @@ export default async function FamilyDashboardPage({
                   '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
               }}
             >
-              Quản trị dòng họ
+              Nghiệp vụ dòng họ
             </h2>
-            <HeritageBadge variant="crimson">Công cụ Quản trị</HeritageBadge>
+            <HeritageBadge variant="crimson">Công cụ phụ trách</HeritageBadge>
           </div>
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
             {adminFeatures.map((feature) => (

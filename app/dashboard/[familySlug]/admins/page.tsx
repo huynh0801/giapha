@@ -22,7 +22,7 @@ type AdminContactRow = {
 };
 
 export const metadata = {
-  title: "Quản trị viên dòng họ",
+  title: "Người phụ trách dòng họ",
 };
 
 export default async function FamilyAdminsPage({ params }: PageProps) {

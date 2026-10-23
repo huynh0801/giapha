@@ -52,7 +52,7 @@ interface PageProps {
 function roleLabel(role?: string | null, isPrimaryAdmin?: boolean | null, isSystemAdmin?: boolean) {
   if (isSystemAdmin) return "Quản trị hệ thống";
   if (role === "family_admin") {
-    return isPrimaryAdmin ? "Quản trị chính" : "Quản trị phụ";
+    return isPrimaryAdmin ? "Phụ trách chính" : "Phụ trách phụ";
   }
   if (role === "member") return "Thành viên";
   return "Chưa có quyền";
@@ -143,7 +143,7 @@ export default async function DashboardFamilySwitcherPage({
       <div className="mb-8 text-center sm:text-left">
         <div className="inline-flex items-center gap-2 rounded-full border border-[#deb887] bg-[#f5e7c7]/50 px-3.5 py-1 text-xs font-black uppercase tracking-[0.2em] text-[#8c1d1d]">
           <FolderTree className="size-3.5" />
-          Không gian làm việc
+          Không gian gia tộc
         </div>
         <h1
           className="mt-3 text-3xl sm:text-4xl lg:text-5xl font-black text-[#183b28] tracking-tight leading-tight"
@@ -156,8 +156,8 @@ export default async function DashboardFamilySwitcherPage({
         </h1>
         <p className="mt-3 max-w-3xl text-sm leading-relaxed text-[#5c4a3e]">
           Dữ liệu gia phả mặc định là riêng tư. Bạn chỉ xem đầy đủ cây gia phả,
-          hồ sơ tổ tiên và sự kiện khi đã được Admin dòng họ duyệt quyền thành
-          viên active.
+          hồ sơ tổ tiên và sự kiện khi đã được Người phụ trách dòng họ duyệt quyền thành
+          viên chính thức.
         </p>
       </div>
 
@@ -165,7 +165,7 @@ export default async function DashboardFamilySwitcherPage({
         <div className="mb-6 rounded-xl border-2 border-[#183b28]/30 bg-[#eaf3ed] p-4 text-sm font-bold text-[#183b28] shadow-xs flex items-center gap-3">
           <CheckCircle2 className="size-5 text-[#183b28] shrink-0" />
           <span>
-            Yêu cầu tham gia đã được gửi. Admin dòng họ sẽ xem xét và duyệt quyền
+            Yêu cầu tham gia đã được gửi. Người phụ trách dòng họ sẽ xem xét và phê duyệt
             cho bạn.
           </span>
         </div>
@@ -245,7 +245,7 @@ export default async function DashboardFamilySwitcherPage({
                     </HeritageBadge>
                     {canManage && (
                       <HeritageBadge variant="jade">
-                        Có quyền quản trị
+                        Quyền phụ trách dòng họ
                       </HeritageBadge>
                     )}
                     <HeritageBadge variant="neutral">
@@ -364,13 +364,13 @@ export default async function DashboardFamilySwitcherPage({
 
                   <p className="mt-3.5 line-clamp-3 text-sm leading-relaxed text-[#5c4a3e]">
                     {family.public_description ||
-                      "Dòng họ này đang để thông tin giới thiệu ở chế độ riêng tư. Bạn có thể gửi yêu cầu tham gia để Admin dòng họ xem xét."}
+                      "Dòng họ này đang để thông tin giới thiệu ở chế độ riêng tư. Bạn có thể gửi yêu cầu tham gia để Người phụ trách dòng họ xem xét."}
                   </p>
 
                   <div className="mt-4 grid gap-2.5 text-sm sm:grid-cols-2">
                     <div className="rounded-xl border border-[#deb887]/40 bg-[#fbf7ed] px-3.5 py-2.5">
                       <p className="text-xs font-black uppercase text-[#7a6455]">
-                        Admin dòng họ
+                        Người phụ trách
                       </p>
                       <p className="mt-1 line-clamp-2 font-bold text-[#183b28]">
                         {family.admin_names || "Chưa cập nhật"}
@@ -401,7 +401,7 @@ export default async function DashboardFamilySwitcherPage({
                       href={`/dashboard/${family.slug}`}
                       className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#183b28] hover:bg-[#122e1f] px-4 py-2.5 text-sm font-black text-white shadow-xs transition-colors"
                     >
-                      Mở workspace
+                      Vào xem gia phả
                       <ArrowRight className="size-4" />
                     </Link>
                   ) : canRequest ? (

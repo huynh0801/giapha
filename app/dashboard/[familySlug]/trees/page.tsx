@@ -69,7 +69,7 @@ export default async function FamilyTreesPage({ params }: PageProps) {
               Cây gia phả của {context.family.name}
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-stone-500">
-              Mỗi dòng họ có thể có nhiều cây, nhưng workspace hiện tại luôn
+              Mỗi dòng họ có thể có nhiều cây, nhưng không gian gia phả hiện tại luôn
               lấy cây được đánh dấu là cây chính để nhập liệu, xem sơ đồ và
               thống kê.
             </p>
