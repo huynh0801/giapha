@@ -54,4 +54,20 @@ test("LandingHero and LandingQuickNav contain mockup copy and navigation items",
   assert.match(navContent, /Liên hệ/);
 });
 
+test("LandingAbout and LandingLatestNews contain expected copy and fallback support", () => {
+  const aboutPath = path.join(process.cwd(), "components", "landing", "LandingAbout.tsx");
+  assert.ok(fs.existsSync(aboutPath), "LandingAbout.tsx should exist");
+  const aboutContent = fs.readFileSync(aboutPath, "utf8");
+  assert.match(aboutContent, /Về dòng họ chúng tôi/);
+  assert.match(aboutContent, /Xem chi tiết/);
+
+  const newsPath = path.join(process.cwd(), "components", "landing", "LandingLatestNews.tsx");
+  assert.ok(fs.existsSync(newsPath), "LandingLatestNews.tsx should exist");
+  const newsContent = fs.readFileSync(newsPath, "utf8");
+  assert.match(newsContent, /Tin tức mới nhất/);
+  assert.match(newsContent, /Xem tất cả/);
+  assert.match(newsContent, /Lễ giỗ Tổ dòng họ/);
+});
+
+
 
