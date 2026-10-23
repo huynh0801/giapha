@@ -8,12 +8,12 @@ export default function LandingAbout() {
       {/* Background: img-detail.png (parchment paper with natural deckle edge and cloud watermark) */}
       <div className="pointer-events-none absolute inset-0 z-0 select-none overflow-hidden rounded-2xl">
         <Image
-          src="/images/landing/about-card-bg.png?v=20261023e"
+          src="/images/landing/about-card-bg.png?v=20261023f"
           alt="Nền giấy dó"
           fill
           unoptimized
           sizes="(max-width: 1024px) 100vw, 70vw"
-          className="object-cover object-right"
+          className="object-cover object-right-top"
           priority
         />
       </div>
