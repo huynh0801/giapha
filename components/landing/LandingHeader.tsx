@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { Search, Menu, X } from "lucide-react";
 import { useState } from "react";
@@ -21,18 +22,26 @@ export default function LandingHeader() {
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Brand / Logo */}
         <Link href="/" className="flex items-center gap-3.5 group">
-          {/* Traditional Red Seal */}
-          <div className="relative flex size-12 items-center justify-center rounded-xl bg-[#8c1d1d] shadow-[0_4px_12px_rgba(140,29,29,0.25)] border-2 border-[#b53a3a]">
-            <span className="text-2xl font-serif font-black text-[#faf2e4] select-none tracking-tight">
-              祖
-            </span>
+          {/* Logo from icon folder */}
+          <div className="relative size-12 shrink-0 overflow-hidden rounded-xl">
+            <Image
+              src="/images/landing/logo.png"
+              alt="Logo Gia Phả Dòng Họ"
+              width={48}
+              height={48}
+              priority
+              className="size-full object-contain drop-shadow-xs"
+            />
           </div>
 
           <div className="flex flex-col">
-            <span className="text-xl sm:text-2xl font-black font-serif tracking-tight text-[#2c1a11] group-hover:text-[#8c1d1d] transition-colors">
+            <span
+              className="text-2xl sm:text-[1.65rem] font-bold tracking-tight text-[#183b28] group-hover:text-[#8c1d1d] transition-colors leading-tight"
+              style={{ fontFamily: '"Playfair Display", Georgia, serif' }}
+            >
               Gia Phả Dòng Họ
             </span>
-            <span className="text-[11px] sm:text-xs font-medium text-[#7a6a5d] tracking-normal">
+            <span className="text-[11px] sm:text-xs font-medium text-[#7a6a5d] tracking-normal mt-0.5">
               Tôn vinh cội nguồn - Gìn giữ truyền thống
             </span>
           </div>
@@ -68,16 +77,15 @@ export default function LandingHeader() {
             <Search className="size-5" />
           </Link>
 
-          {/* Traditional cloud symbol */}
-          <div className="hidden lg:flex items-center text-[#c29b63]">
-            <svg
-              className="size-8"
-              viewBox="0 0 64 64"
-              fill="currentColor"
-              aria-hidden="true"
-            >
-              <path d="M48 38c0-5.52-4.48-10-10-10-1.28 0-2.49.25-3.61.69C32.74 24.16 28.18 21 22.8 21 15.18 21 9 27.18 9 34.8c0 .41.03.82.07 1.22C5.07 37.1 2 40.7 2 45c0 5.52 4.48 10 10 10h36c6.63 0 12-5.37 12-12 0-5.63-3.88-10.36-9.1-11.64.07-.45.1-.9.1-1.36z" opacity="0.85" />
-            </svg>
+          {/* Traditional cloud symbol - reused from footer-clouds */}
+          <div className="hidden lg:flex items-center">
+            <Image
+              src="/images/landing/footer-clouds.png"
+              alt="Họa tiết đám mây"
+              width={54}
+              height={24}
+              className="h-6 w-auto object-contain opacity-85 select-none pointer-events-none"
+            />
           </div>
 
           <Link

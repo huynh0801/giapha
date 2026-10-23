@@ -14,6 +14,7 @@ test("landing assets are present in public/images/landing", () => {
     "about-temple.png",
     "cloud-ornament.png",
     "footer-clouds.png",
+    "logo.png",
   ];
 
   for (const img of requiredImages) {
@@ -28,6 +29,9 @@ test("LandingHeader and LandingFooter export valid React components and required
   const headerContent = fs.readFileSync(headerPath, "utf8");
   assert.match(headerContent, /Gia Phả Dòng Họ/);
   assert.match(headerContent, /Tôn vinh cội nguồn/);
+  assert.match(headerContent, /logo\.png/);
+  assert.match(headerContent, /Playfair Display/);
+  assert.match(headerContent, /footer-clouds\.png/);
   assert.match(headerContent, /\/dashboard/);
   assert.match(headerContent, /\/news/);
 

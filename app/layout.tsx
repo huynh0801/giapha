@@ -1,6 +1,14 @@
 import Footer from "@/components/Footer";
 import VisitTracker from "@/components/VisitTracker";
+import { Playfair_Display } from "next/font/google";
 import "./globals.css";
+
+const playfair = Playfair_Display({
+  subsets: ["latin", "vietnamese"],
+  weight: ["400", "600", "700", "800", "900"],
+  display: "swap",
+  variable: "--font-playfair",
+});
 
 export const metadata = {
   title: "GIA PHẢ DÒNG HỌ",
@@ -19,7 +27,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="vi">
-      <body className="antialiased font-sans">
+      <body className={`${playfair.variable} antialiased font-sans`}>
         <div className="flex min-h-screen flex-col">
           <VisitTracker />
           <div className="flex-1">{children}</div>
