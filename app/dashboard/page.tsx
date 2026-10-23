@@ -140,7 +140,7 @@ export default async function DashboardFamilySwitcherPage({
 
   return (
     <div className="relative flex-1 w-full overflow-hidden">
-      <BackgroundDecor withMid />
+      <BackgroundDecor subtle />
       <main className="relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 py-8 sm:px-6 lg:px-8">
         {/* Heritage Header */}
       <div className="mb-8 text-center sm:text-left">

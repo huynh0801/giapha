@@ -250,7 +250,7 @@ export default async function FamilyDashboardPage({
 
   return (
     <div className="relative flex-1 w-full overflow-hidden">
-      <BackgroundDecor withMid />
+      <BackgroundDecor subtle />
       <main className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-8 sm:px-6 lg:px-8">
         {/* Hero Banner: Identity & Court Calendar framed cleanly */}
       <section className="mb-6">
