@@ -4,8 +4,21 @@ import { ArrowRight } from "lucide-react";
 
 export default function LandingAbout() {
   return (
-    <div className="relative overflow-hidden rounded-2xl flex flex-col lg:flex-row items-stretch w-full h-full flex-1">
-      {/* Left side: img-detail2.png - Giữ đúng tỷ lệ gốc (612/407), không bóp méo hình */}
+    <div className="relative overflow-hidden rounded-2xl flex flex-col lg:flex-row items-stretch w-full h-full flex-1 bg-[#faeed6]">
+      {/* Desktop Background: img-detail.png (576x409) - Giữ nguyên 100% không cắt, neo sát phải, để hình bên trái đè lên */}
+      <div className="hidden lg:block pointer-events-none absolute right-0 top-0 h-full w-auto aspect-[576/409] z-0 select-none">
+        <Image
+          src="/images/landing/about-card-bg.png?v=20261023e"
+          alt="Nền giấy dó"
+          fill
+          unoptimized
+          sizes="50vw"
+          className="object-contain object-right"
+          priority
+        />
+      </div>
+
+      {/* Left side: img-detail2.png (612x407) - Giữ đúng tỷ lệ gốc, đè lên phần bên trái của nền giấy dó */}
       <div className="relative z-10 w-full lg:w-auto lg:h-full aspect-[612/407] shrink-0 overflow-hidden">
         <Image
           src="/images/landing/about-painting.png?v=20261023e"
@@ -18,16 +31,16 @@ export default function LandingAbout() {
         />
       </div>
 
-      {/* Right side: Content with its own parchment background (img-detail.png) */}
-      <div className="relative z-10 flex-1 flex flex-col justify-between p-5 sm:p-6 lg:p-7 space-y-3 min-w-0 h-full overflow-hidden">
-        {/* Background for right side only: Không bị kéo dãn zoom to quá mức */}
-        <div className="pointer-events-none absolute inset-0 -z-10 select-none overflow-hidden">
+      {/* Right side: Content */}
+      <div className="relative z-20 flex-1 flex flex-col justify-between p-5 sm:p-6 lg:p-7 space-y-3 min-w-0 h-full">
+        {/* Mobile Background: img-detail.png */}
+        <div className="lg:hidden pointer-events-none absolute inset-0 -z-10 select-none overflow-hidden">
           <Image
             src="/images/landing/about-card-bg.png?v=20261023e"
             alt="Nền giấy dó"
             fill
             unoptimized
-            sizes="(max-width: 1024px) 100vw, 45vw"
+            sizes="100vw"
             className="object-cover object-right"
             priority
           />
