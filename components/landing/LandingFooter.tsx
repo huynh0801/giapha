@@ -2,7 +2,7 @@ import Image from "next/image";
 
 export default function LandingFooter() {
   return (
-    <footer className="relative w-full bg-[#1b3a29] text-[#e8ecd8] py-4 overflow-hidden border-t-2 border-[#caa455]">
+    <footer className="relative w-full bg-[#1b3a29] text-[#e8ecd8] py-4 sm:py-5 overflow-hidden border-t-2 border-[#caa455]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex items-center justify-between">
         {/* Left Ornament */}
         <div className="flex items-center gap-3">
@@ -11,6 +11,7 @@ export default function LandingFooter() {
               src="/images/landing/footer-clouds.png"
               alt="Họa tiết mây"
               fill
+              sizes="64px"
               className="object-contain"
             />
           </div>
@@ -19,7 +20,7 @@ export default function LandingFooter() {
 
         {/* Center Slogan */}
         <div className="flex-1 text-center px-4">
-          <p className="text-sm sm:text-base md:text-lg font-serif font-bold tracking-widest text-[#f5ebd2] drop-shadow-xs">
+          <p className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold tracking-wider text-[#f5ebd2] drop-shadow-xs">
             Dòng họ trường tồn - Con cháu hưng thịnh
           </p>
         </div>
@@ -32,6 +33,7 @@ export default function LandingFooter() {
               src="/images/landing/footer-clouds.png"
               alt="Họa tiết mây"
               fill
+              sizes="64px"
               className="object-contain"
             />
           </div>

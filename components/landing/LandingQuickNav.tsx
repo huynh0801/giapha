@@ -65,14 +65,14 @@ export default function LandingQuickNav() {
 
                 {/* Title in Deep Forest Green */}
                 <h3
-                  className="text-sm sm:text-base lg:text-[1.05rem] font-bold tracking-tight text-[#183b28] group-hover:text-[#8c1d1d] transition-colors leading-tight"
+                  className="text-base sm:text-lg lg:text-xl font-bold tracking-normal text-[#183b28] group-hover:text-[#8c1d1d] transition-colors leading-tight"
                   style={{ fontFamily: '"SVN-Studio Brush", "Playfair Display", Georgia, serif' }}
                 >
                   {item.title}
                 </h3>
 
                 {/* Description matching exact line-breaks */}
-                <p className="mt-1 text-[11px] sm:text-xs text-[#4a3b30] leading-snug max-w-[155px] whitespace-pre-line font-medium">
+                <p className="mt-1 text-xs sm:text-sm text-[#4a3b30] leading-relaxed max-w-[170px] whitespace-pre-line font-semibold">
                   {item.description}
                 </p>
               </Link>

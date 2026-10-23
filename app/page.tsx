@@ -87,7 +87,7 @@ export default async function GiaPhaHomePage() {
       {/* Floating Admin Access */}
       <Link
         href="/admin"
-        className="fixed bottom-4 right-4 z-40 rounded-full bg-[#fbf6ed]/95 border border-[#d8cbbb] px-3.5 py-1.5 text-xs font-bold text-[#6a4f3b] shadow-lg backdrop-blur-xs hover:bg-[#8c1d1d] hover:text-white hover:border-[#8c1d1d] transition-all"
+        className="fixed bottom-4 right-4 z-40 rounded-full bg-[#fbf6ed]/95 border border-[#d8cbbb] px-4 py-2 text-sm font-bold text-[#6a4f3b] shadow-lg backdrop-blur-xs hover:bg-[#8c1d1d] hover:text-white hover:border-[#8c1d1d] transition-all"
         title="Truy cập khu vực Quản trị"
       >
         Quản trị
@@ -95,4 +95,3 @@ export default async function GiaPhaHomePage() {
     </div>
   );
 }
-

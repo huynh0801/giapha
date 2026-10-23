@@ -36,12 +36,12 @@ export default function LandingHeader() {
 
           <div className="flex flex-col">
             <span
-              className="text-2xl sm:text-[1.65rem] font-bold tracking-tight text-[#183b28] group-hover:text-[#8c1d1d] transition-colors leading-tight"
+              className="text-2xl sm:text-3xl lg:text-[2rem] font-bold tracking-tight text-[#183b28] group-hover:text-[#8c1d1d] transition-colors leading-tight"
               style={{ fontFamily: '"SVN-Studio Brush", "Playfair Display", Georgia, serif' }}
             >
               Gia Phả Dòng Họ
             </span>
-            <span className="text-[11px] sm:text-xs font-medium text-[#7a6a5d] tracking-normal mt-0.5">
+            <span className="text-xs sm:text-sm font-semibold text-[#6a594d] tracking-normal mt-0.5">
               Tôn vinh cội nguồn - Gìn giữ truyền thống
             </span>
           </div>
@@ -53,7 +53,7 @@ export default function LandingHeader() {
             <Link
               key={item.label}
               href={item.href}
-              className={`relative text-sm font-bold tracking-tight transition-colors py-1 ${
+              className={`relative text-base sm:text-lg font-bold tracking-tight transition-colors py-1 ${
                 item.active
                   ? "text-[#2c1a11]"
                   : "text-[#5e4e42] hover:text-[#8c1d1d]"
@@ -90,7 +90,7 @@ export default function LandingHeader() {
 
           <Link
             href="/admin"
-            className="hidden sm:inline-flex items-center rounded-full bg-[#f4ece0] border border-[#d8cbbb] px-3.5 py-1.5 text-xs font-bold text-[#6a4f3b] hover:bg-[#8c1d1d] hover:text-white hover:border-[#8c1d1d] transition-all shadow-xs"
+            className="hidden sm:inline-flex items-center rounded-full bg-[#f4ece0] border border-[#d8cbbb] px-4 py-2 text-sm font-bold text-[#6a4f3b] hover:bg-[#8c1d1d] hover:text-white hover:border-[#8c1d1d] transition-all shadow-xs"
           >
             Quản trị
           </Link>

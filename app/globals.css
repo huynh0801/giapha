@@ -1,7 +1,6 @@
 @import "tailwindcss";
 @import "@xyflow/react/dist/style.css";
 
-
 @font-face {
   font-family: 'SVN-Studio Brush';
   src: url('/fonts/SVN-Studio-Brush.otf') format('opentype'),
@@ -19,23 +18,31 @@
 :root {
   --background: #f5e7c7;
   --foreground: #171717;
-  --font-inter: "SVN-Studio Brush", "Playfair Display", "Segoe UI", Arial, sans-serif;
-  --font-playfair: "SVN-Studio Brush", "Playfair Display", Georgia, serif;
+  --font-brush: var(--font-studio-brush, 'SVN-Studio Brush'), 'SVN-Studio Brush', Georgia, serif;
+  --font-inter: var(--font-studio-brush, 'SVN-Studio Brush'), 'SVN-Studio Brush', Georgia, serif;
+  --font-playfair: var(--font-studio-brush, 'SVN-Studio Brush'), 'SVN-Studio Brush', Georgia, serif;
+  --font-sans: var(--font-studio-brush, 'SVN-Studio Brush'), 'SVN-Studio Brush', Georgia, serif;
+  --font-serif: var(--font-studio-brush, 'SVN-Studio Brush'), 'SVN-Studio Brush', Georgia, serif;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-inter);
-  --font-serif: var(--font-playfair);
+  --font-sans: var(--font-brush);
+  --font-serif: var(--font-brush);
+  --font-brush: var(--font-brush);
 }
 
-
-
+html,
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-inter);
+  font-family: var(--font-brush) !important;
+}
+
+/* Ensure all typography elements across the entire website inherit SVN-Studio Brush */
+*, ::before, ::after {
+  font-family: inherit;
 }
 
 /* Fix iOS auto-zoom when focusing on inputs */
@@ -90,7 +97,7 @@ select:disabled {
 .rich-editor,
 .article-content {
   color: #44403c;
-  font-family: Arial, "Helvetica Neue", "Segoe UI", sans-serif;
+  font-family: inherit;
   line-height: 1.9;
 }
 
@@ -205,17 +212,10 @@ select:disabled {
   padding: 0.35rem 0.75rem;
   text-align: center;
   color: #78716c;
-  font-family: Arial, "Helvetica Neue", "Segoe UI", sans-serif;
+  font-family: inherit;
   font-size: 0.95rem;
   font-style: italic;
   line-height: 1.55;
-}
-
-.rich-editor figcaption {
-  outline: none;
-  transition:
-    background-color 160ms ease,
-    box-shadow 160ms ease;
 }
 
 .rich-editor figcaption:focus {

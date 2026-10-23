@@ -44,15 +44,15 @@ export default function LandingLatestNews({ news }: LandingLatestNewsProps) {
     <div className="flex flex-col h-full space-y-4">
       {/* Header with Title and "Xem tất cả" link */}
       <div className="flex items-center justify-between pb-1">
-        <h2 className="font-serif text-2xl font-black text-[#2c1a11] tracking-tight">
+        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#2c1a11] tracking-normal">
           Tin tức mới nhất
         </h2>
         <Link
           href="/news"
-          className="inline-flex items-center gap-1 text-xs font-bold text-[#8c1d1d] hover:text-[#b52a2a] transition-colors group"
+          className="inline-flex items-center gap-1.5 text-sm sm:text-base font-bold text-[#8c1d1d] hover:text-[#b52a2a] transition-colors group"
         >
           <span>Xem tất cả</span>
-          <ArrowRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-1" />
+          <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-1" />
         </Link>
       </div>
 
@@ -62,20 +62,21 @@ export default function LandingLatestNews({ news }: LandingLatestNewsProps) {
           <Link
             key={item.id}
             href={item.slug.startsWith("http") ? item.slug : `/blog/${item.slug}`}
-            className="group flex gap-3.5 p-3 rounded-2xl bg-[#faf0d7] border border-[#e2d0a8] hover:border-[#caa455] hover:shadow-[0_4px_16px_rgba(44,26,17,0.06)] transition-all duration-200"
+            className="group flex gap-3.5 p-3 sm:p-3.5 rounded-2xl bg-[#faf0d7] border border-[#e2d0a8] hover:border-[#caa455] hover:shadow-[0_4px_16px_rgba(44,26,17,0.06)] transition-all duration-200"
           >
             {/* Thumbnail */}
-            <div className="relative size-18 sm:size-20 rounded-xl overflow-hidden bg-[#eddcb7] shrink-0 border border-[#dfcda3]">
+            <div className="relative size-20 sm:size-24 rounded-xl overflow-hidden bg-[#eddcb7] shrink-0 border border-[#dfcda3]">
               {item.imageUrl ? (
                 <Image
                   src={item.imageUrl}
                   alt={item.title}
                   fill
+                  sizes="96px"
                   unoptimized={item.imageUrl.startsWith("http")}
                   className="object-cover transition-transform duration-300 group-hover:scale-105"
                 />
               ) : (
-                <div className="flex size-full items-center justify-center text-[#8c1d1d] font-serif font-black text-xl">
+                <div className="flex size-full items-center justify-center text-[#8c1d1d] font-black text-2xl">
                   祖
                 </div>
               )}
@@ -83,13 +84,13 @@ export default function LandingLatestNews({ news }: LandingLatestNewsProps) {
 
             {/* Meta & Excerpt */}
             <div className="flex-1 min-w-0 flex flex-col justify-center">
-              <h3 className="font-serif text-sm sm:text-base font-bold text-[#2c1a11] group-hover:text-[#8c1d1d] transition-colors truncate">
+              <h3 className="text-base sm:text-lg lg:text-xl font-bold text-[#2c1a11] group-hover:text-[#8c1d1d] transition-colors truncate leading-snug">
                 {item.title}
               </h3>
-              <p className="text-[11px] font-semibold text-[#8a7b6f] mt-0.5">
+              <p className="text-xs sm:text-sm font-semibold text-[#8a7b6f] mt-0.5">
                 {item.date}
               </p>
-              <p className="text-xs text-[#5c4a3e] line-clamp-2 mt-1 leading-relaxed">
+              <p className="text-sm sm:text-base text-[#5c4a3e] line-clamp-2 mt-1 leading-relaxed">
                 {item.excerpt}
               </p>
             </div>
