@@ -6,7 +6,6 @@ import {
   CalendarDays,
   ChevronLeft,
   ChevronRight,
-  Sparkles,
 } from "lucide-react";
 import { BlogPost } from "@/types";
 import { getSupabase } from "@/utils/supabase/queries";
@@ -89,17 +88,12 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
 
   const posts = (data || []) as NewsPost[];
 
-  // On page 1: the first post is featured, the rest appear in the grid
-  // On page 2+: all posts appear in the grid
-  const featuredPost = currentPage === 1 && posts.length > 0 ? posts[0] : null;
-  const otherPosts = currentPage === 1 ? posts.slice(1) : posts;
-
   return (
     <div className="min-h-screen flex flex-col bg-[#f5e7c7] text-[#2c1a11]">
       <LandingHeader currentUser={currentUser} />
 
       <main className="flex-1 w-full py-8 sm:py-12 lg:py-14">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 space-y-10 sm:space-y-12">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-10">
           {/* Page Header: Thoáng đãng, không bị đóng khung chung */}
           <div className="text-center">
             <div className="inline-flex items-center justify-center gap-3 sm:gap-5 mb-2.5">
@@ -148,173 +142,69 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
             </div>
           </div>
 
-          {/* Featured Article (chỉ hiện trên trang 1) */}
-          {featuredPost ? (
-            <div>
-              <div className="flex items-center gap-2 mb-3.5 border-b border-[#deb887]/60 pb-2">
-                <Sparkles className="size-4 text-[#8c1d1d]" />
-                <span
-                  className="text-sm sm:text-base font-bold text-[#183b28] uppercase tracking-wide"
-                  style={{
-                    fontFamily:
-                      '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
-                  }}
+          {/* Grid of Articles: Từng mục tin tức có khung riêng biệt */}
+          {posts.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+              {posts.map((post) => (
+                <Link
+                  key={post.id}
+                  href={`/blog/${post.slug}`}
+                  className="group block relative p-1.5 border-2 border-[#caa455] bg-[#f5e7c7]/30 hover:border-[#8c1d1d] transition-all shadow-[0_2px_12px_rgba(44,26,17,0.05)]"
                 >
-                  Bản Tin Mới Nhất
-                </span>
-              </div>
+                  <div className="relative border border-[#deb887] bg-[#fffdf7] group-hover:bg-[#fffefb] p-4 flex flex-col justify-between h-full transition-colors">
+                    {/* 4 Traditional Corner Brackets for each card */}
+                    <span className="pointer-events-none absolute top-1 left-1 size-3 border-t-2 border-l-2 border-[#8c1d1d]" />
+                    <span className="pointer-events-none absolute top-1 right-1 size-3 border-t-2 border-r-2 border-[#8c1d1d]" />
+                    <span className="pointer-events-none absolute bottom-1 left-1 size-3 border-b-2 border-l-2 border-[#8c1d1d]" />
+                    <span className="pointer-events-none absolute bottom-1 right-1 size-3 border-b-2 border-r-2 border-[#8c1d1d]" />
 
-              <Link
-                href={`/blog/${featuredPost.slug}`}
-                className="group block relative p-1.5 sm:p-2 border-2 border-[#caa455] bg-[#f5e7c7]/40 hover:border-[#8c1d1d] transition-all shadow-[0_4px_24px_rgba(44,26,17,0.06)]"
-              >
-                <div className="relative border border-[#deb887] bg-[#fffdf7] group-hover:bg-[#fffefb] p-4 sm:p-6 lg:p-8 transition-colors">
-                  {/* 4 Traditional Corner Brackets */}
-                  <span className="pointer-events-none absolute top-1.5 left-1.5 size-4 border-t-2 border-l-2 border-[#8c1d1d]" />
-                  <span className="pointer-events-none absolute top-1.5 right-1.5 size-4 border-t-2 border-r-2 border-[#8c1d1d]" />
-                  <span className="pointer-events-none absolute bottom-1.5 left-1.5 size-4 border-b-2 border-l-2 border-[#8c1d1d]" />
-                  <span className="pointer-events-none absolute bottom-1.5 right-1.5 size-4 border-b-2 border-r-2 border-[#8c1d1d]" />
-
-                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center">
-                    {/* Left: Featured Image with gold frame */}
-                    <div className="lg:col-span-7">
-                      <div className="relative aspect-[16/10] w-full border-2 border-[#caa455] p-1 bg-[#f5e7c7]">
-                        <div className="relative size-full border border-[#deb887] overflow-hidden">
-                          <img
-                            src={featuredPost.cover_image_url}
-                            alt={featuredPost.title}
-                            className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
-                          />
-                        </div>
+                    <div>
+                      {/* Image with gold framing */}
+                      <div className="relative aspect-[16/10] w-full border border-[#deb887] bg-[#f5e7c7] overflow-hidden mb-3">
+                        <img
+                          src={post.cover_image_url}
+                          alt={post.title}
+                          className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
                       </div>
+
+                      {/* Meta: Category & Date */}
+                      <div className="flex items-center justify-between gap-2 border-b border-[#deb887]/50 pb-1.5 mb-2 font-sans">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-[#8c1d1d]">
+                          {post.category || "Tin tức"}
+                        </span>
+                        <span className="text-[11px] text-[#7a6455]">
+                          {formatDate(post.published_at || post.created_at)}
+                        </span>
+                      </div>
+
+                      {/* Title */}
+                      <h3
+                        className="text-sm sm:text-base font-bold text-[#183b28] group-hover:text-[#8c1d1d] transition-colors leading-snug line-clamp-2"
+                        style={{
+                          fontFamily:
+                            '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
+                        }}
+                      >
+                        {post.title}
+                      </h3>
+
+                      {/* Excerpt */}
+                      {post.excerpt && (
+                        <p className="mt-2 text-xs text-[#5c4a3e] leading-relaxed line-clamp-2 font-sans">
+                          {post.excerpt}
+                        </p>
+                      )}
                     </div>
 
-                    {/* Right: Featured Content */}
-                    <div className="lg:col-span-5 flex flex-col justify-between h-full space-y-3.5">
-                      <div>
-                        <span className="inline-block text-[11px] font-bold uppercase tracking-wider text-[#8c1d1d] border-b border-[#8c1d1d]/40 pb-0.5 font-sans">
-                          {featuredPost.category || "Tin dòng họ"}
-                        </span>
-
-                        <h2
-                          className="mt-2 text-xl sm:text-2xl lg:text-3xl font-bold tracking-normal text-[#183b28] group-hover:text-[#8c1d1d] transition-colors leading-snug"
-                          style={{
-                            fontFamily:
-                              '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
-                          }}
-                        >
-                          {featuredPost.title}
-                        </h2>
-
-                        {featuredPost.excerpt && (
-                          <p className="mt-3 text-xs sm:text-sm text-[#4a3b2f] leading-relaxed font-sans line-clamp-3 text-justify">
-                            {featuredPost.excerpt}
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="pt-3.5 border-t border-[#deb887]/70 flex items-center justify-between text-xs font-sans">
-                        <div className="flex items-center gap-1.5 text-[#7a6455]">
-                          <CalendarDays className="size-3.5 text-[#caa455]" />
-                          <span>
-                            {formatDate(
-                              featuredPost.published_at ||
-                                featuredPost.created_at,
-                            )}
-                          </span>
-                        </div>
-
-                        <span className="inline-flex items-center gap-1 font-bold text-[#8c1d1d] group-hover:translate-x-1 transition-transform">
-                          <span>Đọc tiếp</span>
-                          <ArrowRight className="size-3.5" />
-                        </span>
-                      </div>
+                    {/* Read more button */}
+                    <div className="mt-4 pt-2.5 border-t border-[#deb887]/50 flex items-center justify-end text-xs font-bold text-[#8c1d1d] group-hover:translate-x-0.5 transition-transform gap-1 font-sans">
+                      <span>Xem chi tiết</span>
+                      <ArrowRight className="size-3.5" />
                     </div>
                   </div>
-                </div>
-              </Link>
-            </div>
-          ) : null}
-
-          {/* Grid of Articles: Từng mục tin tức có khung riêng biệt */}
-          {otherPosts.length > 0 && (
-            <div>
-              <div className="flex items-center justify-center gap-3 my-6 sm:my-8 w-full">
-                <span className="h-[1px] flex-1 max-w-xs bg-gradient-to-r from-transparent via-[#caa455] to-[#caa455]" />
-                <h2
-                  className="text-lg sm:text-2xl font-bold tracking-tight text-[#183b28] uppercase shrink-0 px-3"
-                  style={{
-                    fontFamily:
-                      '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
-                  }}
-                >
-                  {currentPage === 1 ? "Các Bản Tin & Sự Kiện" : `Bản Tin Dòng Họ - Trang ${currentPage}`}
-                </h2>
-                <span className="h-[1px] flex-1 max-w-xs bg-gradient-to-l from-transparent via-[#caa455] to-[#caa455]" />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {otherPosts.map((post) => (
-                  <Link
-                    key={post.id}
-                    href={`/blog/${post.slug}`}
-                    className="group block relative p-1.5 border-2 border-[#caa455] bg-[#f5e7c7]/30 hover:border-[#8c1d1d] transition-all shadow-[0_2px_12px_rgba(44,26,17,0.05)]"
-                  >
-                    <div className="relative border border-[#deb887] bg-[#fffdf7] group-hover:bg-[#fffefb] p-4 flex flex-col justify-between h-full transition-colors">
-                      {/* 4 Traditional Corner Brackets for each card */}
-                      <span className="pointer-events-none absolute top-1 left-1 size-3 border-t-2 border-l-2 border-[#8c1d1d]" />
-                      <span className="pointer-events-none absolute top-1 right-1 size-3 border-t-2 border-r-2 border-[#8c1d1d]" />
-                      <span className="pointer-events-none absolute bottom-1 left-1 size-3 border-b-2 border-l-2 border-[#8c1d1d]" />
-                      <span className="pointer-events-none absolute bottom-1 right-1 size-3 border-b-2 border-r-2 border-[#8c1d1d]" />
-
-                      <div>
-                        {/* Image with gold framing */}
-                        <div className="relative aspect-[16/10] w-full border border-[#deb887] bg-[#f5e7c7] overflow-hidden mb-3">
-                          <img
-                            src={post.cover_image_url}
-                            alt={post.title}
-                            className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
-                          />
-                        </div>
-
-                        {/* Meta: Category & Date */}
-                        <div className="flex items-center justify-between gap-2 border-b border-[#deb887]/50 pb-1.5 mb-2 font-sans">
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-[#8c1d1d]">
-                            {post.category || "Tin tức"}
-                          </span>
-                          <span className="text-[11px] text-[#7a6455]">
-                            {formatDate(post.published_at || post.created_at)}
-                          </span>
-                        </div>
-
-                        {/* Title */}
-                        <h3
-                          className="text-sm sm:text-base font-bold text-[#183b28] group-hover:text-[#8c1d1d] transition-colors leading-snug line-clamp-2"
-                          style={{
-                            fontFamily:
-                              '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
-                          }}
-                        >
-                          {post.title}
-                        </h3>
-
-                        {/* Excerpt */}
-                        {post.excerpt && (
-                          <p className="mt-2 text-xs text-[#5c4a3e] leading-relaxed line-clamp-2 font-sans">
-                            {post.excerpt}
-                          </p>
-                        )}
-                      </div>
-
-                      {/* Read more button */}
-                      <div className="mt-4 pt-2.5 border-t border-[#deb887]/50 flex items-center justify-end text-xs font-bold text-[#8c1d1d] group-hover:translate-x-0.5 transition-transform gap-1 font-sans">
-                        <span>Xem chi tiết</span>
-                        <ArrowRight className="size-3.5" />
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
+                </Link>
+              ))}
             </div>
           )}
 
