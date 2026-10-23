@@ -48,7 +48,8 @@ interface PageProps {
   }>;
 }
 
-function roleLabel(role?: string | null, isPrimaryAdmin?: boolean | null) {
+function roleLabel(role?: string | null, isPrimaryAdmin?: boolean | null, isSystemAdmin?: boolean) {
+  if (isSystemAdmin) return "Quản trị hệ thống";
   if (role === "family_admin") {
     return isPrimaryAdmin ? "Quản trị chính" : "Quản trị phụ";
   }
@@ -105,10 +106,7 @@ export default async function DashboardFamilySwitcherPage({
 }: PageProps) {
   const resolvedSearchParams = await searchParams;
   const profile = await getProfile();
-
-  if (profile?.is_active && profile.role === "system_admin") {
-    redirect("/admin/families/dashboard");
-  }
+  const isSystemAdmin = profile?.is_active && profile.role === "system_admin";
 
   const families = await getAccessibleFamilies();
 
@@ -196,7 +194,7 @@ export default async function DashboardFamilySwitcherPage({
 
                 <div className="mt-5 flex flex-wrap gap-2">
                   <span className="rounded-full bg-stone-100 px-3 py-1 text-xs font-black text-stone-600">
-                    {roleLabel(membership?.role, membership?.is_primary_admin)}
+                    {roleLabel(membership?.role, membership?.is_primary_admin, isSystemAdmin)}
                   </span>
                   {canManage && (
                     <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700">

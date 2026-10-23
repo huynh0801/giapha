@@ -2,7 +2,7 @@ import config from "@/app/config";
 import LogoutButton from "@/components/LogoutButton";
 import { UserProvider } from "@/components/UserProvider";
 import { getProfile, getUser } from "@/utils/supabase/queries";
-import { Home, Info, Newspaper } from "lucide-react";
+import { Home, Info, Newspaper, ShieldCheck } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -120,6 +120,15 @@ export default async function DashboardLayout({
               </nav>
 
               <div className="flex items-center justify-end gap-2">
+                {profile?.role === "system_admin" && (
+                  <Link
+                    href="/admin"
+                    className="inline-flex h-10 items-center justify-center gap-1.5 rounded-full border border-red-200 bg-red-50/80 px-3 text-xs font-black text-[#800000] shadow-sm transition hover:bg-red-100 hover:text-red-900 active:scale-[0.98] sm:gap-2 sm:px-4 sm:text-sm"
+                  >
+                    <ShieldCheck className="size-4" />
+                    Quản trị hệ thống
+                  </Link>
+                )}
                 <LogoutButton className="h-10 border border-stone-200 bg-white px-4 shadow-sm hover:border-rose-200" />
               </div>
             </div>

@@ -153,6 +153,13 @@ export default function AdminShell({
 
             <div className="mt-5 grid gap-2 border-t border-stone-100 pt-5 lg:mt-auto">
               <Link
+                href="/dashboard"
+                className="flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-bold text-stone-600 transition-colors hover:bg-stone-50 hover:text-[#800000]"
+              >
+                <FolderTree className="size-5" />
+                Không gian gia phả
+              </Link>
+              <Link
                 href="/"
                 className="flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-bold text-stone-600 transition-colors hover:bg-stone-50 hover:text-[#800000]"
               >
