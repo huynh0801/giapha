@@ -17,6 +17,7 @@ test("landing assets are present in public/images/landing", () => {
     "logo.png",
     "decorate1.png",
     "decorate2.png",
+    "herosection-mobile.png",
   ];
 
   for (const img of requiredImages) {
@@ -50,6 +51,7 @@ test("LandingHero and LandingQuickNav contain mockup copy and navigation items",
   assert.ok(fs.existsSync(heroPath), "LandingHero.tsx should exist");
   const heroContent = fs.readFileSync(heroPath, "utf8");
   assert.match(heroContent, /hero-banner\.png/);
+  assert.match(heroContent, /herosection-mobile\.png/);
   assert.match(heroContent, /\/dashboard/);
 
   const navPath = path.join(process.cwd(), "components", "landing", "LandingQuickNav.tsx");
