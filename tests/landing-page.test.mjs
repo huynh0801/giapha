@@ -37,3 +37,21 @@ test("LandingHeader and LandingFooter export valid React components and required
   assert.match(footerContent, /Dòng họ trường tồn - Con cháu hưng thịnh/);
 });
 
+test("LandingHero and LandingQuickNav contain mockup copy and navigation items", () => {
+  const heroPath = path.join(process.cwd(), "components", "landing", "LandingHero.tsx");
+  assert.ok(fs.existsSync(heroPath), "LandingHero.tsx should exist");
+  const heroContent = fs.readFileSync(heroPath, "utf8");
+  assert.match(heroContent, /Dòng họ[\s\S]*là gốc rễ[\s\S]*của mỗi chúng ta/);
+  assert.match(heroContent, /Khám phá gia phả/);
+
+  const navPath = path.join(process.cwd(), "components", "landing", "LandingQuickNav.tsx");
+  assert.ok(fs.existsSync(navPath), "LandingQuickNav.tsx should exist");
+  const navContent = fs.readFileSync(navPath, "utf8");
+  assert.match(navContent, /Gia phả dòng họ/);
+  assert.match(navContent, /Thành viên/);
+  assert.match(navContent, /Tư liệu/);
+  assert.match(navContent, /Tin tức - Sự kiện/);
+  assert.match(navContent, /Liên hệ/);
+});
+
+
