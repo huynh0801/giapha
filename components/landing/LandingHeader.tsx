@@ -148,7 +148,7 @@ export default function LandingHeader({ currentUser: initialUser }: LandingHeade
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-7 lg:gap-9">
+        <nav className="hidden md:flex items-center gap-7 lg:gap-9 ml-auto mr-6 lg:mr-8">
           {navItems.map((item) => {
             const active = isItemActive(item.href);
             return (
