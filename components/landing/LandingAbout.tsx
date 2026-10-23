@@ -8,25 +8,25 @@ export default function LandingAbout() {
       {/* Background: img-detail.png (parchment paper with natural deckle edge and cloud watermark) */}
       <div className="pointer-events-none absolute inset-0 z-0 select-none overflow-hidden rounded-2xl">
         <Image
-          src="/images/landing/about-card-bg.png?v=20261023c"
+          src="/images/landing/about-card-bg.png?v=20261023e"
           alt="Nền giấy dó"
           fill
           unoptimized
           sizes="(max-width: 1024px) 100vw, 70vw"
-          className="object-cover object-right-bottom"
+          className="object-cover object-right"
           priority
         />
       </div>
 
-      {/* Left side: img-detail2.png - Scaled to fit snugly without cropping or letterbox padding */}
-      <div className="relative z-10 w-full lg:w-[48%] aspect-[382/254] lg:aspect-auto lg:h-full shrink-0 overflow-hidden">
+      {/* Left side: img-detail2.png - Giữ đúng tỷ lệ gốc (612/407), không bóp méo hình */}
+      <div className="relative z-10 w-full lg:w-auto lg:h-full aspect-[612/407] shrink-0 overflow-hidden">
         <Image
           src="/images/landing/about-painting.png?v=20261023e"
           alt="Nhà thờ từ đường dòng họ"
           fill
           unoptimized
-          sizes="(max-width: 1024px) 100vw, 40vw"
-          className="object-fill"
+          sizes="(max-width: 1024px) 100vw, 45vw"
+          className="size-full object-cover object-left"
           priority
         />
       </div>
