@@ -35,6 +35,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
+  font-family: var(--font-inter);
 }
 
 /* Fix iOS auto-zoom when focusing on inputs */
