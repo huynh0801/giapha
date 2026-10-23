@@ -69,5 +69,18 @@ test("LandingAbout and LandingLatestNews contain expected copy and fallback supp
   assert.match(newsContent, /Lễ giỗ Tổ dòng họ/);
 });
 
+test("app/page.tsx imports and integrates all landing components", () => {
+  const pagePath = path.join(process.cwd(), "app", "page.tsx");
+  assert.ok(fs.existsSync(pagePath), "app/page.tsx should exist");
+  const pageContent = fs.readFileSync(pagePath, "utf8");
+  assert.match(pageContent, /LandingHeader/);
+  assert.match(pageContent, /LandingHero/);
+  assert.match(pageContent, /LandingQuickNav/);
+  assert.match(pageContent, /LandingAbout/);
+  assert.match(pageContent, /LandingLatestNews/);
+  assert.match(pageContent, /LandingFooter/);
+});
+
+
 
 
