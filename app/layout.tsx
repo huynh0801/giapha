@@ -3,7 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 
 const studioBrush = localFont({
-  src: "../public/fonts/SVN-Studio-Brush.otf",
+  src: "../public/fonts/SVN-Studio-Brush.woff2",
   variable: "--font-studio-brush",
   display: "swap",
   preload: true,
