@@ -118,7 +118,7 @@ export default function LandingHeader({ currentUser: initialUser }: LandingHeade
   return (
     <header className="sticky top-0 z-30 w-full bg-[#f5e7c7] border-b border-[#e2d0a8]/70 shadow-[0_2px_12px_rgba(44,26,17,0.04)]">
       {/* Decorative ornaments on the two sides of the header: decorate2 (left) and decorate1 (right) */}
-      <div className="pointer-events-none select-none absolute inset-0 overflow-hidden z-0">
+      <div className="pointer-events-none select-none absolute top-0 left-0 right-0 h-20 overflow-hidden z-0 hidden md:block">
         <div className="absolute left-0 top-0 h-full w-auto">
           <Image
             src="/images/landing/decorate2.png"
@@ -358,7 +358,7 @@ export default function LandingHeader({ currentUser: initialUser }: LandingHeade
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-[#e2d0a8] bg-[#f5e7c7] px-4 py-4 space-y-2 shadow-lg">
+        <div className="relative z-20 md:hidden border-t border-[#e2d0a8] bg-[#f5e7c7] px-4 py-4 space-y-2 shadow-lg">
           {navItems.map((item) => {
             const active = isItemActive(item.href);
             return (
