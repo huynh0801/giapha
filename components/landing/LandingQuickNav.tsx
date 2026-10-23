@@ -6,8 +6,6 @@ interface QuickNavItem {
   title: string;
   description: string;
   icon: string;
-  href?: string;
-  isClickable?: boolean;
 }
 
 const quickNavItems: QuickNavItem[] = [
@@ -15,40 +13,34 @@ const quickNavItems: QuickNavItem[] = [
     title: "Gia phả dòng họ",
     description: "Xem sơ đồ, lịch sử\ncủa dòng họ",
     icon: "/images/landing/nav-genealogy.png",
-    isClickable: false,
   },
   {
     title: "Thành viên",
     description: "Danh sách con cháu\ntrong dòng họ",
     icon: "/images/landing/nav-members.png",
-    isClickable: false,
   },
   {
     title: "Tư liệu",
     description: "Lưu trữ hình ảnh, văn bản,\nhiện vật quý",
     icon: "/images/landing/nav-documents.png",
-    isClickable: false,
   },
   {
     title: "Tin tức – Sự kiện",
     description: "Các hoạt động\ncủa dòng họ",
     icon: "/images/landing/nav-news.png",
-    isClickable: false,
   },
   {
     title: "Liên hệ",
     description: "Góp ý, liên hệ\nvới ban quản trị",
     icon: "/images/landing/nav-contact.png",
-    href: "/about",
-    isClickable: true,
   },
 ];
 
 export default function LandingQuickNav() {
   return (
-    <section className="relative w-full bg-[#f5e7c7] py-3.5 sm:py-4 lg:py-5 overflow-hidden">
-      <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
-        {/* Mobile & Tablet Layout: 2x2 grid of cards + 1 full-width horizontal card (closely matching mobile design mockup) */}
+    <section className="relative w-full bg-[#f5e7c7] py-3 sm:py-4 lg:py-5 overflow-hidden">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {/* Mobile & Tablet Layout: 2x2 grid of cards + 1 full-width horizontal card */}
         <div className="grid lg:hidden grid-cols-2 gap-2.5 sm:gap-3.5">
           {/* First 4 cards: 2x2 grid, non-clickable informative showcase */}
           {quickNavItems.slice(0, 4).map((item) => (
@@ -125,13 +117,16 @@ export default function LandingQuickNav() {
           </Link>
         </div>
 
-        {/* Desktop Layout: 5 items in a horizontal strip with vertical golden dividers */}
-        <div className="hidden lg:grid grid-cols-5 gap-0 items-center">
-          {quickNavItems.map((item, index) => {
-            const Content = (
+        {/* Desktop Layout: EXACT design as before (5 items in horizontal strip with vertical golden separators) */}
+        <div className="hidden lg:grid lg:grid-cols-5 lg:gap-0 items-center">
+          {quickNavItems.map((item, index) => (
+            <div
+              key={item.title}
+              className="relative flex flex-col items-center justify-center h-full px-2 sm:px-4 lg:px-6"
+            >
               <div className="flex flex-col items-center text-center w-full">
                 {/* Dainty Artistic Illustration */}
-                <div className="relative h-13 w-full flex items-center justify-center mb-1">
+                <div className="relative h-11 sm:h-12 lg:h-13 w-full flex items-center justify-center mb-1">
                   <Image
                     src={item.icon}
                     alt={item.title}
@@ -142,46 +137,26 @@ export default function LandingQuickNav() {
                   />
                 </div>
 
-                {/* Title */}
+                {/* Title in Deep Forest Green */}
                 <h3
-                  className={`text-[15px] font-bold tracking-normal text-[#183b28] ${
-                    item.isClickable ? "group-hover:text-[#8c1d1d]" : ""
-                  } transition-colors leading-tight`}
+                  className="text-xs sm:text-sm lg:text-[15px] font-bold tracking-normal text-[#183b28] leading-tight"
                   style={{ fontFamily: '"SVN-Studio Brush", "Playfair Display", Georgia, serif' }}
                 >
                   {item.title}
                 </h3>
 
-                {/* Description */}
-                <p className="mt-1 text-xs text-[#5c4a3e] leading-snug max-w-[150px] whitespace-pre-line font-sans font-medium">
+                {/* Description matching exact line-breaks */}
+                <p className="mt-0.5 sm:mt-1 text-[10px] sm:text-[11px] lg:text-xs text-[#5c4a3e] leading-snug max-w-[150px] whitespace-pre-line font-sans font-medium">
                   {item.description}
                 </p>
               </div>
-            );
 
-            return (
-              <div
-                key={item.title}
-                className="relative flex flex-col items-center justify-center h-full px-6"
-              >
-                {item.isClickable && item.href ? (
-                  <Link
-                    href={item.href}
-                    className="group flex flex-col items-center text-center w-full cursor-pointer transition-transform hover:scale-[1.02]"
-                  >
-                    {Content}
-                  </Link>
-                ) : (
-                  Content
-                )}
-
-                {/* Hand-drawn style vertical golden separator line between items (desktop) */}
-                {index < quickNavItems.length - 1 && (
-                  <div className="absolute right-0 top-1/2 -translate-y-1/2 h-16 w-[2.5px] bg-[#a6742a] rounded-full shadow-2xs" />
-                )}
-              </div>
-            );
-          })}
+              {/* Hand-drawn style vertical golden separator line between items (desktop) */}
+              {index < quickNavItems.length - 1 && (
+                <div className="hidden lg:block absolute right-0 top-1/2 -translate-y-1/2 h-14 lg:h-16 w-[2px] lg:w-[2.5px] bg-[#a6742a] rounded-full shadow-2xs" />
+              )}
+            </div>
+          ))}
         </div>
       </div>
     </section>
