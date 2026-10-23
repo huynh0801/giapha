@@ -283,6 +283,15 @@ export default function LandingHeader({ currentUser: initialUser }: LandingHeade
                   {/* Menu Items according to Role */}
                   <div className="p-2 space-y-0.5 text-xs sm:text-sm font-sans font-semibold">
                     <Link
+                      href="/profile"
+                      onClick={() => setUserDropdownOpen(false)}
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[#3c2f25] hover:bg-[#f5e7c7] hover:text-[#800000] transition-colors"
+                    >
+                      <User className="size-4 text-[#800000]" />
+                      <span>Hồ sơ cá nhân</span>
+                    </Link>
+
+                    <Link
                       href="/dashboard"
                       onClick={() => setUserDropdownOpen(false)}
                       className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[#3c2f25] hover:bg-[#f5e7c7] hover:text-[#800000] transition-colors"
@@ -394,6 +403,15 @@ export default function LandingHeader({ currentUser: initialUser }: LandingHeade
                   </span>
                 </div>
               </div>
+
+              <Link
+                href="/profile"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-2.5 px-3 py-2 rounded-lg font-sans text-sm font-bold text-[#3c2f25] hover:bg-[#ede5d5]"
+              >
+                <User className="size-4 text-[#800000]" />
+                Hồ sơ cá nhân
+              </Link>
 
               <Link
                 href="/dashboard"

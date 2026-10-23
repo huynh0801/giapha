@@ -257,3 +257,97 @@ export async function setUserFamilyMembership(formData: FormData) {
   revalidatePath("/admin/families/dashboard");
   return { success: true };
 }
+
+
+export async function updateUserProfileFull(formData: FormData) {
+  const fullName = readTrimmed(formData, "full_name");
+  const phoneNumber = readTrimmed(formData, "phone_number");
+  const avatarUrl = readTrimmed(formData, "avatar_url");
+
+  const user = await getUser();
+  if (!user) {
+    return { error: "Bạn cần đăng nhập để cập nhật thông tin." };
+  }
+
+  if (!fullName) {
+    return { error: "Vui lòng nhập họ tên." };
+  }
+
+  const supabase = await getSupabase();
+  const updateData: Record<string, unknown> = {
+    full_name: fullName,
+    phone_number: phoneNumber || null,
+    updated_at: new Date().toISOString(),
+  };
+
+  if (avatarUrl) {
+    updateData.avatar_url = avatarUrl;
+  }
+
+  const { error } = await supabase
+    .from("profiles")
+    .update(updateData)
+    .eq("id", user.id);
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  revalidatePath("/profile");
+  revalidatePath("/");
+  revalidatePath("/dashboard");
+  revalidatePath("/news");
+
+  return { success: true };
+}
+
+export async function changeAnyUserPassword(formData: FormData) {
+  const currentPassword = formData.get("current_password")?.toString() || "";
+  const newPassword = formData.get("new_password")?.toString() || "";
+  const confirmPassword = formData.get("confirm_password")?.toString() || "";
+
+  const user = await getUser();
+  if (!user?.email) {
+    return { error: "Bạn cần đăng nhập để đổi mật khẩu." };
+  }
+
+  if (!currentPassword) {
+    return { error: "Vui lòng nhập mật khẩu hiện tại." };
+  }
+
+  if (!newPassword || newPassword.length < 8) {
+    return { error: "Mật khẩu mới cần ít nhất 8 ký tự." };
+  }
+
+  if (newPassword !== confirmPassword) {
+    return { error: "Mật khẩu xác nhận không khớp." };
+  }
+
+  const supabase = await getSupabase();
+
+  const { error: verifyError } = await supabase.auth.signInWithPassword({
+    email: user.email,
+    password: currentPassword,
+  });
+
+  if (verifyError) {
+    return { error: "Mật khẩu hiện tại không chính xác." };
+  }
+
+  const { error: updateError } = await supabase.auth.updateUser({
+    password: newPassword,
+  });
+
+  if (updateError) {
+    return { error: updateError.message };
+  }
+
+  try {
+    await supabase.rpc("mark_password_changed");
+  } catch {
+    // optional RPC
+  }
+
+  revalidatePath("/profile");
+  return { success: true };
+}

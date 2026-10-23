@@ -72,7 +72,8 @@ export async function updateSession(request: NextRequest) {
   const isAdminPath =
     request.nextUrl.pathname.startsWith("/admin") && !isAdminLoginPage;
   const isDashboardPath = request.nextUrl.pathname.startsWith("/dashboard");
-  const isProtectedPath = isAdminPath || isDashboardPath;
+  const isProfilePath = request.nextUrl.pathname.startsWith("/profile");
+  const isProtectedPath = isAdminPath || isDashboardPath || isProfilePath;
 
   // Check if DB schema is initialized by checking if profiles table exists
   if (isProtectedPath || isLoginPage) {
