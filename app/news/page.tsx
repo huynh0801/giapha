@@ -1,6 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, BookOpen, CalendarDays, Sparkles } from "lucide-react";
+import {
+  ArrowRight,
+  BookOpen,
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight,
+  Sparkles,
+} from "lucide-react";
 import { BlogPost } from "@/types";
 import { getSupabase } from "@/utils/supabase/queries";
 import LandingHeader from "@/components/landing/LandingHeader";
@@ -13,6 +20,8 @@ export const metadata = {
   title: "Tin tức & Hoạt động dòng họ",
   description: "Các hoạt động, sự kiện và câu chuyện lịch sử của dòng họ",
 };
+
+const ITEMS_PER_PAGE = 6;
 
 type NewsPost = Pick<
   BlogPost,
@@ -39,11 +48,34 @@ function formatDate(value: string | null) {
   }
 }
 
-export default async function NewsPage() {
+interface NewsPageProps {
+  searchParams?: Promise<{ page?: string }>;
+}
+
+export default async function NewsPage({ searchParams }: NewsPageProps) {
+  const resolvedSearchParams = (await searchParams) || {};
+  const rawPage = parseInt(resolvedSearchParams.page || "1", 10);
+  const requestedPage = isNaN(rawPage) || rawPage < 1 ? 1 : rawPage;
+
   const [supabase, currentUser] = await Promise.all([
     getSupabase(),
     getCurrentUserAction(),
   ]);
+
+  // 1. Get exact total count of published system blog posts
+  const { count } = await supabase
+    .from("blog_posts")
+    .select("id", { count: "exact", head: true })
+    .eq("scope", "system")
+    .eq("is_published", true);
+
+  const totalCount = count || 0;
+  const totalPages = Math.max(1, Math.ceil(totalCount / ITEMS_PER_PAGE));
+  const currentPage = Math.min(requestedPage, totalPages);
+
+  // 2. Fetch paginated range of posts
+  const from = (currentPage - 1) * ITEMS_PER_PAGE;
+  const to = from + ITEMS_PER_PAGE - 1;
 
   const { data } = await supabase
     .from("blog_posts")
@@ -52,10 +84,15 @@ export default async function NewsPage() {
     )
     .eq("scope", "system")
     .eq("is_published", true)
-    .order("published_at", { ascending: false });
+    .order("published_at", { ascending: false })
+    .range(from, to);
 
   const posts = (data || []) as NewsPost[];
-  const [featuredPost, ...otherPosts] = posts;
+
+  // On page 1: the first post is featured, the rest appear in the grid
+  // On page 2+: all posts appear in the grid
+  const featuredPost = currentPage === 1 && posts.length > 0 ? posts[0] : null;
+  const otherPosts = currentPage === 1 ? posts.slice(1) : posts;
 
   return (
     <div className="min-h-screen flex flex-col bg-[#f5e7c7] text-[#2c1a11]">
@@ -111,7 +148,7 @@ export default async function NewsPage() {
             </div>
           </div>
 
-          {/* Featured Article: Có khung chỉ kép và họa tiết góc riêng */}
+          {/* Featured Article (chỉ hiện trên trang 1) */}
           {featuredPost ? (
             <div>
               <div className="flex items-center gap-2 mb-3.5 border-b border-[#deb887]/60 pb-2">
@@ -199,7 +236,7 @@ export default async function NewsPage() {
             </div>
           ) : null}
 
-          {/* Grid of Other Articles: Từng mục tin tức có khung riêng biệt */}
+          {/* Grid of Articles: Từng mục tin tức có khung riêng biệt */}
           {otherPosts.length > 0 && (
             <div>
               <div className="flex items-center justify-center gap-3 my-6 sm:my-8 w-full">
@@ -211,7 +248,7 @@ export default async function NewsPage() {
                       '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
                   }}
                 >
-                  Các Bản Tin &amp; Sự Kiện
+                  {currentPage === 1 ? "Các Bản Tin & Sự Kiện" : `Bản Tin Dòng Họ - Trang ${currentPage}`}
                 </h2>
                 <span className="h-[1px] flex-1 max-w-xs bg-gradient-to-l from-transparent via-[#caa455] to-[#caa455]" />
               </div>
@@ -278,6 +315,74 @@ export default async function NewsPage() {
                   </Link>
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* Phân Trang (Pagination Controls) */}
+          {totalCount > 0 && (
+            <div className="pt-6 sm:pt-8 border-t border-[#deb887]/80 flex flex-col sm:flex-row items-center justify-between gap-4 font-sans">
+              <div className="text-xs text-[#5c4a3e]">
+                Hiển thị trang <strong className="text-[#183b28]">{currentPage}</strong> /{" "}
+                <strong className="text-[#183b28]">{totalPages}</strong> (Tổng số{" "}
+                <strong className="text-[#8c1d1d]">{totalCount}</strong> bản tin)
+              </div>
+
+              {totalPages > 1 && (
+                <div className="flex items-center gap-1.5">
+                  {/* Nút Trang Trước */}
+                  {currentPage > 1 ? (
+                    <Link
+                      href={currentPage - 1 === 1 ? "/news" : `/news?page=${currentPage - 1}`}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 border border-[#deb887] bg-[#fffdf7] text-xs font-bold text-[#183b28] hover:border-[#8c1d1d] hover:text-[#8c1d1d] transition-colors shadow-2xs"
+                    >
+                      <ChevronLeft className="size-3.5" />
+                      <span>Trước</span>
+                    </Link>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 px-3 py-1.5 border border-[#deb887]/40 bg-[#fbf7ee] text-xs font-bold text-[#a89687] cursor-not-allowed">
+                      <ChevronLeft className="size-3.5" />
+                      <span>Trước</span>
+                    </span>
+                  )}
+
+                  {/* Danh Sách Các Số Trang */}
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => {
+                    const isActive = pageNum === currentPage;
+                    return isActive ? (
+                      <span
+                        key={pageNum}
+                        className="size-8 flex items-center justify-center border-2 border-[#caa455] bg-[#8c1d1d] text-white text-xs font-bold shadow-xs"
+                      >
+                        {pageNum}
+                      </span>
+                    ) : (
+                      <Link
+                        key={pageNum}
+                        href={pageNum === 1 ? "/news" : `/news?page=${pageNum}`}
+                        className="size-8 flex items-center justify-center border border-[#deb887] bg-[#fffdf7] text-xs font-bold text-[#183b28] hover:border-[#8c1d1d] hover:text-[#8c1d1d] transition-colors shadow-2xs"
+                      >
+                        {pageNum}
+                      </Link>
+                    );
+                  })}
+
+                  {/* Nút Trang Sau */}
+                  {currentPage < totalPages ? (
+                    <Link
+                      href={`/news?page=${currentPage + 1}`}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 border border-[#deb887] bg-[#fffdf7] text-xs font-bold text-[#183b28] hover:border-[#8c1d1d] hover:text-[#8c1d1d] transition-colors shadow-2xs"
+                    >
+                      <span>Sau</span>
+                      <ChevronRight className="size-3.5" />
+                    </Link>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 px-3 py-1.5 border border-[#deb887]/40 bg-[#fbf7ee] text-xs font-bold text-[#a89687] cursor-not-allowed">
+                      <span>Sau</span>
+                      <ChevronRight className="size-3.5" />
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
