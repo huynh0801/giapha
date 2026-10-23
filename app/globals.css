@@ -18,17 +18,16 @@
 :root {
   --background: #f5e7c7;
   --foreground: #171717;
+  --font-system: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-brush: var(--font-studio-brush, 'SVN-Studio Brush'), 'SVN-Studio Brush', Georgia, serif;
-  --font-inter: var(--font-studio-brush, 'SVN-Studio Brush'), 'SVN-Studio Brush', Georgia, serif;
-  --font-playfair: var(--font-studio-brush, 'SVN-Studio Brush'), 'SVN-Studio Brush', Georgia, serif;
-  --font-sans: var(--font-studio-brush, 'SVN-Studio Brush'), 'SVN-Studio Brush', Georgia, serif;
-  --font-serif: var(--font-studio-brush, 'SVN-Studio Brush'), 'SVN-Studio Brush', Georgia, serif;
+  --font-sans: var(--font-system);
+  --font-serif: var(--font-brush);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-brush);
+  --font-sans: var(--font-sans);
   --font-serif: var(--font-brush);
   --font-brush: var(--font-brush);
 }
@@ -37,12 +36,15 @@ html,
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-brush) !important;
+  font-family: var(--font-brush);
 }
 
-/* Ensure all typography elements across the entire website inherit SVN-Studio Brush */
-*, ::before, ::after {
-  font-family: inherit;
+.font-sans {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+}
+
+.font-brush {
+  font-family: var(--font-brush) !important;
 }
 
 /* Fix iOS auto-zoom when focusing on inputs */
@@ -97,7 +99,7 @@ select:disabled {
 .rich-editor,
 .article-content {
   color: #44403c;
-  font-family: inherit;
+  font-family: var(--font-system);
   line-height: 1.9;
 }
 

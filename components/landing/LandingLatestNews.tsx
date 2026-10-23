@@ -41,42 +41,45 @@ export default function LandingLatestNews({ news }: LandingLatestNewsProps) {
   const displayNews = news && news.length > 0 ? news.slice(0, 3) : fallbackNews;
 
   return (
-    <div className="flex flex-col h-full space-y-4">
+    <div className="relative overflow-hidden rounded-3xl bg-[#fcf5e5] border border-[#e2d0a8] shadow-[0_4px_20px_rgba(44,26,17,0.05)] p-5 sm:p-6 lg:p-7 flex flex-col justify-between h-full">
       {/* Header with Title and "Xem tất cả" link */}
-      <div className="flex items-center justify-between pb-1">
-        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#2c1a11] tracking-normal">
+      <div className="flex items-center justify-between pb-3 border-b border-[#e2d0a8]/60">
+        <h2
+          className="text-xl sm:text-2xl lg:text-[1.65rem] font-bold text-[#183b28] tracking-tight leading-tight"
+          style={{ fontFamily: '"SVN-Studio Brush", Georgia, serif' }}
+        >
           Tin tức mới nhất
         </h2>
         <Link
           href="/news"
-          className="inline-flex items-center gap-1.5 text-sm sm:text-base font-bold text-[#8c1d1d] hover:text-[#b52a2a] transition-colors group"
+          className="inline-flex items-center gap-1 text-xs sm:text-sm font-sans font-bold text-[#8c1d1d] hover:text-[#b52a2a] transition-colors group"
         >
           <span>Xem tất cả</span>
-          <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-1" />
+          <ArrowRight className="size-3.5 sm:size-4 transition-transform duration-200 group-hover:translate-x-1" />
         </Link>
       </div>
 
-      {/* List of 3 Articles */}
-      <div className="space-y-3.5">
+      {/* List of 3 Articles with thin dividers */}
+      <div className="flex-1 flex flex-col justify-between divide-y divide-[#e2d0a8]/70 pt-2 sm:pt-2.5">
         {displayNews.map((item) => (
           <Link
             key={item.id}
             href={item.slug.startsWith("http") ? item.slug : `/blog/${item.slug}`}
-            className="group flex gap-3.5 p-3 sm:p-3.5 rounded-2xl bg-[#faf0d7] border border-[#e2d0a8] hover:border-[#caa455] hover:shadow-[0_4px_16px_rgba(44,26,17,0.06)] transition-all duration-200"
+            className="group flex gap-3 sm:gap-3.5 py-2.5 sm:py-3 first:pt-1 last:pb-0 transition-all duration-200"
           >
             {/* Thumbnail */}
-            <div className="relative size-20 sm:size-24 rounded-xl overflow-hidden bg-[#eddcb7] shrink-0 border border-[#dfcda3]">
+            <div className="relative size-14 sm:size-16 rounded-xl overflow-hidden bg-[#eddcb7] shrink-0 border border-[#dfcda3]">
               {item.imageUrl ? (
                 <Image
                   src={item.imageUrl}
                   alt={item.title}
                   fill
-                  sizes="96px"
+                  sizes="64px"
                   unoptimized={item.imageUrl.startsWith("http")}
                   className="object-cover transition-transform duration-300 group-hover:scale-105"
                 />
               ) : (
-                <div className="flex size-full items-center justify-center text-[#8c1d1d] font-black text-2xl">
+                <div className="flex size-full items-center justify-center text-[#8c1d1d] font-bold text-xl">
                   祖
                 </div>
               )}
@@ -84,13 +87,13 @@ export default function LandingLatestNews({ news }: LandingLatestNewsProps) {
 
             {/* Meta & Excerpt */}
             <div className="flex-1 min-w-0 flex flex-col justify-center">
-              <h3 className="text-base sm:text-lg lg:text-xl font-bold text-[#2c1a11] group-hover:text-[#8c1d1d] transition-colors truncate leading-snug">
+              <h3 className="font-sans text-xs sm:text-sm font-bold text-[#2c1a11] group-hover:text-[#8c1d1d] transition-colors truncate leading-snug">
                 {item.title}
               </h3>
-              <p className="text-xs sm:text-sm font-semibold text-[#8a7b6f] mt-0.5">
+              <p className="font-sans text-[10px] sm:text-[11px] font-semibold text-[#8a7b6f] mt-0.5">
                 {item.date}
               </p>
-              <p className="text-sm sm:text-base text-[#5c4a3e] line-clamp-2 mt-1 leading-relaxed">
+              <p className="font-sans text-[11px] sm:text-xs text-[#5c4a3e] line-clamp-2 mt-0.5 leading-relaxed font-normal">
                 {item.excerpt}
               </p>
             </div>

@@ -78,7 +78,7 @@ export default function LandingQuickNav() {
                 </h3>
 
                 {/* Description matching exact line-breaks */}
-                <p className="mt-0.5 sm:mt-1 text-[10px] sm:text-[11px] lg:text-xs text-[#5c4a3e] leading-snug max-w-[150px] whitespace-pre-line font-normal">
+                <p className="mt-0.5 sm:mt-1 text-[10px] sm:text-[11px] lg:text-xs text-[#5c4a3e] leading-snug max-w-[150px] whitespace-pre-line font-sans font-medium">
                   {item.description}
                 </p>
               </Link>

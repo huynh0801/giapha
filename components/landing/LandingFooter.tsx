@@ -20,7 +20,10 @@ export default function LandingFooter() {
 
         {/* Center Slogan */}
         <div className="flex-1 text-center px-4">
-          <p className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold tracking-wider text-[#f5ebd2] drop-shadow-xs">
+          <p
+            className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold tracking-wider text-[#f5ebd2] drop-shadow-xs"
+            style={{ fontFamily: '"SVN-Studio Brush", Georgia, serif' }}
+          >
             Dòng họ trường tồn - Con cháu hưng thịnh
           </p>
         </div>

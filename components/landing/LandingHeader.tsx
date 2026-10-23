@@ -41,7 +41,7 @@ export default function LandingHeader() {
             >
               Gia Phả Dòng Họ
             </span>
-            <span className="text-xs sm:text-sm font-semibold text-[#6a594d] tracking-normal mt-0.5">
+            <span className="font-sans text-xs sm:text-sm font-semibold text-[#6a594d] tracking-normal mt-0.5">
               Tôn vinh cội nguồn - Gìn giữ truyền thống
             </span>
           </div>
@@ -53,7 +53,7 @@ export default function LandingHeader() {
             <Link
               key={item.label}
               href={item.href}
-              className={`relative text-base sm:text-lg font-bold tracking-tight transition-colors py-1 ${
+              className={`relative font-sans text-sm sm:text-base font-bold tracking-tight transition-colors py-1 ${
                 item.active
                   ? "text-[#2c1a11]"
                   : "text-[#5e4e42] hover:text-[#8c1d1d]"
@@ -90,7 +90,7 @@ export default function LandingHeader() {
 
           <Link
             href="/admin"
-            className="hidden sm:inline-flex items-center rounded-full bg-[#f4ece0] border border-[#d8cbbb] px-4 py-2 text-sm font-bold text-[#6a4f3b] hover:bg-[#8c1d1d] hover:text-white hover:border-[#8c1d1d] transition-all shadow-xs"
+            className="hidden sm:inline-flex items-center rounded-full bg-[#f4ece0] border border-[#d8cbbb] px-4 py-2 font-sans text-xs sm:text-sm font-bold text-[#6a4f3b] hover:bg-[#8c1d1d] hover:text-white hover:border-[#8c1d1d] transition-all shadow-xs"
           >
             Quản trị
           </Link>
@@ -115,7 +115,7 @@ export default function LandingHeader() {
               key={item.label}
               href={item.href}
               onClick={() => setMobileMenuOpen(false)}
-              className={`block px-3 py-2 rounded-lg text-base font-bold transition-colors ${
+              className={`block px-3 py-2 rounded-lg font-sans text-base font-bold transition-colors ${
                 item.active
                   ? "bg-[#ede5d5] text-[#8c1d1d]"
                   : "text-[#5e4e42] hover:bg-[#f4ece0] hover:text-[#8c1d1d]"
@@ -128,7 +128,7 @@ export default function LandingHeader() {
             <Link
               href="/admin"
               onClick={() => setMobileMenuOpen(false)}
-              className="w-full text-center py-2.5 rounded-xl bg-[#8c1d1d] text-white font-bold text-sm"
+              className="w-full text-center py-2.5 rounded-xl bg-[#8c1d1d] text-white font-sans font-bold text-sm"
             >
               Đăng nhập Quản trị
             </Link>
