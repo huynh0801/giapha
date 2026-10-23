@@ -25,8 +25,6 @@ import {
 const navItems = [
   { label: "Trang chủ", href: "/" },
   { label: "Gia phả", href: "/dashboard" },
-  { label: "Thành viên", href: "/dashboard" },
-  { label: "Tư liệu", href: "/about" },
   { label: "Tin tức", href: "/news" },
   { label: "Liên hệ", href: "/about" },
 ];
@@ -99,14 +97,13 @@ export default function LandingHeader({ currentUser: initialUser }: LandingHeade
     }
   };
 
-  const isItemActive = (href: string, label: string) => {
+  const isItemActive = (href: string) => {
     if (!pathname) return href === "/";
     if (href === "/") return pathname === "/";
     if (href === "/news") {
       return pathname.startsWith("/news") || pathname.startsWith("/blog");
     }
     if (href === "/about") {
-      if (label === "Liên hệ") return false;
       return pathname.startsWith("/about");
     }
     if (href === "/dashboard") return pathname.startsWith("/dashboard");
@@ -154,7 +151,7 @@ export default function LandingHeader({ currentUser: initialUser }: LandingHeade
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-7 lg:gap-9">
           {navItems.map((item) => {
-            const active = isItemActive(item.href, item.label);
+            const active = isItemActive(item.href);
             return (
               <Link
                 key={item.label}
@@ -360,7 +357,7 @@ export default function LandingHeader({ currentUser: initialUser }: LandingHeade
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-[#e2d0a8] bg-[#f5e7c7] px-4 py-4 space-y-2 shadow-lg">
           {navItems.map((item) => {
-            const active = isItemActive(item.href, item.label);
+            const active = isItemActive(item.href);
             return (
               <Link
                 key={item.label}

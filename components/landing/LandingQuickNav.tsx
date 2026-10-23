@@ -1,11 +1,9 @@
 import Image from "next/image";
-import Link from "next/link";
 
 interface QuickNavItem {
   title: string;
   description: string;
   icon: string;
-  href: string;
 }
 
 const quickNavItems: QuickNavItem[] = [
@@ -13,31 +11,26 @@ const quickNavItems: QuickNavItem[] = [
     title: "Gia phả dòng họ",
     description: "Xem sơ đồ, lịch sử\ncủa dòng họ",
     icon: "/images/landing/nav-genealogy.png",
-    href: "/dashboard",
   },
   {
     title: "Thành viên",
     description: "Danh sách con cháu\ntrong dòng họ",
     icon: "/images/landing/nav-members.png",
-    href: "/dashboard",
   },
   {
     title: "Tư liệu",
     description: "Lưu trữ hình ảnh, văn bản,\nhiện vật quý",
     icon: "/images/landing/nav-documents.png",
-    href: "/about",
   },
   {
     title: "Tin tức – Sự kiện",
     description: "Các hoạt động\ncủa dòng họ",
     icon: "/images/landing/nav-news.png",
-    href: "/news",
   },
   {
     title: "Liên hệ",
     description: "Góp ý, liên hệ\nvới ban quản trị",
     icon: "/images/landing/nav-contact.png",
-    href: "/about",
   },
 ];
 
@@ -53,12 +46,9 @@ export default function LandingQuickNav() {
                 index === 4 ? "col-span-2 sm:col-span-1" : ""
               }`}
             >
-              <Link
-                href={item.href}
-                className="group flex flex-col items-center text-center w-full transition-all duration-200"
-              >
+              <div className="flex flex-col items-center text-center w-full">
                 {/* Dainty Artistic Illustration */}
-                <div className="relative h-11 sm:h-12 lg:h-13 w-full flex items-center justify-center mb-1 transition-transform duration-200 group-hover:scale-105">
+                <div className="relative h-11 sm:h-12 lg:h-13 w-full flex items-center justify-center mb-1">
                   <Image
                     src={item.icon}
                     alt={item.title}
@@ -71,7 +61,7 @@ export default function LandingQuickNav() {
 
                 {/* Title in Deep Forest Green */}
                 <h3
-                  className="text-xs sm:text-sm lg:text-[15px] font-bold tracking-normal text-[#183b28] group-hover:text-[#8c1d1d] transition-colors leading-tight"
+                  className="text-xs sm:text-sm lg:text-[15px] font-bold tracking-normal text-[#183b28] leading-tight"
                   style={{ fontFamily: '"SVN-Studio Brush", "Playfair Display", Georgia, serif' }}
                 >
                   {item.title}
@@ -81,7 +71,7 @@ export default function LandingQuickNav() {
                 <p className="mt-0.5 sm:mt-1 text-[10px] sm:text-[11px] lg:text-xs text-[#5c4a3e] leading-snug max-w-[150px] whitespace-pre-line font-sans font-medium">
                   {item.description}
                 </p>
-              </Link>
+              </div>
 
               {/* Hand-drawn style vertical golden separator line between items (desktop) */}
               {index < quickNavItems.length - 1 && (
