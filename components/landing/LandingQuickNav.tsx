@@ -46,7 +46,7 @@ export default function LandingQuickNav() {
           {quickNavItems.slice(0, 4).map((item) => (
             <div
               key={item.title}
-              className="bg-[#faeed6]/90 border border-[#deb887]/80 rounded-2xl p-2.5 sm:p-3.5 flex flex-col justify-between shadow-[0_2px_8px_rgba(44,26,17,0.04)]"
+              className="bg-[#faeed6]/90 border border-[#deb887]/80 rounded-2xl p-2.5 sm:p-3.5 flex flex-col items-center justify-between shadow-[0_2px_8px_rgba(44,26,17,0.04)]"
             >
               {/* Illustration centered on top */}
               <div className="relative h-11 sm:h-13 w-full flex items-center justify-center mb-1.5">
@@ -60,22 +60,17 @@ export default function LandingQuickNav() {
                 />
               </div>
 
-              {/* Bottom area: Title & description on left, slim arrow on right */}
-              <div className="flex items-center justify-between gap-1.5 mt-auto">
-                <div className="flex flex-col text-left min-w-0">
-                  <h3
-                    className="text-xs sm:text-sm font-bold tracking-normal text-[#183b28] leading-tight"
-                    style={{ fontFamily: '"SVN-Studio Brush", "Playfair Display", Georgia, serif' }}
-                  >
-                    {item.title}
-                  </h3>
-                  <p className="mt-0.5 text-[10px] sm:text-[11px] text-[#5c4a3e] leading-snug whitespace-pre-line font-sans font-medium">
-                    {item.description}
-                  </p>
-                </div>
-                <div className="shrink-0 text-[#183b28]/70">
-                  <ArrowRight className="size-3.5 sm:size-4" />
-                </div>
+              {/* Bottom area: Title & description centered, no arrow */}
+              <div className="flex flex-col items-center text-center w-full mt-auto">
+                <h3
+                  className="text-xs sm:text-sm font-bold tracking-normal text-[#183b28] leading-tight text-center"
+                  style={{ fontFamily: '"SVN-Studio Brush", "Playfair Display", Georgia, serif' }}
+                >
+                  {item.title}
+                </h3>
+                <p className="mt-0.5 text-[10px] sm:text-[11px] text-[#5c4a3e] leading-snug whitespace-pre-line font-sans font-medium text-center">
+                  {item.description}
+                </p>
               </div>
             </div>
           ))}
