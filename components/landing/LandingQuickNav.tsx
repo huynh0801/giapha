@@ -85,7 +85,7 @@ export default function LandingQuickNav() {
 
               {/* Hand-drawn style vertical golden separator line between items (desktop) */}
               {index < quickNavItems.length - 1 && (
-                <div className="hidden lg:block absolute right-0 top-1/2 -translate-y-1/2 h-10 lg:h-12 w-[1px] bg-[#caa455]/50 rounded-full" />
+                <div className="hidden lg:block absolute right-0 top-1/2 -translate-y-1/2 h-14 lg:h-16 w-[2px] lg:w-[2.5px] bg-[#a6742a] rounded-full shadow-2xs" />
               )}
             </div>
           ))}
