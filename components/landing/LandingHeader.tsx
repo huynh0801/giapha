@@ -120,7 +120,7 @@ export default function LandingHeader({ currentUser: initialUser }: LandingHeade
   ).toUpperCase();
 
   return (
-    <header className="relative z-30 w-full bg-[#f5e7c7] border-b border-[#e2d0a8]/70">
+    <header className="sticky top-0 z-30 w-full bg-[#f5e7c7] border-b border-[#e2d0a8]/70 shadow-[0_2px_12px_rgba(44,26,17,0.04)]">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Brand / Logo */}
         <Link href="/" className="flex items-center gap-3.5 group">

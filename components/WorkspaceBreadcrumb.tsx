@@ -90,7 +90,7 @@ export default function WorkspaceBreadcrumb({
   return (
     <nav
       aria-label="Điều hướng trong workspace dòng họ"
-      className="sticky top-[76px] z-20 border-b border-amber-100/80 bg-[#fffdf8]/94 shadow-[0_8px_24px_rgba(58,31,19,0.05)] backdrop-blur-xl"
+      className="sticky top-20 z-20 border-b border-amber-100/80 bg-[#fffdf8]/94 shadow-[0_8px_24px_rgba(58,31,19,0.05)] backdrop-blur-xl"
     >
       <div className="mx-auto flex w-full max-w-7xl px-4 py-2 sm:px-6 lg:px-8">
         <div className="flex w-full items-center justify-between gap-3">
