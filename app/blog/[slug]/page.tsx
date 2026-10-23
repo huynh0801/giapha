@@ -2,6 +2,7 @@ import { BlogPost } from "@/types";
 import { getSupabase } from "@/utils/supabase/queries";
 import {
   ArrowLeft,
+  ArrowRight,
   CalendarDays,
   ChevronRight,
   Clock3,
@@ -10,10 +11,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import LandingHeader from "@/components/landing/LandingHeader";
 import LandingFooter from "@/components/landing/LandingFooter";
+import BackgroundDecor from "@/components/landing/BackgroundDecor";
 import { getCurrentUserAction } from "@/app/actions/auth";
 
 // Prevent Next.js from caching this page — always fetch fresh data.
-// Fixes: soft reload (F5) serving stale RSC payload that causes CSS/image mismatches.
 export const dynamic = "force-dynamic";
 
 interface PageProps {
@@ -22,12 +23,29 @@ interface PageProps {
 
 function formatDate(value: string | null) {
   if (!value) return "";
-  return new Intl.DateTimeFormat("vi-VN", {
-    weekday: "long",
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  }).format(new Date(value));
+  try {
+    return new Intl.DateTimeFormat("vi-VN", {
+      weekday: "long",
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    }).format(new Date(value));
+  } catch {
+    return "";
+  }
+}
+
+function formatShortDate(value: string | null) {
+  if (!value) return "";
+  try {
+    return new Intl.DateTimeFormat("vi-VN", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    }).format(new Date(value));
+  } catch {
+    return "";
+  }
 }
 
 function renderContent(content: string) {
@@ -45,10 +63,10 @@ function stripHtml(content: string) {
   return content.replace(/<[^>]+>/g, " ");
 }
 
-/** Inject inline styles into <img> tags so they render correctly before CSS loads */
+/** Inject traditional heritage styles into <img> tags inside HTML body */
 function injectImgInlineStyles(html: string) {
-  const fallbackStyle =
-    "width:100%;height:clamp(240px,42vw,460px);border-radius:24px;object-fit:cover;object-position:center;display:block";
+  const traditionalImgStyle =
+    "width:100%;height:auto;max-height:520px;border-radius:0px;border:1px solid #deb887;background-color:#f5e7c7;padding:4px;object-fit:cover;object-position:center;display:block;margin:1.5rem auto";
   return html
     .replace(
       /<figcaption(?:\s+[^>]*)?>\s*(?:Chú thích ảnh|Chú thích dưới ảnh|&nbsp;|<br\s*\/?>|\s)*\s*<\/figcaption>/gi,
@@ -56,9 +74,8 @@ function injectImgInlineStyles(html: string) {
     )
     .replace(/\sdata-placeholder="[^"]*"/gi, "")
     .replace(/<img\b([^>]*?)(\s*\/?>)/gi, (match, attrs, close) => {
-      // Skip if image already has an inline style attribute
-      if (/\bstyle\s*=/i.test(attrs)) return match;
-      return `<img${attrs} style="${fallbackStyle}"${close}`;
+      const cleanAttrs = attrs.replace(/\bstyle\s*=\s*(['"]).*?\1/gi, "");
+      return `<img${cleanAttrs} style="${traditionalImgStyle}"${close}`;
     });
 }
 
@@ -85,7 +102,7 @@ export async function generateMetadata({ params }: PageProps) {
   }
 
   return {
-    title: post.title,
+    title: `${post.title} | Gia Phả Dòng Họ`,
     description: post.excerpt || undefined,
     openGraph: {
       title: post.title,
@@ -134,160 +151,239 @@ export default async function BlogDetailPage({ params }: PageProps) {
     <div className="min-h-screen flex flex-col bg-[#f5e7c7] text-[#2c1a11]">
       <LandingHeader currentUser={currentUser} />
 
-      <main className="flex-1">
-        <article>
-        <section className="mx-auto max-w-6xl px-4 pb-8 pt-10 sm:px-6 md:pt-14 lg:px-8">
-          <div className="flex flex-wrap items-center gap-2 text-xs font-bold text-stone-500">
-            <Link href="/" className="hover:text-[#800000]">
-              Trang chủ
-            </Link>
-            <ChevronRight className="size-3.5 text-stone-300" />
-            <Link href="/news" className="hover:text-[#800000]">
-              Bài viết
-            </Link>
-          </div>
+      <main className="relative flex-1 w-full py-8 sm:py-12 lg:py-14 overflow-hidden">
+        {/* Background Decor: decorate2 (left) and decorate1 (right) */}
+        <BackgroundDecor withMid />
 
-          <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-end">
-            <div>
-              <h1 className="max-w-4xl text-2xl font-black leading-[1.15] tracking-tight text-[#2b1810] sm:text-3xl lg:text-[2rem]">
-                {post.title}
-              </h1>
-              {post.excerpt && (
-                <p className="mt-4 max-w-3xl text-sm font-medium leading-7 text-stone-600 sm:text-base">
-                  {post.excerpt}
-                </p>
-              )}
-            </div>
+        <div className="relative z-10 mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 space-y-12 sm:space-y-14">
+          {/* MASTER SCROLL FRAME: Đóng toàn bộ nội dung bài viết vào 1 khung chỉ kép lớn */}
+          <article className="relative p-1.5 sm:p-2.5 border-2 border-[#caa455] bg-[#f5e7c7]/30 shadow-[0_4px_30px_rgba(44,26,17,0.08)]">
+            <div className="relative border border-[#deb887] bg-[#fffdf7] p-5 sm:p-8 md:p-12 space-y-8 sm:space-y-10">
+              {/* 4 Traditional Corner Brackets */}
+              <span className="pointer-events-none absolute top-2 left-2 size-5 border-t-2 border-l-2 border-[#8c1d1d]" />
+              <span className="pointer-events-none absolute top-2 right-2 size-5 border-t-2 border-r-2 border-[#8c1d1d]" />
+              <span className="pointer-events-none absolute bottom-2 left-2 size-5 border-b-2 border-l-2 border-[#8c1d1d]" />
+              <span className="pointer-events-none absolute bottom-2 right-2 size-5 border-b-2 border-r-2 border-[#8c1d1d]" />
 
-            <aside className="rounded-[24px] bg-white p-5 shadow-[0_18px_45px_rgba(58,31,19,0.08)]">
-              <div className="flex items-center gap-3 border-b border-stone-100 pb-4">
-                <CalendarDays className="size-5 text-[#b56a10]" />
-                <div>
-                  <p className="text-xs font-black uppercase tracking-[0.18em] text-stone-400">
-                    Ngày đăng
-                  </p>
-                  <p className="mt-1 text-sm font-bold text-stone-800">
-                    {formatDate(publishedDate)}
-                  </p>
-                </div>
+              {/* Breadcrumb Navigation Bar */}
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#deb887]/60 pb-4">
+                <nav className="flex items-center gap-2 text-xs font-sans text-[#7a6455]">
+                  <Link
+                    href="/"
+                    className="hover:text-[#8c1d1d] transition-colors"
+                  >
+                    Trang chủ
+                  </Link>
+                  <ChevronRight className="size-3 text-[#caa455]" />
+                  <Link
+                    href="/news"
+                    className="hover:text-[#8c1d1d] transition-colors"
+                  >
+                    Bản tin dòng tộc
+                  </Link>
+                  <ChevronRight className="size-3 text-[#caa455]" />
+                  <span className="text-[#8c1d1d] font-bold truncate max-w-[200px] sm:max-w-xs">
+                    {post.category || "Tin tức"}
+                  </span>
+                </nav>
+
+                <Link
+                  href="/news"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-[#8c1d1d] hover:text-[#6e1616] transition-colors font-sans"
+                >
+                  <ArrowLeft className="size-3.5" />
+                  <span>Về danh sách tin</span>
+                </Link>
               </div>
-              <div className="flex items-center gap-3 pt-4">
-                <Clock3 className="size-5 text-[#b56a10]" />
+
+              {/* Article Header & Title */}
+              <div className="text-center space-y-4">
+                {/* Category Badge */}
                 <div>
-                  <p className="text-xs font-black uppercase tracking-[0.18em] text-stone-400">
-                    Thời gian đọc
-                  </p>
-                  <p className="mt-1 text-sm font-bold text-stone-800">
-                    {readingMinutes} phút
-                  </p>
+                  <span className="inline-block text-[11px] font-bold uppercase tracking-widest text-[#8c1d1d] border border-[#deb887] bg-[#fcf5e5] px-3.5 py-1 font-sans shadow-2xs">
+                    {post.category || "Văn hóa dòng họ"}
+                  </span>
                 </div>
-              </div>
-            </aside>
-          </div>
-        </section>
 
-        <section className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <figure className="overflow-hidden rounded-[28px] bg-white shadow-[0_24px_80px_rgba(58,31,19,0.12)]">
-            <img
-              src={post.cover_image_url}
-              alt={post.title}
-              className="aspect-[16/9] w-full object-cover"
-              style={{ aspectRatio: "16/9", width: "100%", objectFit: "cover", display: "block" }}
-            />
-          </figure>
-        </section>
+                {/* Main Title */}
+                <h1
+                  className="text-2xl sm:text-3xl md:text-4xl lg:text-[2.6rem] font-bold text-[#183b28] tracking-normal uppercase leading-tight sm:leading-snug max-w-4xl mx-auto"
+                  style={{
+                    fontFamily:
+                      '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
+                  }}
+                >
+                  {post.title}
+                </h1>
 
-        <section className="mx-auto grid max-w-6xl gap-8 px-4 py-8 sm:px-6 md:py-12 lg:grid-cols-[220px_minmax(0,760px)] lg:px-8">
-          <aside className="hidden lg:block">
-            <div className="sticky top-24 space-y-5 text-sm">
-              <Link
-                href="/news"
-                className="inline-flex items-center gap-2 font-bold text-stone-600 transition-colors hover:text-[#800000]"
-              >
-                <ArrowLeft className="size-4" />
-                Xem bài khác
-              </Link>
-            </div>
-          </aside>
+                {/* Metadata Bar */}
+                <div className="flex items-center justify-center flex-wrap gap-4 sm:gap-6 text-xs text-[#6e5849] font-sans pt-1">
+                  <div className="flex items-center gap-1.5">
+                    <CalendarDays className="size-3.5 text-[#caa455]" />
+                    <span>{formatDate(publishedDate)}</span>
+                  </div>
+                  <span className="size-1 rounded-full bg-[#caa455]" />
+                  <div className="flex items-center gap-1.5">
+                    <Clock3 className="size-3.5 text-[#caa455]" />
+                    <span>Thời gian đọc: {readingMinutes} phút</span>
+                  </div>
+                </div>
 
-          <div className="max-w-none">
-            {isHtmlContent ? (
-              <div
-                className="article-content"
-                dangerouslySetInnerHTML={{ __html: injectImgInlineStyles(post.content) }}
-              />
-            ) : (
-              <>
-                {leadParagraph && (
-                  <p className="text-base font-semibold leading-8 text-[#3a271b] first-letter:float-left first-letter:mr-2 first-letter:mt-1 first-letter:text-5xl first-letter:font-black first-letter:leading-[0.85] first-letter:text-[#800000]">
-                    {leadParagraph}
-                  </p>
-                )}
+                {/* Traditional Ornament separator */}
+                <div className="pt-2 flex items-center justify-center gap-3">
+                  <span className="h-[1px] w-20 sm:w-32 bg-gradient-to-r from-transparent to-[#caa455]" />
+                  <span className="size-2 rotate-45 bg-[#8c1d1d]" />
+                  <span className="h-[1px] w-20 sm:w-32 bg-gradient-to-l from-transparent to-[#caa455]" />
+                </div>
 
-                <div className="mt-6 space-y-5">
-                  {bodyParagraphs.map((paragraph, index) => (
-                    <p key={index} className="text-base leading-8 text-stone-700">
-                      {paragraph}
+                {/* Excerpt Callout */}
+                {post.excerpt && (
+                  <div className="mt-4 border-l-4 border-[#8c1d1d] bg-[#fdfaf3] p-4 sm:p-5 text-left border border-y-[#deb887]/40 border-r-[#deb887]/40">
+                    <p className="text-xs sm:text-sm text-[#4a3b2f] leading-relaxed font-sans font-medium italic text-justify">
+                      &ldquo;{post.excerpt}&rdquo;
                     </p>
-                  ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Cover Image with Double Gold Borders */}
+              {post.cover_image_url && (
+                <div className="relative p-1.5 border-2 border-[#caa455] bg-[#f5e7c7]">
+                  <div className="relative border border-[#deb887] overflow-hidden aspect-[16/9] w-full">
+                    <img
+                      src={post.cover_image_url}
+                      alt={post.title}
+                      className="size-full object-cover"
+                    />
+                  </div>
                 </div>
-              </>
-            )}
+              )}
 
-            <div className="mt-12 border-t border-stone-200 pt-6">
-              <Link
-                href="/news"
-                className="inline-flex items-center gap-2 rounded-full bg-[#800000] px-5 py-3 text-sm font-black text-white transition-colors hover:bg-[#650000]"
-              >
-                <ArrowLeft className="size-4" />
-                Quay lại danh sách bài viết
-              </Link>
-            </div>
-          </div>
-        </section>
-      </article>
-
-      {related && related.length > 0 && (
-        <section className="mx-auto max-w-6xl px-4 pb-16 sm:px-6 lg:px-8">
-          <div className="mb-6 flex items-end justify-between gap-4">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.24em] text-amber-600">
-                Đọc thêm
-              </p>
-              <h2 className="mt-2 text-2xl font-black text-[#7D0000] md:text-3xl">
-                Bài viết liên quan
-              </h2>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {related.map((item) => (
-              <Link
-                href={`/blog/${item.slug}`}
-                key={item.id}
-                className="group overflow-hidden rounded-2xl bg-white shadow-[0_14px_34px_rgba(58,31,19,0.08)] transition-all duration-300 hover:-translate-y-1"
-              >
-                <div className="aspect-[4/3] overflow-hidden">
-                  <img
-                    src={item.cover_image_url}
-                    alt={item.title}
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+              {/* Article Body Content */}
+              <div className="max-w-none font-sans text-sm sm:text-base leading-relaxed sm:leading-8 text-[#2c1a11] space-y-5">
+                {isHtmlContent ? (
+                  <div
+                    className="article-content leading-relaxed space-y-4"
+                    dangerouslySetInnerHTML={{
+                      __html: injectImgInlineStyles(post.content),
+                    }}
                   />
+                ) : (
+                  <>
+                    {leadParagraph && (
+                      <p className="text-base sm:text-lg font-semibold leading-relaxed sm:leading-8 text-[#183b28] first-letter:float-left first-letter:mr-2.5 first-letter:text-4xl sm:first-letter:text-5xl first-letter:font-bold first-letter:leading-none first-letter:text-[#8c1d1d] first-letter:font-serif">
+                        {leadParagraph}
+                      </p>
+                    )}
+
+                    <div className="space-y-4 sm:space-y-5 text-[#3d2c20]">
+                      {bodyParagraphs.map((paragraph, index) => (
+                        <p
+                          key={index}
+                          className="leading-relaxed sm:leading-8 text-justify"
+                        >
+                          {paragraph}
+                        </p>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Return Button inside Frame Footer */}
+              <div className="pt-8 border-t border-[#deb887]/70 flex flex-col sm:flex-row items-center justify-between gap-4 font-sans">
+                <Link
+                  href="/news"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 border-2 border-[#caa455] bg-[#8c1d1d] text-white text-xs sm:text-sm font-bold shadow-xs hover:bg-[#6e1616] transition-colors"
+                >
+                  <ArrowLeft className="size-4" />
+                  <span>Quay lại danh sách bản tin</span>
+                </Link>
+
+                <div className="text-xs text-[#7a6455] italic">
+                  Gia phả số dòng họ – Giữ gìn cội nguồn truyền thống
                 </div>
-                <div className="p-4">
-                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-amber-600">
-                    {item.category}
-                  </p>
-                  <h3 className="mt-2 line-clamp-2 text-sm font-black leading-snug text-stone-900 group-hover:text-[#7D0000]">
-                    {item.title}
-                  </h3>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
+              </div>
+            </div>
+          </article>
+
+          {/* RELATED ARTICLES: Lưới thẻ cổ truyền đồng bộ trang /news */}
+          {related && related.length > 0 && (
+            <div className="space-y-6 pt-4">
+              <div className="flex items-center justify-center gap-3 w-full">
+                <span className="h-[1px] flex-1 max-w-xs bg-gradient-to-r from-transparent via-[#caa455] to-[#caa455]" />
+                <h2
+                  className="text-lg sm:text-2xl font-bold tracking-tight text-[#183b28] uppercase shrink-0 px-3"
+                  style={{
+                    fontFamily:
+                      '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
+                  }}
+                >
+                  Các Bản Tin Khác
+                </h2>
+                <span className="h-[1px] flex-1 max-w-xs bg-gradient-to-l from-transparent via-[#caa455] to-[#caa455]" />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {related.map((item) => (
+                  <Link
+                    key={item.id}
+                    href={`/blog/${item.slug}`}
+                    className="group block relative p-1.5 border-2 border-[#caa455] bg-[#f5e7c7]/30 hover:border-[#8c1d1d] transition-all shadow-[0_2px_12px_rgba(44,26,17,0.05)]"
+                  >
+                    <div className="relative border border-[#deb887] bg-[#fffdf7] group-hover:bg-[#fffefb] p-4 flex flex-col justify-between h-full transition-colors">
+                      {/* 4 Traditional Corner Brackets */}
+                      <span className="pointer-events-none absolute top-1 left-1 size-3 border-t-2 border-l-2 border-[#8c1d1d]" />
+                      <span className="pointer-events-none absolute top-1 right-1 size-3 border-t-2 border-r-2 border-[#8c1d1d]" />
+                      <span className="pointer-events-none absolute bottom-1 left-1 size-3 border-b-2 border-l-2 border-[#8c1d1d]" />
+                      <span className="pointer-events-none absolute bottom-1 right-1 size-3 border-b-2 border-r-2 border-[#8c1d1d]" />
+
+                      <div>
+                        {/* Image with gold framing */}
+                        <div className="relative aspect-[16/10] w-full border border-[#deb887] bg-[#f5e7c7] overflow-hidden mb-3">
+                          <img
+                            src={item.cover_image_url}
+                            alt={item.title}
+                            className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          />
+                        </div>
+
+                        {/* Meta: Category & Date */}
+                        <div className="flex items-center justify-between gap-2 border-b border-[#deb887]/50 pb-1.5 mb-2 font-sans">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-[#8c1d1d]">
+                            {item.category || "Tin tức"}
+                          </span>
+                          <span className="text-[11px] text-[#7a6455]">
+                            {formatShortDate(
+                              item.published_at || item.created_at,
+                            )}
+                          </span>
+                        </div>
+
+                        {/* Title */}
+                        <h3
+                          className="text-sm sm:text-base font-bold text-[#183b28] group-hover:text-[#8c1d1d] transition-colors leading-snug line-clamp-2"
+                          style={{
+                            fontFamily:
+                              '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
+                          }}
+                        >
+                          {item.title}
+                        </h3>
+                      </div>
+
+                      {/* Read more button */}
+                      <div className="mt-4 pt-2.5 border-t border-[#deb887]/50 flex items-center justify-end text-xs font-bold text-[#8c1d1d] group-hover:translate-x-0.5 transition-transform gap-1 font-sans">
+                        <span>Xem chi tiết</span>
+                        <ArrowRight className="size-3.5" />
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </main>
 
       <LandingFooter />

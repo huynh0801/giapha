@@ -91,6 +91,18 @@ test("app/page.tsx imports and integrates all landing components", () => {
   assert.match(pageContent, /LandingFooter/);
 });
 
+test("app/blog/[slug]/page.tsx integrates traditional master frame and background decor", () => {
+  const blogPath = path.join(process.cwd(), "app", "blog", "[slug]", "page.tsx");
+  assert.ok(fs.existsSync(blogPath), "app/blog/[slug]/page.tsx should exist");
+  const content = fs.readFileSync(blogPath, "utf8");
+  assert.match(content, /BackgroundDecor/);
+  assert.match(content, /#caa455/);
+  assert.match(content, /#8c1d1d/);
+  assert.match(content, /SVN-Studio Brush/);
+  assert.match(content, /\/news/);
+});
+
+
 
 
 
