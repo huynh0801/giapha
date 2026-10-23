@@ -76,7 +76,7 @@ export default function LandingLatestNews({ news }: LandingLatestNewsProps) {
                   fill
                   sizes="80px"
                   unoptimized={item.imageUrl.startsWith("http")}
-                  className="object-fill transition-transform duration-300 group-hover:scale-105"
+                  className="object-cover transition-transform duration-300 group-hover:scale-105"
                 />
               ) : (
                 <div className="flex size-full items-center justify-center text-[#8c1d1d] font-bold text-xl">

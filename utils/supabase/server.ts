@@ -64,3 +64,19 @@ export const createClient = (
     },
   });
 };
+
+
+export const createPublicClient = () => {
+  if (!supabaseUrl || !supabaseKey) {
+    return null;
+  }
+
+  return createServerClient(supabaseUrl, supabaseKey, {
+    cookies: {
+      getAll() {
+        return [];
+      },
+      setAll() {},
+    },
+  });
+};

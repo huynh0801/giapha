@@ -6,7 +6,7 @@ import LandingLatestNews from "@/components/landing/LandingLatestNews";
 import LandingFooter from "@/components/landing/LandingFooter";
 import type { LandingNewsItem } from "@/components/landing/types";
 import { BlogPost } from "@/types";
-import { getSupabase } from "@/utils/supabase/queries";
+import { getPublicSupabase } from "@/utils/supabase/queries";
 import { unstable_cache } from "next/cache";
 import Link from "next/link";
 
@@ -33,24 +33,32 @@ function formatNewsDate(value: string | null) {
 const getLatestSystemNews = unstable_cache(
   async (): Promise<LandingNewsItem[]> => {
     try {
-      const supabase = await getSupabase();
+      const supabase = getPublicSupabase();
+      if (!supabase) return [];
       const { data: posts, error } = await supabase
         .from("blog_posts")
-        .select("id,title,slug,excerpt,cover_image_url,published_at,created_at")
+        .select("id,title,slug,excerpt,content,cover_image_url,published_at,created_at")
         .eq("scope", "system")
         .eq("is_published", true)
         .order("published_at", { ascending: false })
         .limit(3);
 
       if (!error && posts && posts.length > 0) {
-        return (posts as BlogPost[]).map((post) => ({
+        return (posts as (BlogPost & { content?: string })[]).map((post) => {
+          let excerpt = post.excerpt?.trim() || "";
+          if (!excerpt && post.content) {
+            const plain = post.content.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+            excerpt = plain.length > 150 ? plain.slice(0, 147) + "..." : plain;
+          }
+          return {
           id: post.id,
           title: post.title,
           slug: post.slug,
           date: formatNewsDate(post.published_at || post.created_at),
-          excerpt: post.excerpt || "",
+          excerpt,
           imageUrl: post.cover_image_url || null,
-        }));
+          };
+        });
       }
     } catch (err) {
       console.error("Error fetching homepage news:", err);

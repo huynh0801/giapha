@@ -6,7 +6,7 @@ import {
   FamilyTree,
   Profile,
 } from "@/types";
-import { createClient } from "@/utils/supabase/server";
+import { createClient, createPublicClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { cache } from "react";
 
@@ -23,6 +23,10 @@ export const getSupabase = cache(async () => {
   const cookieStore = await cookies();
   return createClient(cookieStore);
 });
+
+export const getPublicSupabase = () => {
+  return createPublicClient();
+};
 
 export const getUser = cache(async () => {
   const supabase = await getSupabase();
