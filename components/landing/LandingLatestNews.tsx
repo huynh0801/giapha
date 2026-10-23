@@ -67,14 +67,14 @@ export default function LandingLatestNews({ news }: LandingLatestNewsProps) {
             href={item.slug.startsWith("http") ? item.slug : `/blog/${item.slug}`}
             className="group flex gap-3 sm:gap-3.5 py-2.5 sm:py-3 first:pt-1 last:pb-0 transition-all duration-200"
           >
-            {/* Thumbnail */}
-            <div className="relative size-14 sm:size-16 rounded-xl overflow-hidden bg-[#eddcb7] shrink-0 border border-[#dfcda3]">
+            {/* Thumbnail - landscape aspect ratio showing full image */}
+            <div className="relative w-18 sm:w-20 aspect-[3/2] rounded-xl overflow-hidden bg-[#eddcb7] shrink-0 border border-[#dfcda3]">
               {item.imageUrl ? (
                 <Image
                   src={item.imageUrl}
                   alt={item.title}
                   fill
-                  sizes="64px"
+                  sizes="80px"
                   unoptimized={item.imageUrl.startsWith("http")}
                   className="object-cover transition-transform duration-300 group-hover:scale-105"
                 />

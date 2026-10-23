@@ -6,20 +6,21 @@ export default function LandingAbout() {
   return (
     <div className="relative overflow-hidden rounded-3xl border border-[#e2d0a8] shadow-[0_4px_20px_rgba(44,26,17,0.05)] flex flex-col md:flex-row items-stretch h-full bg-[#fdf6e7]">
       {/* Authentic parchment background with built-in cloud watermark */}
-      <div className="pointer-events-none absolute inset-0 z-0 select-none">
+      <div className="pointer-events-none absolute inset-0 z-0 select-none overflow-hidden rounded-3xl">
         <Image
-          src="/images/landing/about-parchment.png"
+          src="/images/landing/about-card-bg.png"
           alt="Nền giấy dó"
           fill
           sizes="(max-width: 768px) 100vw, 55vw"
-          className="object-cover object-right"
+          className="object-cover object-bottom-right"
+          priority
         />
       </div>
 
-      {/* Temple Artwork on the Left - Full bleed to top, bottom, and left */}
-      <div className="relative z-10 w-full md:w-[46%] min-h-[220px] md:min-h-full shrink-0 overflow-hidden">
+      {/* Temple Artwork on the Left - shows the entire complete painting */}
+      <div className="relative z-10 w-full md:w-[46%] aspect-[382/254] md:aspect-auto md:min-h-full shrink-0 overflow-hidden md:rounded-l-3xl">
         <Image
-          src="/images/landing/about-temple.png"
+          src="/images/landing/about-painting.png"
           alt="Nhà thờ từ đường dòng họ"
           fill
           sizes="(max-width: 768px) 100vw, 35vw"
