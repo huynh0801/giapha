@@ -68,12 +68,12 @@ export default async function GiaPhaHomePage() {
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-10 gap-6 lg:gap-8 items-stretch">
               {/* Left Column: Về dòng họ chúng tôi (70% width) */}
-              <div className="lg:col-span-7 flex flex-col">
+              <div className="lg:col-span-7 flex flex-col h-full">
                 <LandingAbout />
               </div>
 
               {/* Right Column: Tin tức mới nhất (30% width) */}
-              <div className="lg:col-span-3 flex flex-col">
+              <div className="lg:col-span-3 flex flex-col h-full">
                 <LandingLatestNews news={newsItems} />
               </div>
             </div>

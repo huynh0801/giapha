@@ -41,7 +41,7 @@ export default function LandingLatestNews({ news }: LandingLatestNewsProps) {
   const displayNews = news && news.length > 0 ? news.slice(0, 3) : fallbackNews;
 
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-[#f5e7c7] border border-[#cbb27a] p-4 sm:p-5 lg:p-6 flex flex-col justify-between h-full shadow-[0_2px_12px_rgba(44,26,17,0.03)]">
+    <div className="relative overflow-hidden rounded-2xl bg-[#f5e7c7] border border-[#cbb27a] p-4 sm:p-5 lg:p-6 flex flex-col justify-between h-full flex-1 shadow-[0_2px_12px_rgba(44,26,17,0.03)]">
       {/* Header with Title and "Xem tất cả" link */}
       <div className="flex items-center justify-between pb-2.5 sm:pb-3 border-b border-[#cbb27a]/50">
         <h2
