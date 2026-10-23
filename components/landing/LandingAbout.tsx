@@ -5,19 +5,6 @@ import { ArrowRight } from "lucide-react";
 export default function LandingAbout() {
   return (
     <div className="relative overflow-hidden rounded-2xl flex flex-col lg:flex-row items-stretch w-full h-full flex-1">
-      {/* Background: img-detail.png (parchment paper with natural deckle edge and cloud watermark) */}
-      <div className="pointer-events-none absolute inset-0 z-0 select-none overflow-hidden rounded-2xl">
-        <Image
-          src="/images/landing/about-card-bg.png?v=20261023f"
-          alt="Nền giấy dó"
-          fill
-          unoptimized
-          sizes="(max-width: 1024px) 100vw, 70vw"
-          className="object-cover object-right-top"
-          priority
-        />
-      </div>
-
       {/* Left side: img-detail2.png - Giữ đúng tỷ lệ gốc (612/407), không bóp méo hình */}
       <div className="relative z-10 w-full lg:w-auto lg:h-full aspect-[612/407] shrink-0 overflow-hidden">
         <Image
@@ -31,8 +18,21 @@ export default function LandingAbout() {
         />
       </div>
 
-      {/* Right side: Content */}
-      <div className="relative z-10 flex-1 flex flex-col justify-between p-5 sm:p-6 lg:p-7 space-y-3 min-w-0 h-full">
+      {/* Right side: Content with its own parchment background (img-detail.png) */}
+      <div className="relative z-10 flex-1 flex flex-col justify-between p-5 sm:p-6 lg:p-7 space-y-3 min-w-0 h-full overflow-hidden">
+        {/* Background for right side only: Không bị kéo dãn zoom to quá mức */}
+        <div className="pointer-events-none absolute inset-0 -z-10 select-none overflow-hidden">
+          <Image
+            src="/images/landing/about-card-bg.png?v=20261023e"
+            alt="Nền giấy dó"
+            fill
+            unoptimized
+            sizes="(max-width: 1024px) 100vw, 45vw"
+            className="object-cover object-right"
+            priority
+          />
+        </div>
+
         <div>
           <h2
             className="text-lg sm:text-xl lg:text-[1.45rem] font-bold text-[#183b28] tracking-tight leading-tight"
