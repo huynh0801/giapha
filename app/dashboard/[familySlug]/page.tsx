@@ -1,4 +1,5 @@
 import FamilyQrCard from "@/components/FamilyQrCard";
+import BackgroundDecor from "@/components/landing/BackgroundDecor";
 import {
   HeritageBadge,
   HeritageFrame,
@@ -248,8 +249,10 @@ export default async function FamilyDashboardPage({
   ];
 
   return (
-    <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-8 sm:px-6 lg:px-8">
-      {/* Hero Banner: Identity & Court Calendar framed cleanly */}
+    <div className="relative flex-1 w-full overflow-hidden">
+      <BackgroundDecor withMid />
+      <main className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-8 sm:px-6 lg:px-8">
+        {/* Hero Banner: Identity & Court Calendar framed cleanly */}
       <section className="mb-6">
         <HeritageFrame innerClassName="p-6 sm:p-8">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
@@ -504,6 +507,7 @@ export default async function FamilyDashboardPage({
         </section>
       )}
     </main>
+    </div>
   );
 }
 

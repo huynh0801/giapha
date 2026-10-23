@@ -1,4 +1,5 @@
 import { requestJoinFamilyAction } from "@/app/actions/join-request";
+import BackgroundDecor from "@/components/landing/BackgroundDecor";
 import { HeritageBadge, HeritageFrame } from "@/components/dashboard/HeritageUI";
 import {
   getAccessibleFamilies,
@@ -138,8 +139,10 @@ export default async function DashboardFamilySwitcherPage({
   const returnTo = buildDashboardHref({ q, visibility, page: currentPage });
 
   return (
-    <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 py-8 sm:px-6 lg:px-8">
-      {/* Heritage Header */}
+    <div className="relative flex-1 w-full overflow-hidden">
+      <BackgroundDecor withMid />
+      <main className="relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 py-8 sm:px-6 lg:px-8">
+        {/* Heritage Header */}
       <div className="mb-8 text-center sm:text-left">
         <div className="inline-flex items-center gap-2 rounded-full border border-[#deb887] bg-[#f5e7c7]/50 px-3.5 py-1 text-xs font-black uppercase tracking-[0.2em] text-[#8c1d1d]">
           <FolderTree className="size-3.5" />
@@ -496,5 +499,6 @@ export default async function DashboardFamilySwitcherPage({
         )}
       </section>
     </main>
+    </div>
   );
 }
