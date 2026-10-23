@@ -9,7 +9,6 @@ import {
   LogIn,
   LogOut,
   Menu,
-  Search,
   ShieldCheck,
   User,
   X,
@@ -171,28 +170,8 @@ export default function LandingHeader({ currentUser: initialUser }: LandingHeade
           })}
         </nav>
 
-        {/* Right Actions: Search & Auth / Profile */}
+        {/* Right Actions: Auth / Profile */}
         <div className="flex items-center gap-3 sm:gap-4">
-          <Link
-            href="/news"
-            aria-label="Tìm kiếm bài viết"
-            className="flex size-9 items-center justify-center rounded-full text-[#5e4e42] hover:text-[#8c1d1d] hover:bg-[#ede5d5]/60 transition-colors"
-          >
-            <Search className="size-5" />
-          </Link>
-
-          {/* Traditional cloud symbol - reused from footer-clouds */}
-          <div className="hidden lg:flex items-center">
-            <Image
-              src="/images/landing/footer-clouds.png"
-              alt="Họa tiết đám mây"
-              width={54}
-              height={24}
-              style={{ width: "auto", height: "auto" }}
-              className="h-6 w-auto object-contain opacity-85 select-none pointer-events-none"
-            />
-          </div>
-
           {/* Desktop Auth State: Login button or Profile Dropdown */}
           {user === undefined ? (
             // Placeholder while resolving to prevent layout flicker

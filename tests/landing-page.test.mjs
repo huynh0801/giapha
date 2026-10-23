@@ -31,13 +31,13 @@ test("LandingHeader and LandingFooter export valid React components and required
   assert.match(headerContent, /Tôn vinh cội nguồn/);
   assert.match(headerContent, /logo\.png/);
   assert.match(headerContent, /Playfair Display/);
-  assert.match(headerContent, /footer-clouds\.png/);
   assert.match(headerContent, /\/dashboard/);
   assert.match(headerContent, /\/news/);
 
   const footerPath = path.join(process.cwd(), "components", "landing", "LandingFooter.tsx");
   assert.ok(fs.existsSync(footerPath), "LandingFooter.tsx should exist");
   const footerContent = fs.readFileSync(footerPath, "utf8");
+  assert.match(footerContent, /footer-clouds\.png/);
   assert.match(footerContent, /Dòng họ trường tồn - Con cháu hưng thịnh/);
 });
 
