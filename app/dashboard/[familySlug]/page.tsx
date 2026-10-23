@@ -1,4 +1,9 @@
 import FamilyQrCard from "@/components/FamilyQrCard";
+import {
+  HeritageBadge,
+  HeritageFrame,
+  HeritageStatCard,
+} from "@/components/dashboard/HeritageUI";
 import { getTodayLunar } from "@/utils/dateHelpers";
 import { computeEvents } from "@/utils/eventHelpers";
 import { getFamilyContextBySlug, getSupabase } from "@/utils/supabase/queries";
@@ -33,6 +38,8 @@ type Feature = {
   description: string;
   href: string;
   icon: ReactNode;
+  iconBg: string;
+  iconColor: string;
 };
 
 type FamilyAdminContact = {
@@ -90,28 +97,29 @@ export default async function FamilyDashboardPage({
   if (!context) notFound();
 
   const supabase = await getSupabase();
-  const [personsRes, relationshipsRes, eventsRes, adminContactsRes] = await Promise.all([
-    supabase
-      .from("persons")
-      .select(
-        "id, full_name, birth_year, birth_month, birth_day, death_year, death_month, death_day, death_lunar_year, death_lunar_month, death_lunar_day, is_deceased",
-      )
-      .eq("family_id", context.family.id)
-      .eq("tree_id", context.tree.id),
-    supabase
-      .from("relationships")
-      .select("id")
-      .eq("family_id", context.family.id)
-      .eq("tree_id", context.tree.id),
-    supabase
-      .from("custom_events")
-      .select("id, name, content, event_date, location, created_by")
-      .eq("family_id", context.family.id)
-      .eq("tree_id", context.tree.id),
-    supabase.rpc("get_family_admin_contacts", {
-      target_family_id: context.family.id,
-    }),
-  ]);
+  const [personsRes, relationshipsRes, eventsRes, adminContactsRes] =
+    await Promise.all([
+      supabase
+        .from("persons")
+        .select(
+          "id, full_name, birth_year, birth_month, birth_day, death_year, death_month, death_day, death_lunar_year, death_lunar_month, death_lunar_day, is_deceased",
+        )
+        .eq("family_id", context.family.id)
+        .eq("tree_id", context.tree.id),
+      supabase
+        .from("relationships")
+        .select("id")
+        .eq("family_id", context.family.id)
+        .eq("tree_id", context.tree.id),
+      supabase
+        .from("custom_events")
+        .select("id, name, content, event_date, location, created_by")
+        .eq("family_id", context.family.id)
+        .eq("tree_id", context.tree.id),
+      supabase.rpc("get_family_admin_contacts", {
+        target_family_id: context.family.id,
+      }),
+    ]);
 
   const persons = personsRes.data || [];
   const relationships = relationshipsRes.data || [];
@@ -129,49 +137,67 @@ export default async function FamilyDashboardPage({
   const treeHref = (path: string) => `${base}/${path}${treeQuery}`;
   const qrPath = `/dashboard/families/${familySlug}`;
   const qrUrl = new URL(qrPath, getSiteOrigin(requestHeaders)).toString();
+
   const features: Feature[] = [
     {
       title: "Cây gia phả",
-      description: "Xem danh sách, cây, mindmap và bubble map trong đúng dòng họ.",
+      description:
+        "Xem danh sách, cây, mindmap và bubble map trong đúng dòng họ.",
       href: treeHref("members"),
-      icon: <Network className="size-7 text-amber-600" />,
+      icon: <Network className="size-6" />,
+      iconBg: "bg-[#f5e7c7]",
+      iconColor: "text-[#8c1d1d]",
     },
     {
       title: "Tra danh xưng",
       description: "Tính cách gọi giữa hai thành viên trong cây hiện tại.",
       href: treeHref("kinship"),
-      icon: <GitMerge className="size-7 text-blue-600" />,
+      icon: <GitMerge className="size-6" />,
+      iconBg: "bg-[#eaf3ed]",
+      iconColor: "text-[#183b28]",
     },
     {
       title: "Thống kê",
       description: "Tổng quan thành viên, thế hệ và quan hệ trong dòng họ.",
       href: treeHref("stats"),
-      icon: <BarChart2 className="size-7 text-purple-600" />,
+      icon: <BarChart2 className="size-6" />,
+      iconBg: "bg-[#fef8ea]",
+      iconColor: "text-[#92540b]",
     },
     {
       title: "Sự kiện",
       description: "Sinh nhật, ngày giỗ và sự kiện nội bộ của dòng họ.",
       href: treeHref("events"),
-      icon: <CalendarDays className="size-7 text-emerald-600" />,
+      icon: <CalendarDays className="size-6" />,
+      iconBg: "bg-[#f5e7c7]",
+      iconColor: "text-[#8c1d1d]",
     },
     {
       title: "Hồ sơ dòng họ",
-      description: "Xem nguồn gốc, mô tả và thông tin giới thiệu riêng của dòng họ.",
+      description:
+        "Xem nguồn gốc, mô tả và thông tin giới thiệu riêng của dòng họ.",
       href: `${base}/about`,
-      icon: <FileText className="size-7 text-rose-600" />,
+      icon: <FileText className="size-6" />,
+      iconBg: "bg-[#eaf3ed]",
+      iconColor: "text-[#183b28]",
     },
     {
       title: "Thông tin dòng họ",
-      description: "Đọc tin nội bộ, thông báo và ghi chép chỉ dành cho thành viên.",
+      description:
+        "Đọc tin nội bộ, thông báo và ghi chép chỉ dành cho thành viên.",
       href: `${base}/blog`,
-      icon: <BookOpen className="size-7 text-orange-600" />,
+      icon: <BookOpen className="size-6" />,
+      iconBg: "bg-[#fef8ea]",
+      iconColor: "text-[#92540b]",
     },
     {
       title: "Quản trị viên",
       description:
         "Xem người phụ trách dòng họ; Quản trị chính có thể thêm hoặc bỏ Quản trị phụ.",
       href: `${base}/admins`,
-      icon: <UserCog className="size-7 text-emerald-700" />,
+      icon: <UserCog className="size-6" />,
+      iconBg: "bg-[#f5e7c7]",
+      iconColor: "text-[#8c1d1d]",
     },
   ];
 
@@ -180,185 +206,248 @@ export default async function FamilyDashboardPage({
       ? [
           {
             title: "Quản lý cây",
-            description: "Tạo cây gia phả, đặt cây chính và chuẩn bị phạm vi nhập liệu.",
+            description:
+              "Tạo cây gia phả, đặt cây chính và chuẩn bị phạm vi nhập liệu.",
             href: `${base}/trees`,
-            icon: <FolderTree className="size-7 text-amber-700" />,
+            icon: <FolderTree className="size-6" />,
+            iconBg: "bg-[#f5e7c7]",
+            iconColor: "text-[#8c1d1d]",
           },
           {
             title: "Yêu cầu tham gia",
             description: "Duyệt hoặc từ chối người dùng xin tham gia dòng họ.",
             href: `${base}/requests`,
-            icon: <UserPlus className="size-7 text-emerald-600" />,
+            icon: <UserPlus className="size-6" />,
+            iconBg: "bg-[#eaf3ed]",
+            iconColor: "text-[#183b28]",
           },
         ]
       : []),
     ...(context.canEdit
       ? [
-        {
-          title: "Thứ tự gia phả",
-          description: "Tính thế hệ, thứ tự sinh và dâu/rể theo cây hiện tại.",
-          href: treeHref("lineage"),
-          icon: <Users className="size-7 text-indigo-600" />,
-        },
-        {
-          title: "Sao lưu riêng tư",
-          description: "Import/export chỉ trong family_id và tree_id hiện tại.",
-          href: treeHref("data"),
-          icon: <Database className="size-7 text-teal-600" />,
-        },
-      ]
+          {
+            title: "Thứ tự gia phả",
+            description:
+              "Tính thế hệ, thứ tự sinh và dâu/rể theo cây hiện tại.",
+            href: treeHref("lineage"),
+            icon: <Users className="size-6" />,
+            iconBg: "bg-[#fef8ea]",
+            iconColor: "text-[#92540b]",
+          },
+          {
+            title: "Sao lưu riêng tư",
+            description:
+              "Import/export chỉ trong family_id và tree_id hiện tại.",
+            href: treeHref("data"),
+            icon: <Database className="size-6" />,
+            iconBg: "bg-[#f5e7c7]",
+            iconColor: "text-[#8c1d1d]",
+          },
+        ]
       : []),
   ];
 
   return (
     <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-8 sm:px-6 lg:px-8">
-      <section className="mb-8 rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-amber-50 px-3 py-1 text-xs font-black uppercase tracking-wide text-amber-700">
-              <ShieldCheck className="size-4" />
-              Không gian riêng tư
-            </div>
-            <h1 className="text-3xl font-black tracking-tight text-stone-950 sm:text-4xl">
-              {context.family.name}
-            </h1>
-            {context.family.description && (
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-stone-500">
-                {context.family.description}
-              </p>
-            )}
-          </div>
-
-          <div className="rounded-xl bg-stone-50 px-4 py-3">
-            <p className="text-sm font-black text-stone-800">
-              {formatDate(today)}
-            </p>
-            <p className="mt-1 text-xs font-semibold text-stone-500">
-              Âm lịch: {lunar.lunarDayStr} - Năm {lunar.lunarYear}
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <div className="rounded-xl bg-stone-50 p-4">
-            <p className="text-xs font-black uppercase text-stone-400">
-              Thành viên
-            </p>
-            <p className="mt-1 text-3xl font-black text-stone-950">
-              {persons.length}
-            </p>
-          </div>
-          <div className="rounded-xl bg-stone-50 p-4">
-            <p className="text-xs font-black uppercase text-stone-400">
-              Quan hệ
-            </p>
-            <p className="mt-1 text-3xl font-black text-stone-950">
-              {relationships.length}
-            </p>
-          </div>
-          <div className="rounded-xl bg-stone-50 p-4">
-            <p className="text-xs font-black uppercase text-stone-400">
-              Sự kiện 30 ngày
-            </p>
-            <p className="mt-1 text-3xl font-black text-stone-950">
-              {upcomingEvents.length}
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-6 rounded-2xl border border-stone-200 bg-stone-50 p-4">
-          <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-stone-400">
-                Danh sách quản trị viên
-              </p>
-              <h2 className="mt-1 text-lg font-black text-stone-950">
-                Người phụ trách dòng họ
-              </h2>
-            </div>
-            <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-[#800000] shadow-sm">
-              {adminContacts.length} admin
-            </span>
-          </div>
-          <div className="mt-3">
-            <Link
-              href={`${base}/admins`}
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-amber-200 bg-white px-4 py-2 text-sm font-black text-stone-800 shadow-sm transition hover:border-amber-300 hover:text-[#800000]"
-            >
-              <UserCog className="size-4" />
-              Mở quản trị viên
-            </Link>
-          </div>
-
-          <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
-            {adminContacts.length === 0 ? (
-              <div className="rounded-xl bg-white px-4 py-3 text-sm font-semibold text-stone-500">
-                Chưa có quản trị viên active.
+      {/* Hero Banner with Heritage Frame */}
+      <section className="mb-8">
+        <HeritageFrame innerClassName="p-6 sm:p-8">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+            <div className="flex-1 min-w-0">
+              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#deb887] bg-[#f5e7c7]/60 px-3.5 py-1 text-xs font-black uppercase tracking-wide text-[#8c1d1d]">
+                <ShieldCheck className="size-3.5" />
+                Không gian riêng tư
               </div>
-            ) : (
-              adminContacts.map((admin) => (
-                <div
-                  key={admin.profile_id}
-                  className="rounded-xl bg-white px-4 py-3 shadow-sm"
-                >
-                  <p className="font-black text-stone-950">
-                    {admin.full_name || "Admin dòng họ"}
-                  </p>
-                  <span
-                    className={`mt-2 inline-flex rounded-full px-3 py-1 text-xs font-black ${
-                      admin.is_primary_admin
-                        ? "bg-[#800000] text-white"
-                        : "bg-emerald-50 text-emerald-700"
-                    }`}
-                  >
-                    {admin.is_primary_admin
-                      ? "Quản trị chính"
-                      : "Quản trị phụ"}
-                  </span>
-                  {admin.email && (
-                    <a
-                      href={`mailto:${admin.email}`}
-                      className="mt-2 inline-flex max-w-full items-center gap-2 text-sm font-semibold text-stone-600 hover:text-[#800000]"
-                    >
-                      <Mail className="size-4 shrink-0" />
-                      <span className="truncate">{admin.email}</span>
-                    </a>
-                  )}
-                  {admin.phone_number && (
-                    <p className="mt-1 inline-flex items-center gap-2 text-sm font-semibold text-stone-500">
-                      <Phone className="size-4 shrink-0" />
-                      {admin.phone_number}
-                    </p>
-                  )}
-                </div>
-              ))
-            )}
-          </div>
-        </div>
+              <h1
+                className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[#183b28] leading-tight"
+                style={{
+                  fontFamily:
+                    '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
+                }}
+              >
+                {context.family.name}
+              </h1>
+              {context.family.description && (
+                <p className="mt-3 max-w-2xl text-sm sm:text-base leading-relaxed text-[#5c4a3e]">
+                  {context.family.description}
+                </p>
+              )}
+            </div>
 
-        {context.canEdit && (
-          <div className="mt-6">
-            <FamilyQrCard
-              familyName={context.family.name}
-              treeName={context.tree.name}
-              url={qrUrl}
+            {/* Imperial Court Calendar Tablet */}
+            <div className="rounded-2xl border border-[#deb887] bg-gradient-to-br from-[#fffdf7] to-[#fbf7ed] p-4 sm:p-5 shadow-xs shrink-0 lg:w-72">
+              <p className="text-xs font-black uppercase tracking-wider text-[#8c1d1d]">
+                Thời khắc gia tộc
+              </p>
+              <p className="mt-1.5 text-base sm:text-lg font-bold text-[#183b28] capitalize">
+                {formatDate(today)}
+              </p>
+              <div className="mt-2.5 pt-2.5 border-t border-[#deb887]/50">
+                <p className="text-xs font-semibold text-[#7a6455]">
+                  Âm lịch:{" "}
+                  <span className="font-bold text-[#8c1d1d]">
+                    {lunar.lunarDayStr}
+                  </span>
+                </p>
+                <p className="text-xs font-semibold text-[#7a6455] mt-0.5">
+                  Năm:{" "}
+                  <span className="font-bold text-[#183b28]">
+                    {lunar.lunarYear}
+                  </span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* 3 Heritage Stat Cards */}
+          <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <HeritageStatCard
+              title="Thành viên"
+              value={persons.length.toLocaleString("vi-VN")}
+              icon={<Users className="size-5" />}
+              subtext="Đã ghi chép trong cây"
+            />
+            <HeritageStatCard
+              title="Mối quan hệ"
+              value={relationships.length.toLocaleString("vi-VN")}
+              icon={<GitMerge className="size-5" />}
+              subtext="Huyết thống & hôn phối"
+            />
+            <HeritageStatCard
+              title="Sự kiện 30 ngày"
+              value={upcomingEvents.length.toLocaleString("vi-VN")}
+              icon={<CalendarDays className="size-5" />}
+              subtext="Giỗ chạp & ngày kỷ niệm"
             />
           </div>
-        )}
+
+          {/* Admin Contacts Sub-block */}
+          <div className="mt-8 rounded-2xl border border-[#deb887]/80 bg-[#fcfaf5] p-5 sm:p-6 shadow-xs">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b border-[#deb887]/50 pb-4">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.2em] text-[#8c1d1d]">
+                  Danh bạ phụ trách
+                </p>
+                <h2
+                  className="mt-1 text-xl sm:text-2xl font-bold text-[#183b28]"
+                  style={{
+                    fontFamily:
+                      '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
+                  }}
+                >
+                  Người phụ trách dòng họ
+                </h2>
+              </div>
+              <div className="flex items-center gap-3">
+                <HeritageBadge variant="amber">
+                  {adminContacts.length} admin
+                </HeritageBadge>
+                <Link
+                  href={`${base}/admins`}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#deb887] bg-[#fffdf7] px-4 py-2 text-xs sm:text-sm font-black text-[#5c4a3e] shadow-xs transition hover:bg-[#f5e7c7]/60 hover:text-[#8c1d1d]"
+                >
+                  <UserCog className="size-4 text-[#8c1d1d]" />
+                  Mở quản trị viên
+                </Link>
+              </div>
+            </div>
+
+            <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+              {adminContacts.length === 0 ? (
+                <div className="rounded-xl border border-dashed border-[#deb887] bg-[#fffdf7] px-4 py-3 text-sm font-semibold text-[#7a6455]">
+                  Chưa có quản trị viên active.
+                </div>
+              ) : (
+                adminContacts.map((admin) => (
+                  <div
+                    key={admin.profile_id}
+                    className="rounded-xl border border-[#deb887]/50 bg-[#fffdf7] p-4 shadow-xs"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <p className="font-bold text-base text-[#183b28]">
+                        {admin.full_name || "Admin dòng họ"}
+                      </p>
+                      <HeritageBadge
+                        variant={admin.is_primary_admin ? "crimson" : "jade"}
+                      >
+                        {admin.is_primary_admin
+                          ? "Quản trị chính"
+                          : "Quản trị phụ"}
+                      </HeritageBadge>
+                    </div>
+
+                    <div className="mt-3 space-y-1.5 text-xs sm:text-sm">
+                      {admin.email && (
+                        <a
+                          href={`mailto:${admin.email}`}
+                          className="flex max-w-full items-center gap-2 font-medium text-[#5c4a3e] hover:text-[#8c1d1d]"
+                        >
+                          <Mail className="size-3.5 shrink-0 text-[#deb887]" />
+                          <span className="truncate">{admin.email}</span>
+                        </a>
+                      )}
+                      {admin.phone_number && (
+                        <p className="flex items-center gap-2 font-medium text-[#7a6455]">
+                          <Phone className="size-3.5 shrink-0 text-[#deb887]" />
+                          {admin.phone_number}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* QR Card if Editor/Admin */}
+          {context.canEdit && (
+            <div className="mt-8 pt-6 border-t border-[#deb887]/50">
+              <FamilyQrCard
+                familyName={context.family.name}
+                treeName={context.tree.name}
+                url={qrUrl}
+              />
+            </div>
+          )}
+        </HeritageFrame>
       </section>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {features.map((feature) => (
-          <FeatureCard key={feature.href} feature={feature} />
-        ))}
-      </div>
-
-      {adminFeatures.length > 0 && (
-        <section className="mt-8">
-          <h2 className="mb-4 text-lg font-black text-stone-900">
-            Quản trị dòng họ
+      {/* Main Features Grid */}
+      <section className="mb-10">
+        <div className="mb-4 flex items-center justify-between">
+          <h2
+            className="text-2xl font-bold text-[#183b28]"
+            style={{
+              fontFamily:
+                '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
+            }}
+          >
+            Chức năng gia phả
           </h2>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        </div>
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
+          {features.map((feature) => (
+            <FeatureCard key={feature.href} feature={feature} />
+          ))}
+        </div>
+      </section>
+
+      {/* Admin Features Section */}
+      {adminFeatures.length > 0 && (
+        <section className="mb-10">
+          <div className="mb-4 flex items-center justify-between">
+            <h2
+              className="text-2xl font-bold text-[#183b28]"
+              style={{
+                fontFamily:
+                  '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
+              }}
+            >
+              Quản trị dòng họ
+            </h2>
+            <HeritageBadge variant="crimson">Công cụ Quản trị</HeritageBadge>
+          </div>
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
             {adminFeatures.map((feature) => (
               <FeatureCard key={feature.href} feature={feature} />
             ))}
@@ -366,24 +455,52 @@ export default async function FamilyDashboardPage({
         </section>
       )}
 
+      {/* Upcoming Events Section */}
       {upcomingEvents.length > 0 && (
-        <section className="mt-8 rounded-2xl border border-stone-200 bg-white p-5 shadow-sm">
-          <h2 className="text-lg font-black text-stone-900">
-            Sự kiện sắp tới
-          </h2>
-          <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
-            {upcomingEvents.map((event, index) => (
-              <div
-                key={`${event.personId || "event"}-${index}`}
-                className="rounded-xl bg-amber-50 p-4"
-              >
-                <p className="font-black text-amber-900">{event.personName}</p>
-                <p className="mt-1 text-xs font-semibold text-amber-700">
-                  {event.daysUntil === 0 ? "Hôm nay" : `${event.daysUntil} ngày nữa`}
-                </p>
+        <section className="mb-8">
+          <HeritageFrame innerClassName="p-6">
+            <div className="mb-4 flex items-center justify-between border-b border-[#deb887]/50 pb-3">
+              <div className="flex items-center gap-2.5">
+                <CalendarDays className="size-5 text-[#8c1d1d]" />
+                <h2
+                  className="text-xl sm:text-2xl font-bold text-[#183b28]"
+                  style={{
+                    fontFamily:
+                      '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
+                  }}
+                >
+                  Sự kiện & Giỗ chạp sắp tới (30 ngày)
+                </h2>
               </div>
-            ))}
-          </div>
+              <HeritageBadge variant="amber">
+                {upcomingEvents.length} sự kiện
+              </HeritageBadge>
+            </div>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              {upcomingEvents.map((event, index) => (
+                <div
+                  key={`${event.personId || "event"}-${index}`}
+                  className="rounded-xl border border-[#deb887]/70 bg-gradient-to-br from-[#fffdf7] to-[#fbf7ed] p-4 shadow-xs"
+                >
+                  <p className="font-bold text-base text-[#183b28]">
+                    {event.personName}
+                  </p>
+                  <div className="mt-2 flex items-center justify-between">
+                    <span className="text-xs font-semibold text-[#7a6455]">
+                      {event.content || "Ngày kỵ nhật"}
+                    </span>
+                    <HeritageBadge
+                      variant={event.daysUntil === 0 ? "crimson" : "amber"}
+                    >
+                      {event.daysUntil === 0
+                        ? "Hôm nay"
+                        : `${event.daysUntil} ngày nữa`}
+                    </HeritageBadge>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </HeritageFrame>
         </section>
       )}
     </main>
@@ -394,15 +511,26 @@ function FeatureCard({ feature }: { feature: Feature }) {
   return (
     <Link
       href={feature.href}
-      className="group rounded-2xl border border-stone-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-amber-200 hover:shadow-md"
+      className="group relative block rounded-2xl border-2 border-[#deb887]/80 bg-[#fffdf7] p-5 shadow-xs transition-all duration-200 hover:-translate-y-1 hover:border-[#caa455] hover:shadow-md"
     >
-      <div className="mb-4 flex size-12 items-center justify-center rounded-xl bg-stone-50">
+      {/* Subtle corner marker */}
+      <span className="pointer-events-none absolute top-2 right-2 size-2 border-t-2 border-r-2 border-[#deb887] opacity-60 transition-colors group-hover:border-[#8c1d1d] group-hover:opacity-100" />
+
+      <div
+        className={`mb-4 flex size-12 items-center justify-center rounded-xl border border-[#deb887]/50 ${feature.iconBg} ${feature.iconColor} shadow-xs transition-transform duration-200 group-hover:scale-105`}
+      >
         {feature.icon}
       </div>
-      <h2 className="text-lg font-black text-stone-900 group-hover:text-amber-800">
+      <h3
+        className="text-lg font-bold text-[#183b28] transition-colors group-hover:text-[#8c1d1d]"
+        style={{
+          fontFamily:
+            '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
+        }}
+      >
         {feature.title}
-      </h2>
-      <p className="mt-2 text-sm leading-6 text-stone-500">
+      </h3>
+      <p className="mt-1.5 text-xs sm:text-sm leading-relaxed text-[#5c4a3e]">
         {feature.description}
       </p>
     </Link>
