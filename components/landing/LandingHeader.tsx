@@ -117,7 +117,31 @@ export default function LandingHeader({ currentUser: initialUser }: LandingHeade
 
   return (
     <header className="sticky top-0 z-30 w-full bg-[#f5e7c7] border-b border-[#e2d0a8]/70 shadow-[0_2px_12px_rgba(44,26,17,0.04)]">
-      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+      {/* Decorative ornaments on the two sides of the header: decorate2 (left) and decorate1 (right) */}
+      <div className="pointer-events-none select-none absolute inset-0 overflow-hidden z-0">
+        <div className="absolute left-0 top-0 h-full w-auto">
+          <Image
+            src="/images/landing/decorate2.png"
+            alt="Họa tiết trang trí góc trái"
+            width={120}
+            height={80}
+            priority
+            className="h-full w-auto object-contain object-left-top opacity-70 sm:opacity-85 lg:opacity-95"
+          />
+        </div>
+        <div className="absolute right-0 top-0 h-full w-auto">
+          <Image
+            src="/images/landing/decorate1.png"
+            alt="Họa tiết trang trí góc phải"
+            width={120}
+            height={80}
+            priority
+            className="h-full w-auto object-contain object-right-top opacity-70 sm:opacity-85 lg:opacity-95"
+          />
+        </div>
+      </div>
+
+      <div className="relative z-10 mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Brand / Logo */}
         <Link href="/" className="flex items-center gap-3.5 group">
           <div className="relative size-12 shrink-0 overflow-hidden rounded-xl">
