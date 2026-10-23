@@ -100,12 +100,8 @@ export default async function GiaPhaHomePage() {
       {/* 5. Footer Ornamental Ribbon */}
       <LandingFooter />
 
-      {/* Floating Admin Access */}
-      <Link
-        href="/admin"
-        className="fixed bottom-4 right-4 z-40 rounded-full bg-[#fbf6ed]/95 border border-[#d8cbbb] px-4 py-2 text-sm font-bold text-[#6a4f3b] shadow-lg backdrop-blur-xs hover:bg-[#8c1d1d] hover:text-white hover:border-[#8c1d1d] transition-all"
-        title="Truy cập khu vực Quản trị"
-      >
+      {/* Screen-reader accessible admin link (visually hidden, removed from bottom-right corner) */}
+      <Link href="/admin" className="sr-only">
         Quản trị
       </Link>
     </div>

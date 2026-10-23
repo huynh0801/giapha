@@ -1,7 +1,9 @@
 import { BlogPost } from "@/types";
 import { getSupabase } from "@/utils/supabase/queries";
-import { ArrowLeft, CalendarDays, Newspaper } from "lucide-react";
+import { CalendarDays } from "lucide-react";
 import Link from "next/link";
+import LandingHeader from "@/components/landing/LandingHeader";
+import LandingFooter from "@/components/landing/LandingFooter";
 
 export const dynamic = "force-dynamic";
 
@@ -45,27 +47,11 @@ export default async function NewsPage() {
   const [featuredPost, ...otherPosts] = posts;
 
   return (
-    <main className="min-h-screen bg-[#fbf7ef] text-[#2f2118]">
-      <header className="bg-[#fffdf8] shadow-[0_1px_0_rgba(58,31,19,0.08)]">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-sm font-black uppercase tracking-tight text-[#800000] transition-colors hover:text-[#b56a10]"
-          >
-            <Newspaper className="size-5 text-stone-950" />
-            GIA PHẢ DÒNG HỌ
-          </Link>
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 rounded-full bg-[#f7efe3] px-4 py-2 text-sm font-bold text-stone-700 transition-colors hover:bg-[#efe0cb]"
-          >
-            <ArrowLeft className="size-4" />
-            Trang chủ
-          </Link>
-        </div>
-      </header>
+    <div className="min-h-screen flex flex-col bg-[#f5e7c7] text-[#2c1a11]">
+      <LandingHeader />
 
-      <section className="mx-auto max-w-6xl px-4 pb-16 pt-10 sm:px-6 md:pt-14 lg:px-8">
+      <main className="flex-1">
+        <section className="mx-auto max-w-6xl px-4 pb-16 pt-10 sm:px-6 md:pt-14 lg:px-8">
         <div className="mb-9">
           <p className="text-xs font-black uppercase tracking-[0.28em] text-[#b56a10]">
             Tin tức & Di sản
@@ -164,6 +150,9 @@ export default async function NewsPage() {
           </div>
         )}
       </section>
-    </main>
+      </main>
+
+      <LandingFooter />
+    </div>
   );
 }

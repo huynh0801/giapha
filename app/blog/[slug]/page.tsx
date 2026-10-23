@@ -5,10 +5,11 @@ import {
   CalendarDays,
   ChevronRight,
   Clock3,
-  Newspaper,
 } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import LandingHeader from "@/components/landing/LandingHeader";
+import LandingFooter from "@/components/landing/LandingFooter";
 
 // Prevent Next.js from caching this page — always fetch fresh data.
 // Fixes: soft reload (F5) serving stale RSC payload that causes CSS/image mismatches.
@@ -126,27 +127,11 @@ export default async function BlogDetailPage({ params }: PageProps) {
     .limit(3);
 
   return (
-    <main className="min-h-screen bg-[#fbf7ef] text-[#2f2118]">
-      <header className="bg-[#fffdf8] shadow-[0_1px_0_rgba(58,31,19,0.08)]">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-sm font-black uppercase tracking-tight text-[#800000] transition-colors hover:text-[#b56a10]"
-          >
-            <Newspaper className="size-5 text-stone-950" />
-            GIA PHẢ DÒNG HỌ
-          </Link>
-          <Link
-            href="/news"
-            className="inline-flex items-center gap-2 rounded-full bg-[#f7efe3] px-4 py-2 text-sm font-bold text-stone-700 transition-colors hover:bg-[#efe0cb]"
-          >
-            <ArrowLeft className="size-4" />
-            Tin tức
-          </Link>
-        </div>
-      </header>
+    <div className="min-h-screen flex flex-col bg-[#f5e7c7] text-[#2c1a11]">
+      <LandingHeader />
 
-      <article>
+      <main className="flex-1">
+        <article>
         <section className="mx-auto max-w-6xl px-4 pb-8 pt-10 sm:px-6 md:pt-14 lg:px-8">
           <div className="flex flex-wrap items-center gap-2 text-xs font-bold text-stone-500">
             <Link href="/" className="hover:text-[#800000]">
@@ -299,6 +284,9 @@ export default async function BlogDetailPage({ params }: PageProps) {
           </div>
         </section>
       )}
-    </main>
+      </main>
+
+      <LandingFooter />
+    </div>
   );
 }

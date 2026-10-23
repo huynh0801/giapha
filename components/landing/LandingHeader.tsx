@@ -4,9 +4,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { Search, Menu, X } from "lucide-react";
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 
 const navItems = [
-  { label: "Trang chủ", href: "/", active: true },
+  { label: "Trang chủ", href: "/" },
   { label: "Gia phả", href: "/dashboard" },
   { label: "Thành viên", href: "/dashboard" },
   { label: "Tư liệu", href: "/about" },
@@ -16,6 +17,19 @@ const navItems = [
 
 export default function LandingHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const pathname = usePathname();
+
+  const isItemActive = (href: string, label: string) => {
+    if (!pathname) return href === "/";
+    if (href === "/") return pathname === "/";
+    if (href === "/news") return pathname.startsWith("/news") || pathname.startsWith("/blog");
+    if (href === "/about") {
+      if (label === "Liên hệ") return false;
+      return pathname.startsWith("/about");
+    }
+    if (href === "/dashboard") return pathname.startsWith("/dashboard");
+    return pathname === href;
+  };
 
   return (
     <header className="relative z-30 w-full bg-[#f5e7c7] border-b border-[#e2d0a8]/70">
@@ -49,22 +63,25 @@ export default function LandingHeader() {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-7 lg:gap-9">
-          {navItems.map((item) => (
-            <Link
-              key={item.label}
-              href={item.href}
-              className={`relative font-sans text-sm sm:text-base font-bold tracking-tight transition-colors py-1 ${
-                item.active
-                  ? "text-[#2c1a11]"
-                  : "text-[#5e4e42] hover:text-[#8c1d1d]"
-              }`}
-            >
-              {item.label}
-              {item.active && (
-                <span className="absolute bottom-[-4px] left-0 right-0 h-[2.5px] bg-[#8c1d1d] rounded-full" />
-              )}
-            </Link>
-          ))}
+          {navItems.map((item) => {
+            const active = isItemActive(item.href, item.label);
+            return (
+              <Link
+                key={item.label}
+                href={item.href}
+                className={`relative font-sans text-sm sm:text-base font-bold tracking-tight transition-colors py-1 ${
+                  active
+                    ? "text-[#2c1a11]"
+                    : "text-[#5e4e42] hover:text-[#8c1d1d]"
+                }`}
+              >
+                {item.label}
+                {active && (
+                  <span className="absolute bottom-[-4px] left-0 right-0 h-[2.5px] bg-[#8c1d1d] rounded-full" />
+                )}
+              </Link>
+            );
+          })}
         </nav>
 
         {/* Right Actions: Search & Ornamental cloud / Admin */}
@@ -111,20 +128,23 @@ export default function LandingHeader() {
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-[#e2d0a8] bg-[#f5e7c7] px-4 py-4 space-y-2 shadow-lg">
-          {navItems.map((item) => (
-            <Link
-              key={item.label}
-              href={item.href}
-              onClick={() => setMobileMenuOpen(false)}
-              className={`block px-3 py-2 rounded-lg font-sans text-base font-bold transition-colors ${
-                item.active
-                  ? "bg-[#ede5d5] text-[#8c1d1d]"
-                  : "text-[#5e4e42] hover:bg-[#f4ece0] hover:text-[#8c1d1d]"
-              }`}
-            >
-              {item.label}
-            </Link>
-          ))}
+          {navItems.map((item) => {
+            const active = isItemActive(item.href, item.label);
+            return (
+              <Link
+                key={item.label}
+                href={item.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className={`block px-3 py-2 rounded-lg font-sans text-base font-bold transition-colors ${
+                  active
+                    ? "bg-[#ede5d5] text-[#8c1d1d]"
+                    : "text-[#5e4e42] hover:bg-[#f4ece0] hover:text-[#8c1d1d]"
+                }`}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
           <div className="pt-2 border-t border-[#e8dfcf]/60 flex gap-2">
             <Link
               href="/admin"
