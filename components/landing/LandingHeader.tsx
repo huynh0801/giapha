@@ -84,6 +84,7 @@ export default function LandingHeader() {
               alt="Họa tiết đám mây"
               width={54}
               height={24}
+              style={{ width: "auto", height: "auto" }}
               className="h-6 w-auto object-contain opacity-85 select-none pointer-events-none"
             />
           </div>
