@@ -259,241 +259,241 @@ export default async function DashboardFamilySwitcherPage({
         </section>
       )}
 
-      {/* Directory Section */}
-      <section>
-        <HeritageFrame innerClassName="p-6 sm:p-7">
-          <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between border-b border-[#deb887]/60 pb-5">
-            <div>
-              <div className="mb-2.5 inline-flex items-center gap-2 rounded-full border border-[#deb887] bg-[#f5e7c7]/50 px-3 py-0.5 text-xs font-black uppercase tracking-wide text-[#8c1d1d]">
-                <LockKeyhole className="size-3.5" />
-                Danh bạ dòng họ
-              </div>
-              <h2
-                className="text-2xl sm:text-3xl font-bold text-[#183b28]"
-                style={{
-                  fontFamily:
-                    '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
-                }}
-              >
-                Tìm dòng họ để xin tham gia
-              </h2>
-              <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-[#5c4a3e]">
-                Bạn có thể xem thông tin giới thiệu theo mức chia sẻ của từng dòng
-                họ. Dữ liệu gia phả riêng tư không được mở nếu chưa được duyệt.
-              </p>
+      {/* Directory Section (Framed INSIDE cards, clean container outside) */}
+      <section className="mb-10">
+        <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between border-b border-[#deb887]/60 pb-5">
+          <div>
+            <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-[#deb887] bg-[#f5e7c7]/50 px-3.5 py-1 text-xs font-black uppercase tracking-wide text-[#8c1d1d]">
+              <LockKeyhole className="size-3.5" />
+              Danh bạ dòng họ
             </div>
-            <form className="flex w-full flex-col gap-2 sm:flex-row lg:max-w-xl">
-              <div className="relative flex-1">
-                <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[#7a6455]" />
-                <input
-                  name="q"
-                  defaultValue={q}
-                  placeholder="Tìm theo tên hoặc slug dòng họ"
-                  className="w-full rounded-xl border border-[#deb887] bg-[#fffdf7] py-2.5 pl-10 pr-3.5 text-sm font-semibold text-[#183b28] placeholder-[#7a6455]/70 outline-none transition focus:border-[#caa455] focus:ring-1 focus:ring-[#caa455]"
-                />
-              </div>
-              <select
-                name="visibility"
-                defaultValue={visibility}
-                className="rounded-xl border border-[#deb887] bg-[#fffdf7] px-3.5 py-2.5 text-sm font-bold text-[#183b28] outline-none transition focus:border-[#caa455] sm:w-48"
-              >
-                <option value="all">Tất cả</option>
-                <option value="public">Công khai giới thiệu</option>
-                <option value="family_only">Chỉ thành viên</option>
-                <option value="private">Riêng tư</option>
-              </select>
-              <button
-                type="submit"
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#8c1d1d] hover:bg-[#6e1616] px-5 py-2.5 text-sm font-black text-white shadow-xs transition-colors"
-              >
-                Lọc
-              </button>
-            </form>
+            <h2
+              className="mt-1 text-2xl sm:text-3xl font-bold text-[#183b28]"
+              style={{
+                fontFamily:
+                  '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
+              }}
+            >
+              Tìm dòng họ để xin tham gia
+            </h2>
+            <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-[#5c4a3e]">
+              Bạn có thể xem thông tin giới thiệu theo mức chia sẻ của từng dòng
+              họ. Dữ liệu gia phả riêng tư không được mở nếu chưa được duyệt.
+            </p>
           </div>
+          <form className="flex w-full flex-col gap-2 sm:flex-row lg:max-w-xl">
+            <div className="relative flex-1">
+              <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[#7a6455]" />
+              <input
+                name="q"
+                defaultValue={q}
+                placeholder="Tìm theo tên hoặc slug dòng họ"
+                className="w-full rounded-xl border border-[#deb887] bg-[#fffdf7] py-2.5 pl-10 pr-3.5 text-sm font-semibold text-[#183b28] placeholder-[#7a6455]/70 outline-none transition focus:border-[#caa455] focus:ring-1 focus:ring-[#caa455]"
+              />
+            </div>
+            <select
+              name="visibility"
+              defaultValue={visibility}
+              className="rounded-xl border border-[#deb887] bg-[#fffdf7] px-3.5 py-2.5 text-sm font-bold text-[#183b28] outline-none transition focus:border-[#caa455] sm:w-48"
+            >
+              <option value="all">Tất cả</option>
+              <option value="public">Công khai giới thiệu</option>
+              <option value="family_only">Chỉ thành viên</option>
+              <option value="private">Riêng tư</option>
+            </select>
+            <button
+              type="submit"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#8c1d1d] hover:bg-[#6e1616] px-5 py-2.5 text-sm font-black text-white shadow-xs transition-colors"
+            >
+              Lọc
+            </button>
+          </form>
+        </div>
 
-          <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-            {directory.map((family) => {
-              const statusLabel = requestLabel(family.request_status);
-              const canRequest =
-                !family.has_active_membership &&
-                family.request_status !== "pending";
+        {/* Directory Items with HeritageFrame INSIDE each card */}
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+          {directory.map((family) => {
+            const statusLabel = requestLabel(family.request_status);
+            const canRequest =
+              !family.has_active_membership &&
+              family.request_status !== "pending";
 
-              return (
-                <article
-                  key={family.id}
-                  className="relative rounded-xl border border-[#deb887]/80 bg-[#fcfaf5] p-5 shadow-xs transition-all hover:border-[#caa455] hover:shadow-md flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="min-w-0">
-                        <div className="mb-2 flex flex-wrap items-center gap-2">
-                          <HeritageBadge variant="neutral">
-                            {visibilityLabel(family.visibility)}
+            return (
+              <HeritageFrame
+                key={family.id}
+                className="transition-transform duration-200 hover:-translate-y-1"
+                innerClassName="p-5 flex flex-col justify-between h-full"
+              >
+                <div>
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <div className="mb-2 flex flex-wrap items-center gap-2">
+                        <HeritageBadge variant="neutral">
+                          {visibilityLabel(family.visibility)}
+                        </HeritageBadge>
+                        {family.has_active_membership && (
+                          <HeritageBadge variant="jade">
+                            <CheckCircle2 className="size-3.5" />
+                            Đã là thành viên
                           </HeritageBadge>
-                          {family.has_active_membership && (
-                            <HeritageBadge variant="jade">
-                              <CheckCircle2 className="size-3.5" />
-                              Đã là thành viên
-                            </HeritageBadge>
-                          )}
-                          {statusLabel && !family.has_active_membership && (
-                            <HeritageBadge variant="amber">
-                              <Clock3 className="size-3.5" />
-                              {statusLabel}
-                            </HeritageBadge>
-                          )}
-                        </div>
-                        <h3
-                          className="truncate text-xl font-bold text-[#183b28]"
-                          style={{
-                            fontFamily:
-                              '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
-                          }}
-                        >
-                          {family.name}
-                        </h3>
-                        <p className="mt-0.5 font-mono text-xs text-[#7a6455]">
-                          {family.slug}
-                        </p>
+                        )}
+                        {statusLabel && !family.has_active_membership && (
+                          <HeritageBadge variant="amber">
+                            <Clock3 className="size-3.5" />
+                            {statusLabel}
+                          </HeritageBadge>
+                        )}
                       </div>
-                      <div className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-[#deb887] bg-[#f5e7c7] text-[#8c1d1d] shadow-xs">
-                        <ShieldCheck className="size-5" />
-                      </div>
+                      <h3
+                        className="truncate text-xl font-bold text-[#183b28]"
+                        style={{
+                          fontFamily:
+                            '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
+                        }}
+                      >
+                        {family.name}
+                      </h3>
+                      <p className="mt-0.5 font-mono text-xs text-[#7a6455]">
+                        {family.slug}
+                      </p>
                     </div>
-
-                    <p className="mt-3.5 line-clamp-3 text-sm leading-relaxed text-[#5c4a3e]">
-                      {family.public_description ||
-                        "Dòng họ này đang để thông tin giới thiệu ở chế độ riêng tư. Bạn có thể gửi yêu cầu tham gia để Admin dòng họ xem xét."}
-                    </p>
-
-                    <div className="mt-4 grid gap-2.5 text-sm sm:grid-cols-2">
-                      <div className="rounded-xl border border-[#deb887]/40 bg-[#fffdf7] px-3.5 py-2.5">
-                        <p className="text-xs font-black uppercase text-[#7a6455]">
-                          Admin dòng họ
-                        </p>
-                        <p className="mt-1 line-clamp-2 font-bold text-[#183b28]">
-                          {family.admin_names || "Chưa cập nhật"}
-                        </p>
-                      </div>
-                      <div className="rounded-xl border border-[#deb887]/40 bg-[#fffdf7] px-3.5 py-2.5">
-                        <p className="text-xs font-black uppercase text-[#7a6455]">
-                          Thành viên
-                        </p>
-                        <p className="mt-1 inline-flex items-center gap-1.5 font-bold text-[#183b28]">
-                          <Users className="size-4 text-[#7a6455]" />
-                          {family.member_count.toLocaleString("vi-VN")}
-                        </p>
-                      </div>
+                    <div className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-[#deb887] bg-[#f5e7c7] text-[#8c1d1d] shadow-xs">
+                      <ShieldCheck className="size-5" />
                     </div>
                   </div>
 
-                  <div className="mt-5 flex flex-col gap-2.5 pt-3.5 border-t border-[#deb887]/40 sm:flex-row">
+                  <p className="mt-3.5 line-clamp-3 text-sm leading-relaxed text-[#5c4a3e]">
+                    {family.public_description ||
+                      "Dòng họ này đang để thông tin giới thiệu ở chế độ riêng tư. Bạn có thể gửi yêu cầu tham gia để Admin dòng họ xem xét."}
+                  </p>
+
+                  <div className="mt-4 grid gap-2.5 text-sm sm:grid-cols-2">
+                    <div className="rounded-xl border border-[#deb887]/40 bg-[#fbf7ed] px-3.5 py-2.5">
+                      <p className="text-xs font-black uppercase text-[#7a6455]">
+                        Admin dòng họ
+                      </p>
+                      <p className="mt-1 line-clamp-2 font-bold text-[#183b28]">
+                        {family.admin_names || "Chưa cập nhật"}
+                      </p>
+                    </div>
+                    <div className="rounded-xl border border-[#deb887]/40 bg-[#fbf7ed] px-3.5 py-2.5">
+                      <p className="text-xs font-black uppercase text-[#7a6455]">
+                        Thành viên
+                      </p>
+                      <p className="mt-1 inline-flex items-center gap-1.5 font-bold text-[#183b28]">
+                        <Users className="size-4 text-[#7a6455]" />
+                        {family.member_count.toLocaleString("vi-VN")}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-5 flex flex-col gap-2.5 pt-3.5 border-t border-[#deb887]/40 sm:flex-row">
+                  <Link
+                    href={`/dashboard/families/${family.slug}`}
+                    className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-[#deb887] bg-[#fffdf7] px-4 py-2.5 text-sm font-black text-[#5c4a3e] shadow-xs transition hover:bg-[#f5e7c7]/40 hover:text-[#183b28]"
+                  >
+                    <Eye className="size-4" />
+                    Xem thông tin
+                  </Link>
+                  {family.has_active_membership ? (
                     <Link
-                      href={`/dashboard/families/${family.slug}`}
-                      className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-[#deb887] bg-[#fffdf7] px-4 py-2.5 text-sm font-black text-[#5c4a3e] shadow-xs transition hover:bg-[#f5e7c7]/40 hover:text-[#183b28]"
+                      href={`/dashboard/${family.slug}`}
+                      className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#183b28] hover:bg-[#122e1f] px-4 py-2.5 text-sm font-black text-white shadow-xs transition-colors"
                     >
-                      <Eye className="size-4" />
-                      Xem thông tin
+                      Mở workspace
+                      <ArrowRight className="size-4" />
                     </Link>
-                    {family.has_active_membership ? (
-                      <Link
-                        href={`/dashboard/${family.slug}`}
-                        className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#183b28] hover:bg-[#122e1f] px-4 py-2.5 text-sm font-black text-white shadow-xs transition-colors"
-                      >
-                        Mở workspace
-                        <ArrowRight className="size-4" />
-                      </Link>
-                    ) : canRequest ? (
-                      <form action={requestJoinFamilyAction} className="flex-1">
-                        <input
-                          type="hidden"
-                          name="family_id"
-                          value={family.id}
-                        />
-                        <input
-                          type="hidden"
-                          name="return_to"
-                          value={returnTo}
-                        />
-                        <button
-                          type="submit"
-                          className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#8c1d1d] hover:bg-[#6e1616] px-4 py-2.5 text-sm font-black text-white shadow-xs transition-colors"
-                        >
-                          <Send className="size-4" />
-                          Gửi yêu cầu
-                        </button>
-                      </form>
-                    ) : (
+                  ) : canRequest ? (
+                    <form action={requestJoinFamilyAction} className="flex-1">
+                      <input
+                        type="hidden"
+                        name="family_id"
+                        value={family.id}
+                      />
+                      <input
+                        type="hidden"
+                        name="return_to"
+                        value={returnTo}
+                      />
                       <button
-                        disabled
-                        className="inline-flex flex-1 cursor-not-allowed items-center justify-center gap-2 rounded-xl border border-[#deb887]/60 bg-[#f4efe6] px-4 py-2.5 text-sm font-black text-[#7a6455]"
+                        type="submit"
+                        className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#8c1d1d] hover:bg-[#6e1616] px-4 py-2.5 text-sm font-black text-white shadow-xs transition-colors"
                       >
-                        <Clock3 className="size-4" />
-                        Đang chờ duyệt
+                        <Send className="size-4" />
+                        Gửi yêu cầu
                       </button>
-                    )}
-                  </div>
-                </article>
-              );
-            })}
+                    </form>
+                  ) : (
+                    <button
+                      disabled
+                      className="inline-flex flex-1 cursor-not-allowed items-center justify-center gap-2 rounded-xl border border-[#deb887]/60 bg-[#f4efe6] px-4 py-2.5 text-sm font-black text-[#7a6455]"
+                    >
+                      <Clock3 className="size-4" />
+                      Đang chờ duyệt
+                    </button>
+                  )}
+                </div>
+              </HeritageFrame>
+            );
+          })}
+        </div>
+
+        {directory.length === 0 && (
+          <div className="mt-6 rounded-2xl border-2 border-dashed border-[#deb887] bg-[#fdfaf3] p-10 text-center">
+            <FolderTree className="mx-auto mb-3 size-10 text-[#deb887]" />
+            <h3
+              className="text-xl font-bold text-[#183b28]"
+              style={{
+                fontFamily:
+                  '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
+              }}
+            >
+              Không tìm thấy dòng họ phù hợp
+            </h3>
+            <p className="mt-2 text-sm text-[#7a6455]">
+              Hãy thử đổi từ khóa hoặc bỏ bộ lọc chế độ hiển thị.
+            </p>
           </div>
+        )}
 
-          {directory.length === 0 && (
-            <div className="rounded-2xl border-2 border-dashed border-[#deb887] bg-[#fdfaf3] p-10 text-center">
-              <FolderTree className="mx-auto mb-3 size-10 text-[#deb887]" />
-              <h3
-                className="text-xl font-bold text-[#183b28]"
-                style={{
-                  fontFamily:
-                    '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
-                }}
-              >
-                Không tìm thấy dòng họ phù hợp
-              </h3>
-              <p className="mt-2 text-sm text-[#7a6455]">
-                Hãy thử đổi từ khóa hoặc bỏ bộ lọc chế độ hiển thị.
-              </p>
-            </div>
-          )}
-
-          {totalCount > PAGE_SIZE && (
-            <div className="mt-8 flex items-center justify-between gap-3 pt-4 border-t border-[#deb887]/50">
-              <Link
-                href={buildDashboardHref({
-                  q,
-                  visibility,
-                  page: Math.max(1, currentPage - 1),
-                })}
-                className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-black transition border ${
-                  currentPage <= 1
-                    ? "pointer-events-none border-[#deb887]/30 bg-[#f4efe6] text-[#deb887]"
-                    : "border-[#deb887] bg-[#fffdf7] text-[#5c4a3e] hover:bg-[#f5e7c7]/50 hover:text-[#183b28]"
-                }`}
-              >
-                <ArrowLeft className="size-4" />
-                Trước
-              </Link>
-              <span className="text-sm font-bold text-[#7a6455]">
-                Trang {currentPage} / {totalPages}
-              </span>
-              <Link
-                href={buildDashboardHref({
-                  q,
-                  visibility,
-                  page: Math.min(totalPages, currentPage + 1),
-                })}
-                className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-black transition border ${
-                  currentPage >= totalPages
-                    ? "pointer-events-none border-[#deb887]/30 bg-[#f4efe6] text-[#deb887]"
-                    : "border-[#deb887] bg-[#fffdf7] text-[#5c4a3e] hover:bg-[#f5e7c7]/50 hover:text-[#183b28]"
-                }`}
-              >
-                Sau
-                <ArrowRight className="size-4" />
-              </Link>
-            </div>
-          )}
-        </HeritageFrame>
+        {totalCount > PAGE_SIZE && (
+          <div className="mt-8 flex items-center justify-between gap-3 pt-4 border-t border-[#deb887]/50">
+            <Link
+              href={buildDashboardHref({
+                q,
+                visibility,
+                page: Math.max(1, currentPage - 1),
+              })}
+              className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-black transition border ${
+                currentPage <= 1
+                  ? "pointer-events-none border-[#deb887]/30 bg-[#f4efe6] text-[#deb887]"
+                  : "border-[#deb887] bg-[#fffdf7] text-[#5c4a3e] hover:bg-[#f5e7c7]/50 hover:text-[#183b28]"
+              }`}
+            >
+              <ArrowLeft className="size-4" />
+              Trước
+            </Link>
+            <span className="text-sm font-bold text-[#7a6455]">
+              Trang {currentPage} / {totalPages}
+            </span>
+            <Link
+              href={buildDashboardHref({
+                q,
+                visibility,
+                page: Math.min(totalPages, currentPage + 1),
+              })}
+              className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-black transition border ${
+                currentPage >= totalPages
+                  ? "pointer-events-none border-[#deb887]/30 bg-[#f4efe6] text-[#deb887]"
+                  : "border-[#deb887] bg-[#fffdf7] text-[#5c4a3e] hover:bg-[#f5e7c7]/50 hover:text-[#183b28]"
+              }`}
+            >
+              Sau
+              <ArrowRight className="size-4" />
+            </Link>
+          </div>
+        )}
       </section>
     </main>
   );

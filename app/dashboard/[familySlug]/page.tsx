@@ -249,8 +249,8 @@ export default async function FamilyDashboardPage({
 
   return (
     <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-8 sm:px-6 lg:px-8">
-      {/* Hero Banner with Heritage Frame */}
-      <section className="mb-8">
+      {/* Hero Banner: Identity & Court Calendar framed cleanly */}
+      <section className="mb-6">
         <HeritageFrame innerClassName="p-6 sm:p-8">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
             <div className="flex-1 min-w-0">
@@ -298,119 +298,121 @@ export default async function FamilyDashboardPage({
               </div>
             </div>
           </div>
-
-          {/* 3 Heritage Stat Cards */}
-          <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <HeritageStatCard
-              title="Thành viên"
-              value={persons.length.toLocaleString("vi-VN")}
-              icon={<Users className="size-5" />}
-              subtext="Đã ghi chép trong cây"
-            />
-            <HeritageStatCard
-              title="Mối quan hệ"
-              value={relationships.length.toLocaleString("vi-VN")}
-              icon={<GitMerge className="size-5" />}
-              subtext="Huyết thống & hôn phối"
-            />
-            <HeritageStatCard
-              title="Sự kiện 30 ngày"
-              value={upcomingEvents.length.toLocaleString("vi-VN")}
-              icon={<CalendarDays className="size-5" />}
-              subtext="Giỗ chạp & ngày kỷ niệm"
-            />
-          </div>
-
-          {/* Admin Contacts Sub-block */}
-          <div className="mt-8 rounded-2xl border border-[#deb887]/80 bg-[#fcfaf5] p-5 sm:p-6 shadow-xs">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b border-[#deb887]/50 pb-4">
-              <div>
-                <p className="text-xs font-black uppercase tracking-[0.2em] text-[#8c1d1d]">
-                  Danh bạ phụ trách
-                </p>
-                <h2
-                  className="mt-1 text-xl sm:text-2xl font-bold text-[#183b28]"
-                  style={{
-                    fontFamily:
-                      '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
-                  }}
-                >
-                  Người phụ trách dòng họ
-                </h2>
-              </div>
-              <div className="flex items-center gap-3">
-                <HeritageBadge variant="amber">
-                  {adminContacts.length} admin
-                </HeritageBadge>
-                <Link
-                  href={`${base}/admins`}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#deb887] bg-[#fffdf7] px-4 py-2 text-xs sm:text-sm font-black text-[#5c4a3e] shadow-xs transition hover:bg-[#f5e7c7]/60 hover:text-[#8c1d1d]"
-                >
-                  <UserCog className="size-4 text-[#8c1d1d]" />
-                  Mở quản trị viên
-                </Link>
-              </div>
-            </div>
-
-            <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-              {adminContacts.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-[#deb887] bg-[#fffdf7] px-4 py-3 text-sm font-semibold text-[#7a6455]">
-                  Chưa có quản trị viên active.
-                </div>
-              ) : (
-                adminContacts.map((admin) => (
-                  <div
-                    key={admin.profile_id}
-                    className="rounded-xl border border-[#deb887]/50 bg-[#fffdf7] p-4 shadow-xs"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <p className="font-bold text-base text-[#183b28]">
-                        {admin.full_name || "Admin dòng họ"}
-                      </p>
-                      <HeritageBadge
-                        variant={admin.is_primary_admin ? "crimson" : "jade"}
-                      >
-                        {admin.is_primary_admin
-                          ? "Quản trị chính"
-                          : "Quản trị phụ"}
-                      </HeritageBadge>
-                    </div>
-
-                    <div className="mt-3 space-y-1.5 text-xs sm:text-sm">
-                      {admin.email && (
-                        <a
-                          href={`mailto:${admin.email}`}
-                          className="flex max-w-full items-center gap-2 font-medium text-[#5c4a3e] hover:text-[#8c1d1d]"
-                        >
-                          <Mail className="size-3.5 shrink-0 text-[#deb887]" />
-                          <span className="truncate">{admin.email}</span>
-                        </a>
-                      )}
-                      {admin.phone_number && (
-                        <p className="flex items-center gap-2 font-medium text-[#7a6455]">
-                          <Phone className="size-3.5 shrink-0 text-[#deb887]" />
-                          {admin.phone_number}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-
-          {/* QR Card if Editor/Admin */}
-          {context.canEdit && (
-            <div className="mt-8 pt-6 border-t border-[#deb887]/50">
-              <FamilyQrCard
-                familyName={context.family.name}
-                treeName={context.tree.name}
-                url={qrUrl}
-              />
-            </div>
-          )}
         </HeritageFrame>
       </section>
+
+      {/* 3 Heritage Stat Cards (Framed inside each card) */}
+      <section className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <HeritageStatCard
+          title="Thành viên"
+          value={persons.length.toLocaleString("vi-VN")}
+          icon={<Users className="size-5" />}
+          subtext="Đã ghi chép trong cây"
+        />
+        <HeritageStatCard
+          title="Mối quan hệ"
+          value={relationships.length.toLocaleString("vi-VN")}
+          icon={<GitMerge className="size-5" />}
+          subtext="Huyết thống & hôn phối"
+        />
+        <HeritageStatCard
+          title="Sự kiện 30 ngày"
+          value={upcomingEvents.length.toLocaleString("vi-VN")}
+          icon={<CalendarDays className="size-5" />}
+          subtext="Giỗ chạp & ngày kỷ niệm"
+        />
+      </section>
+
+      {/* Admin Contacts Section */}
+      <section className="mb-8">
+        <HeritageFrame innerClassName="p-5 sm:p-6">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b border-[#deb887]/50 pb-4">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-[#8c1d1d]">
+                Danh bạ phụ trách
+              </p>
+              <h2
+                className="mt-1 text-xl sm:text-2xl font-bold text-[#183b28]"
+                style={{
+                  fontFamily:
+                    '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
+                }}
+              >
+                Người phụ trách dòng họ
+              </h2>
+            </div>
+            <div className="flex items-center gap-3">
+              <HeritageBadge variant="amber">
+                {adminContacts.length} admin
+              </HeritageBadge>
+              <Link
+                href={`${base}/admins`}
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#deb887] bg-[#fffdf7] px-4 py-2 text-xs sm:text-sm font-black text-[#5c4a3e] shadow-xs transition hover:bg-[#f5e7c7]/60 hover:text-[#8c1d1d]"
+              >
+                <UserCog className="size-4 text-[#8c1d1d]" />
+                Mở quản trị viên
+              </Link>
+            </div>
+          </div>
+
+          <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+            {adminContacts.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-[#deb887] bg-[#fffdf7] px-4 py-3 text-sm font-semibold text-[#7a6455]">
+                Chưa có quản trị viên active.
+              </div>
+            ) : (
+              adminContacts.map((admin) => (
+                <div
+                  key={admin.profile_id}
+                  className="rounded-xl border border-[#deb887]/50 bg-[#fffdf7] p-4 shadow-xs"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="font-bold text-base text-[#183b28]">
+                      {admin.full_name || "Admin dòng họ"}
+                    </p>
+                    <HeritageBadge
+                      variant={admin.is_primary_admin ? "crimson" : "jade"}
+                    >
+                      {admin.is_primary_admin
+                        ? "Quản trị chính"
+                        : "Quản trị phụ"}
+                    </HeritageBadge>
+                  </div>
+
+                  <div className="mt-3 space-y-1.5 text-xs sm:text-sm">
+                    {admin.email && (
+                      <a
+                        href={`mailto:${admin.email}`}
+                        className="flex max-w-full items-center gap-2 font-medium text-[#5c4a3e] hover:text-[#8c1d1d]"
+                      >
+                        <Mail className="size-3.5 shrink-0 text-[#deb887]" />
+                        <span className="truncate">{admin.email}</span>
+                      </a>
+                    )}
+                    {admin.phone_number && (
+                      <p className="flex items-center gap-2 font-medium text-[#7a6455]">
+                        <Phone className="size-3.5 shrink-0 text-[#deb887]" />
+                        {admin.phone_number}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </HeritageFrame>
+      </section>
+
+      {/* QR Card if Editor/Admin */}
+      {context.canEdit && (
+        <section className="mb-8">
+          <FamilyQrCard
+            familyName={context.family.name}
+            treeName={context.tree.name}
+            url={qrUrl}
+          />
+        </section>
+      )}
 
       {/* Main Features Grid */}
       <section className="mb-10">
@@ -455,52 +457,50 @@ export default async function FamilyDashboardPage({
         </section>
       )}
 
-      {/* Upcoming Events Section */}
+      {/* Upcoming Events Section (Framed INSIDE each event item) */}
       {upcomingEvents.length > 0 && (
         <section className="mb-8">
-          <HeritageFrame innerClassName="p-6">
-            <div className="mb-4 flex items-center justify-between border-b border-[#deb887]/50 pb-3">
-              <div className="flex items-center gap-2.5">
-                <CalendarDays className="size-5 text-[#8c1d1d]" />
-                <h2
-                  className="text-xl sm:text-2xl font-bold text-[#183b28]"
-                  style={{
-                    fontFamily:
-                      '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
-                  }}
-                >
-                  Sự kiện & Giỗ chạp sắp tới (30 ngày)
-                </h2>
-              </div>
-              <HeritageBadge variant="amber">
-                {upcomingEvents.length} sự kiện
-              </HeritageBadge>
+          <div className="mb-4 flex items-center justify-between border-b border-[#deb887]/50 pb-3">
+            <div className="flex items-center gap-2.5">
+              <CalendarDays className="size-5 text-[#8c1d1d]" />
+              <h2
+                className="text-xl sm:text-2xl font-bold text-[#183b28]"
+                style={{
+                  fontFamily:
+                    '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
+                }}
+              >
+                Sự kiện & Giỗ chạp sắp tới (30 ngày)
+              </h2>
             </div>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-              {upcomingEvents.map((event, index) => (
-                <div
-                  key={`${event.personId || "event"}-${index}`}
-                  className="rounded-xl border border-[#deb887]/70 bg-gradient-to-br from-[#fffdf7] to-[#fbf7ed] p-4 shadow-xs"
-                >
-                  <p className="font-bold text-base text-[#183b28]">
-                    {event.personName}
-                  </p>
-                  <div className="mt-2 flex items-center justify-between">
-                    <span className="text-xs font-semibold text-[#7a6455]">
-                      {event.content || "Ngày kỵ nhật"}
-                    </span>
-                    <HeritageBadge
-                      variant={event.daysUntil === 0 ? "crimson" : "amber"}
-                    >
-                      {event.daysUntil === 0
-                        ? "Hôm nay"
-                        : `${event.daysUntil} ngày nữa`}
-                    </HeritageBadge>
-                  </div>
+            <HeritageBadge variant="amber">
+              {upcomingEvents.length} sự kiện
+            </HeritageBadge>
+          </div>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            {upcomingEvents.map((event, index) => (
+              <div
+                key={`${event.personId || "event"}-${index}`}
+                className="rounded-xl border border-[#deb887]/70 bg-gradient-to-br from-[#fffdf7] to-[#fbf7ed] p-4 shadow-xs"
+              >
+                <p className="font-bold text-base text-[#183b28]">
+                  {event.personName}
+                </p>
+                <div className="mt-2 flex items-center justify-between">
+                  <span className="text-xs font-semibold text-[#7a6455]">
+                    {event.content || "Ngày kỵ nhật"}
+                  </span>
+                  <HeritageBadge
+                    variant={event.daysUntil === 0 ? "crimson" : "amber"}
+                  >
+                    {event.daysUntil === 0
+                      ? "Hôm nay"
+                      : `${event.daysUntil} ngày nữa`}
+                  </HeritageBadge>
                 </div>
-              ))}
-            </div>
-          </HeritageFrame>
+              </div>
+            ))}
+          </div>
         </section>
       )}
     </main>
