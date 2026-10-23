@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import LandingHeader from "@/components/landing/LandingHeader";
 import LandingFooter from "@/components/landing/LandingFooter";
+import BackgroundDecor from "@/components/landing/BackgroundDecor";
 
 export default function AboutPage() {
   const [formData, setFormData] = useState({
@@ -41,8 +42,11 @@ export default function AboutPage() {
     <div className="min-h-screen flex flex-col bg-[#f5e7c7] text-[#2c1a11]">
       <LandingHeader />
 
-      <main className="flex-1 w-full py-6 sm:py-10 lg:py-12">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+      <main className="relative flex-1 w-full py-6 sm:py-10 lg:py-12 overflow-hidden">
+        {/* Họa tiết trang trí nền decorate2 & decorate1 */}
+        <BackgroundDecor withMid />
+
+        <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           {/* SINGLE MASTER TRADITIONAL FRAME: Gộp toàn bộ thông tin vào 1 khung duy nhất */}
           <div className="relative p-1.5 sm:p-2 border-2 border-[#caa455] bg-[#f5e7c7]/40 shadow-[0_4px_30px_rgba(44,26,17,0.08)]">
             <div className="relative border border-[#deb887] bg-[#fffdf7] p-5 sm:p-8 md:p-12 space-y-10 sm:space-y-12">

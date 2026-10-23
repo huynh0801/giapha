@@ -11,6 +11,7 @@ import { BlogPost } from "@/types";
 import { getSupabase } from "@/utils/supabase/queries";
 import LandingHeader from "@/components/landing/LandingHeader";
 import LandingFooter from "@/components/landing/LandingFooter";
+import BackgroundDecor from "@/components/landing/BackgroundDecor";
 import { getCurrentUserAction } from "@/app/actions/auth";
 
 export const dynamic = "force-dynamic";
@@ -92,8 +93,11 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
     <div className="min-h-screen flex flex-col bg-[#f5e7c7] text-[#2c1a11]">
       <LandingHeader currentUser={currentUser} />
 
-      <main className="flex-1 w-full py-8 sm:py-12 lg:py-14">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-10">
+      <main className="relative flex-1 w-full py-8 sm:py-12 lg:py-14 overflow-hidden">
+        {/* Họa tiết trang trí nền decorate2 & decorate1 */}
+        <BackgroundDecor />
+
+        <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-10">
           {/* Page Header: Thoáng đãng, không bị đóng khung chung */}
           <div className="text-center">
             <div className="inline-flex items-center justify-center gap-3 sm:gap-5 mb-2.5">
