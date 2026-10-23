@@ -54,7 +54,7 @@ test("LandingHero and LandingQuickNav contain mockup copy and navigation items",
   assert.match(navContent, /Gia phả dòng họ/);
   assert.match(navContent, /Thành viên/);
   assert.match(navContent, /Tư liệu/);
-  assert.match(navContent, /Tin tức - Sự kiện/);
+  assert.match(navContent, /Tin tức [–-] Sự kiện/);
   assert.match(navContent, /Liên hệ/);
 });
 

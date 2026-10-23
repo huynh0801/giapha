@@ -2,11 +2,25 @@
 @import "@xyflow/react/dist/style.css";
 
 
+@font-face {
+  font-family: 'SVN-Studio Brush';
+  src: url('/fonts/SVN-Studio-Brush.otf') format('opentype'),
+       url('/fonts/SVN-Studio-Brush.ttf') format('truetype'),
+       url('/fonts/SVN-Studio-Brush.woff2') format('woff2'),
+       url('/fonts/svn-studio-brush.otf') format('opentype'),
+       url('/fonts/svn-studio-brush.ttf') format('truetype'),
+       local('SVN-Studio Brush'),
+       local('SVN-StudioBrush');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --background: #f5e7c7;
   --foreground: #171717;
-  --font-inter: "Segoe UI", "Be Vietnam Pro", Arial, sans-serif;
-  --font-playfair: "Playfair Display", Georgia, "Times New Roman", serif;
+  --font-inter: "SVN-Studio Brush", "Playfair Display", "Segoe UI", Arial, sans-serif;
+  --font-playfair: "SVN-Studio Brush", "Playfair Display", Georgia, serif;
 }
 
 @theme inline {
@@ -16,12 +30,7 @@
   --font-serif: var(--font-playfair);
 }
 
-/* @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-} */
+
 
 body {
   background: var(--background);

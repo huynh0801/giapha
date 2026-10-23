@@ -37,7 +37,7 @@ export default function LandingHeader() {
           <div className="flex flex-col">
             <span
               className="text-2xl sm:text-[1.65rem] font-bold tracking-tight text-[#183b28] group-hover:text-[#8c1d1d] transition-colors leading-tight"
-              style={{ fontFamily: '"Playfair Display", Georgia, serif' }}
+              style={{ fontFamily: '"SVN-Studio Brush", "Playfair Display", Georgia, serif' }}
             >
               Gia Phả Dòng Họ
             </span>
