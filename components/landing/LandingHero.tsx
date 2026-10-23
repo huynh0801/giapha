@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export default function LandingHero() {
   return (
-    <section className="relative w-full overflow-hidden bg-[#fcf8ee]">
+    <section className="relative w-full overflow-hidden bg-[#f5e7c7]">
       <Link
         href="/dashboard"
         className="block relative w-full aspect-[2048/768] cursor-pointer"

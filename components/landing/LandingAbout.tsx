@@ -4,7 +4,7 @@ import { ArrowRight } from "lucide-react";
 
 export default function LandingAbout() {
   return (
-    <div className="relative overflow-hidden rounded-3xl bg-[#fefaf2] border border-[#ecdcc9] shadow-[0_8px_30px_rgba(44,26,17,0.06)] p-5 sm:p-7 md:p-8 flex flex-col md:flex-row gap-6 md:gap-8 items-center h-full">
+    <div className="relative overflow-hidden rounded-3xl bg-[#faf0d7] border border-[#e2d0a8] shadow-[0_8px_30px_rgba(44,26,17,0.06)] p-5 sm:p-7 md:p-8 flex flex-col md:flex-row gap-6 md:gap-8 items-center h-full">
       {/* Temple Artwork on the Left */}
       <div className="relative w-full md:w-5/12 aspect-[4/3] rounded-2xl overflow-hidden border border-[#e2d0be] shadow-xs shrink-0">
         <Image

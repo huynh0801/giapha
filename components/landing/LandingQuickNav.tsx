@@ -43,14 +43,14 @@ const quickNavItems: QuickNavItem[] = [
 
 export default function LandingQuickNav() {
   return (
-    <section className="relative w-full bg-[#fbf5ea] border-y border-[#e5dcce] py-8 sm:py-10">
+    <section className="relative w-full bg-[#f5e7c7] border-y border-[#e2d0a8] py-8 sm:py-10">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 lg:gap-0 lg:divide-x lg:divide-[#ded4c3]">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 lg:gap-0 lg:divide-x lg:divide-[#e2d0a8]">
           {quickNavItems.map((item, index) => (
             <Link
               key={item.title}
               href={item.href}
-              className={`group flex flex-col items-center text-center p-3 sm:p-4 rounded-2xl transition-all duration-200 hover:bg-[#f5ede0]/70 ${
+              className={`group flex flex-col items-center text-center p-3 sm:p-4 rounded-2xl transition-all duration-200 hover:bg-[#eddcb7]/60 ${
                 index === 4 ? "col-span-2 md:col-span-1" : ""
               }`}
             >

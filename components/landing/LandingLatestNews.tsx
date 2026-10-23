@@ -62,10 +62,10 @@ export default function LandingLatestNews({ news }: LandingLatestNewsProps) {
           <Link
             key={item.id}
             href={item.slug.startsWith("http") ? item.slug : `/blog/${item.slug}`}
-            className="group flex gap-3.5 p-3 rounded-2xl bg-[#fefaf2] border border-[#ecdcc9] hover:border-[#caa455] hover:shadow-[0_4px_16px_rgba(44,26,17,0.06)] transition-all duration-200"
+            className="group flex gap-3.5 p-3 rounded-2xl bg-[#faf0d7] border border-[#e2d0a8] hover:border-[#caa455] hover:shadow-[0_4px_16px_rgba(44,26,17,0.06)] transition-all duration-200"
           >
             {/* Thumbnail */}
-            <div className="relative size-18 sm:size-20 rounded-xl overflow-hidden bg-[#f4ece0] shrink-0 border border-[#e5d8c7]">
+            <div className="relative size-18 sm:size-20 rounded-xl overflow-hidden bg-[#eddcb7] shrink-0 border border-[#dfcda3]">
               {item.imageUrl ? (
                 <Image
                   src={item.imageUrl}

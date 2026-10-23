@@ -18,7 +18,7 @@ export default function LandingHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <header className="relative z-30 w-full bg-[#fbf6ed] border-b border-[#e8dfcf]/60">
+    <header className="relative z-30 w-full bg-[#f5e7c7] border-b border-[#e2d0a8]/70">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Brand / Logo */}
         <Link href="/" className="flex items-center gap-3.5 group">
@@ -109,7 +109,7 @@ export default function LandingHeader() {
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-[#e8dfcf] bg-[#fbf6ed] px-4 py-4 space-y-2 shadow-lg">
+        <div className="md:hidden border-t border-[#e2d0a8] bg-[#f5e7c7] px-4 py-4 space-y-2 shadow-lg">
           {navItems.map((item) => (
             <Link
               key={item.label}

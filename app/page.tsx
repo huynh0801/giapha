@@ -52,7 +52,7 @@ export default async function GiaPhaHomePage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#fdfaf3] text-[#2c1a11] selection:bg-[#8c1d1d] selection:text-white">
+    <div className="min-h-screen flex flex-col bg-[#f5e7c7] text-[#2c1a11] selection:bg-[#8c1d1d] selection:text-white">
       {/* 1. Header Navigation */}
       <LandingHeader />
 
@@ -64,7 +64,7 @@ export default async function GiaPhaHomePage() {
         <LandingQuickNav />
 
         {/* 4. Lower Content: About & Latest News Grid */}
-        <section className="relative w-full py-10 sm:py-14 lg:py-16 bg-[#fcf8ee]">
+        <section className="relative w-full py-10 sm:py-14 lg:py-16 bg-[#f5e7c7]">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-stretch">
               {/* Left Column: Về dòng họ chúng tôi (7 cols) */}
