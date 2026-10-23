@@ -64,7 +64,8 @@ export default function LandingQuickNav() {
                     alt={item.title}
                     width={90}
                     height={60}
-                    className="max-h-full w-auto object-contain select-none pointer-events-none drop-shadow-2xs"
+                    style={{ width: "auto", height: "auto" }}
+                    className="max-h-full max-w-full object-contain select-none pointer-events-none drop-shadow-2xs"
                   />
                 </div>
 
