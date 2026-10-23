@@ -21,7 +21,7 @@ export default function LandingAbout() {
       {/* Left side: img-detail2.png - Scaled to fit snugly without cropping or letterbox padding */}
       <div className="relative z-10 w-full lg:w-[48%] aspect-[382/254] lg:aspect-auto lg:h-full shrink-0 overflow-hidden">
         <Image
-          src="/images/landing/about-painting.png?v=20261023c"
+          src="/images/landing/about-painting.png?v=20261023e"
           alt="Nhà thờ từ đường dòng họ"
           fill
           unoptimized
