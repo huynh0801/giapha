@@ -3,21 +3,15 @@
 import Image from "next/image";
 import Link from "next/link";
 import {
-  Building2,
   ChevronDown,
-  FileText,
   FolderTree,
   Info,
-  KeyRound,
-  LayoutDashboard,
   LogIn,
   LogOut,
   Menu,
-  Newspaper,
   Search,
   ShieldCheck,
   User,
-  Users,
   X,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -245,7 +239,7 @@ export default function LandingHeader({ currentUser: initialUser }: LandingHeade
 
               {/* Profile Dropdown Menu */}
               {userDropdownOpen && (
-                <div className="absolute right-0 top-full mt-2 w-72 rounded-2xl bg-[#fffdf8] border border-[#e2d0a8] shadow-[0_16px_40px_rgba(58,31,19,0.14)] overflow-hidden z-50 text-[#2c1a11] animate-in fade-in zoom-in-95 duration-150">
+                <div className="absolute right-0 top-full mt-2 w-64 rounded-2xl bg-[#fffdf8] border border-[#e2d0a8] shadow-[0_16px_40px_rgba(58,31,19,0.14)] overflow-hidden z-50 text-[#2c1a11] animate-in fade-in zoom-in-95 duration-150">
                   {/* Dropdown Header */}
                   <div className="bg-[#f5e7c7]/60 border-b border-[#e2d0a8]/70 px-4 py-3">
                     <div className="flex items-center gap-3">
@@ -288,84 +282,33 @@ export default function LandingHeader({ currentUser: initialUser }: LandingHeade
 
                   {/* Menu Items according to Role */}
                   <div className="p-2 space-y-0.5 text-xs sm:text-sm font-sans font-semibold">
+                    <Link
+                      href="/dashboard"
+                      onClick={() => setUserDropdownOpen(false)}
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[#3c2f25] hover:bg-[#f5e7c7] hover:text-[#800000] transition-colors"
+                    >
+                      <FolderTree className="size-4 text-[#800000]" />
+                      <span>Không gian gia phả</span>
+                    </Link>
+
                     {user.role === "system_admin" ? (
-                      <>
-                        <Link
-                          href="/dashboard"
-                          onClick={() => setUserDropdownOpen(false)}
-                          className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[#3c2f25] hover:bg-[#f5e7c7] hover:text-[#800000] transition-colors"
-                        >
-                          <FolderTree className="size-4 text-[#800000]" />
-                          <span>Không gian gia phả</span>
-                        </Link>
-                        <Link
-                          href="/admin"
-                          onClick={() => setUserDropdownOpen(false)}
-                          className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[#3c2f25] hover:bg-[#f5e7c7] hover:text-[#800000] transition-colors"
-                        >
-                          <LayoutDashboard className="size-4 text-[#800000]" />
-                          <span>Bảng quản trị hệ thống</span>
-                        </Link>
-                        <Link
-                          href="/admin/families"
-                          onClick={() => setUserDropdownOpen(false)}
-                          className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[#3c2f25] hover:bg-[#f5e7c7] hover:text-[#800000] transition-colors"
-                        >
-                          <Building2 className="size-4 text-[#800000]" />
-                          <span>Quản trị dòng họ</span>
-                        </Link>
-                        <Link
-                          href="/admin/users"
-                          onClick={() => setUserDropdownOpen(false)}
-                          className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[#3c2f25] hover:bg-[#f5e7c7] hover:text-[#800000] transition-colors"
-                        >
-                          <Users className="size-4 text-[#800000]" />
-                          <span>Quản lý người dùng</span>
-                        </Link>
-                        <Link
-                          href="/admin/blog"
-                          onClick={() => setUserDropdownOpen(false)}
-                          className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[#3c2f25] hover:bg-[#f5e7c7] hover:text-[#800000] transition-colors"
-                        >
-                          <FileText className="size-4 text-[#800000]" />
-                          <span>Bài viết & Tin tức</span>
-                        </Link>
-                        <Link
-                          href="/admin/change-password"
-                          onClick={() => setUserDropdownOpen(false)}
-                          className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[#3c2f25] hover:bg-[#f5e7c7] hover:text-[#800000] transition-colors"
-                        >
-                          <KeyRound className="size-4 text-[#800000]" />
-                          <span>Đổi mật khẩu</span>
-                        </Link>
-                      </>
+                      <Link
+                        href="/admin"
+                        onClick={() => setUserDropdownOpen(false)}
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[#3c2f25] hover:bg-[#f5e7c7] hover:text-[#800000] transition-colors"
+                      >
+                        <ShieldCheck className="size-4 text-[#800000]" />
+                        <span>Trang quản trị</span>
+                      </Link>
                     ) : (
-                      <>
-                        <Link
-                          href="/dashboard"
-                          onClick={() => setUserDropdownOpen(false)}
-                          className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[#3c2f25] hover:bg-[#f5e7c7] hover:text-[#800000] transition-colors"
-                        >
-                          <FolderTree className="size-4 text-[#800000]" />
-                          <span>Không gian gia phả</span>
-                        </Link>
-                        <Link
-                          href="/dashboard/about"
-                          onClick={() => setUserDropdownOpen(false)}
-                          className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[#3c2f25] hover:bg-[#f5e7c7] hover:text-[#800000] transition-colors"
-                        >
-                          <Info className="size-4 text-[#800000]" />
-                          <span>Hồ sơ dòng họ</span>
-                        </Link>
-                        <Link
-                          href="/news"
-                          onClick={() => setUserDropdownOpen(false)}
-                          className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[#3c2f25] hover:bg-[#f5e7c7] hover:text-[#800000] transition-colors"
-                        >
-                          <Newspaper className="size-4 text-[#800000]" />
-                          <span>Tin tức & Sự kiện</span>
-                        </Link>
-                      </>
+                      <Link
+                        href="/dashboard/about"
+                        onClick={() => setUserDropdownOpen(false)}
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[#3c2f25] hover:bg-[#f5e7c7] hover:text-[#800000] transition-colors"
+                      >
+                        <Info className="size-4 text-[#800000]" />
+                        <span>Hồ sơ dòng họ</span>
+                      </Link>
                     )}
                   </div>
 
@@ -452,76 +395,33 @@ export default function LandingHeader({ currentUser: initialUser }: LandingHeade
                 </div>
               </div>
 
+              <Link
+                href="/dashboard"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-2.5 px-3 py-2 rounded-lg font-sans text-sm font-bold text-[#3c2f25] hover:bg-[#ede5d5]"
+              >
+                <FolderTree className="size-4 text-[#800000]" />
+                Không gian gia phả
+              </Link>
+
               {user.role === "system_admin" ? (
-                <>
-                  <Link
-                    href="/dashboard"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-lg font-sans text-sm font-bold text-[#3c2f25] hover:bg-[#ede5d5]"
-                  >
-                    <FolderTree className="size-4 text-[#800000]" />
-                    Không gian gia phả
-                  </Link>
-                  <Link
-                    href="/admin"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-lg font-sans text-sm font-bold text-[#3c2f25] hover:bg-[#ede5d5]"
-                  >
-                    <LayoutDashboard className="size-4 text-[#800000]" />
-                    Bảng quản trị hệ thống
-                  </Link>
-                  <Link
-                    href="/admin/families"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-lg font-sans text-sm font-bold text-[#3c2f25] hover:bg-[#ede5d5]"
-                  >
-                    <Building2 className="size-4 text-[#800000]" />
-                    Quản trị dòng họ
-                  </Link>
-                  <Link
-                    href="/admin/users"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-lg font-sans text-sm font-bold text-[#3c2f25] hover:bg-[#ede5d5]"
-                  >
-                    <Users className="size-4 text-[#800000]" />
-                    Quản lý người dùng
-                  </Link>
-                  <Link
-                    href="/admin/blog"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-lg font-sans text-sm font-bold text-[#3c2f25] hover:bg-[#ede5d5]"
-                  >
-                    <FileText className="size-4 text-[#800000]" />
-                    Bài viết & Tin tức
-                  </Link>
-                  <Link
-                    href="/admin/change-password"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-lg font-sans text-sm font-bold text-[#3c2f25] hover:bg-[#ede5d5]"
-                  >
-                    <KeyRound className="size-4 text-[#800000]" />
-                    Đổi mật khẩu
-                  </Link>
-                </>
+                <Link
+                  href="/admin"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-2.5 px-3 py-2 rounded-lg font-sans text-sm font-bold text-[#3c2f25] hover:bg-[#ede5d5]"
+                >
+                  <ShieldCheck className="size-4 text-[#800000]" />
+                  Trang quản trị
+                </Link>
               ) : (
-                <>
-                  <Link
-                    href="/dashboard"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-lg font-sans text-sm font-bold text-[#3c2f25] hover:bg-[#ede5d5]"
-                  >
-                    <FolderTree className="size-4 text-[#800000]" />
-                    Không gian gia phả
-                  </Link>
-                  <Link
-                    href="/dashboard/about"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-lg font-sans text-sm font-bold text-[#3c2f25] hover:bg-[#ede5d5]"
-                  >
-                    <Info className="size-4 text-[#800000]" />
-                    Hồ sơ dòng họ
-                  </Link>
-                </>
+                <Link
+                  href="/dashboard/about"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-2.5 px-3 py-2 rounded-lg font-sans text-sm font-bold text-[#3c2f25] hover:bg-[#ede5d5]"
+                >
+                  <Info className="size-4 text-[#800000]" />
+                  Hồ sơ dòng họ
+                </Link>
               )}
 
               <button
