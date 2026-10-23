@@ -45,8 +45,8 @@ test("LandingHero and LandingQuickNav contain mockup copy and navigation items",
   const heroPath = path.join(process.cwd(), "components", "landing", "LandingHero.tsx");
   assert.ok(fs.existsSync(heroPath), "LandingHero.tsx should exist");
   const heroContent = fs.readFileSync(heroPath, "utf8");
-  assert.match(heroContent, /Dòng họ[\s\S]*là gốc rễ[\s\S]*của mỗi chúng ta/);
-  assert.match(heroContent, /Khám phá gia phả/);
+  assert.match(heroContent, /hero-banner\.png/);
+  assert.match(heroContent, /\/dashboard/);
 
   const navPath = path.join(process.cwd(), "components", "landing", "LandingQuickNav.tsx");
   assert.ok(fs.existsSync(navPath), "LandingQuickNav.tsx should exist");
