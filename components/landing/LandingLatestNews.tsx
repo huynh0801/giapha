@@ -67,7 +67,7 @@ export default function LandingLatestNews({ news }: LandingLatestNewsProps) {
             href={item.slug.startsWith("http") ? item.slug : `/blog/${item.slug}`}
             className="group flex gap-3 sm:gap-3.5 py-2.5 first:pt-1 last:pb-0 transition-all duration-200"
           >
-            {/* Thumbnail - landscape aspect ratio showing full image */}
+            {/* Thumbnail - scaled to fit without cropping */}
             <div className="relative w-16 sm:w-18 lg:w-20 aspect-[3/2] rounded-xl overflow-hidden bg-[#eddcb7] shrink-0 border border-[#cbb27a]/40">
               {item.imageUrl ? (
                 <Image
@@ -76,7 +76,7 @@ export default function LandingLatestNews({ news }: LandingLatestNewsProps) {
                   fill
                   sizes="80px"
                   unoptimized={item.imageUrl.startsWith("http")}
-                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                  className="object-fill transition-transform duration-300 group-hover:scale-105"
                 />
               ) : (
                 <div className="flex size-full items-center justify-center text-[#8c1d1d] font-bold text-xl">
