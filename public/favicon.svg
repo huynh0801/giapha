@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="100%" height="100%">
+  <rect x="50" y="50" width="900" height="900" rx="200" fill="#FFF9F4"/>
+
+  <g id="nha-tho" fill="#8A2317">
+    <path d="M 500 200 
+             Q 720 380, 860 280 
+             Q 840 295, 835 310
+             L 835 395
+             Q 750 395, 500 395
+             Q 250 395, 165 395
+             L 165 310
+             Q 160 295, 140 280
+             Q 280 380, 500 200 Z"/>
+             
+    <path d="M 140 280 C 135 275, 145 270, 155 278 Z"/>
+    <path d="M 860 280 C 865 275, 855 270, 845 278 Z"/>
+
+    <rect x="220" y="395" width="34" height="375"/>
+    <rect x="746" y="395" width="34" height="375"/>
+    
+    <rect x="160" y="770" width="680" height="35" rx="8"/>
+  </g>
+
+  <g id="bieu-tuong-nguoi">
+    <circle cx="500" cy="510" r="60" fill="#D37E2A"/>
+    <path d="M 370 770 C 370 610, 630 610, 630 770" fill="none" stroke="#8A2317" stroke-width="50" stroke-linecap="butt"/>
+    
+    <circle cx="365" cy="600" r="50" fill="#D37E2A"/>
+    <path d="M 252 770 C 252 660, 410 660, 422 750" fill="none" stroke="#D37E2A" stroke-width="36" stroke-linecap="round"/>
+    
+    <circle cx="635" cy="600" r="50" fill="#D37E2A"/>
+    <path d="M 748 770 C 748 660, 590 660, 578 750" fill="none" stroke="#D37E2A" stroke-width="36" stroke-linecap="round"/>
+  </g>
+</svg>
