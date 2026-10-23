@@ -53,3 +53,7 @@ skills-lock.json
 
 # database backups
 /backups
+
+# raw source icons
+/icon
+
