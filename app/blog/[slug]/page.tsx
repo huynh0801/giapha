@@ -155,7 +155,18 @@ export default async function BlogDetailPage({ params }: PageProps) {
         {/* Background Decor: decorate2 (left) and decorate1 (right) */}
         <BackgroundDecor withMid />
 
-        <div className="relative z-10 mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 space-y-12 sm:space-y-14">
+        <div className="relative z-10 mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-8">
+          {/* Top Return Button: Nằm ngoài khung bên trên */}
+          <div className="flex items-center justify-start">
+            <Link
+              href="/news"
+              className="inline-flex items-center gap-2 px-5 py-2.5 border-2 border-[#caa455] bg-[#8c1d1d] text-white text-xs sm:text-sm font-bold shadow-xs hover:bg-[#6e1616] transition-colors"
+            >
+              <ArrowLeft className="size-4" />
+              <span>Quay lại danh sách bản tin</span>
+            </Link>
+          </div>
+
           {/* MASTER SCROLL FRAME: Đóng toàn bộ nội dung bài viết vào 1 khung chỉ kép lớn */}
           <article className="relative p-1.5 sm:p-2.5 border-2 border-[#caa455] bg-[#f5e7c7]/30 shadow-[0_4px_30px_rgba(44,26,17,0.08)]">
             <div className="relative border border-[#deb887] bg-[#fffdf7] p-5 sm:p-8 md:p-12 space-y-8 sm:space-y-10">
@@ -166,7 +177,7 @@ export default async function BlogDetailPage({ params }: PageProps) {
               <span className="pointer-events-none absolute bottom-2 right-2 size-5 border-b-2 border-r-2 border-[#8c1d1d]" />
 
               {/* Breadcrumb Navigation Bar */}
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#deb887]/60 pb-4">
+              <div className="border-b border-[#deb887]/60 pb-3 sm:pb-4">
                 <nav className="flex items-center gap-2 text-xs font-sans text-[#7a6455]">
                   <Link
                     href="/"
@@ -186,14 +197,6 @@ export default async function BlogDetailPage({ params }: PageProps) {
                     {post.category || "Tin tức"}
                   </span>
                 </nav>
-
-                <Link
-                  href="/news"
-                  className="inline-flex items-center gap-1.5 text-xs font-bold text-[#8c1d1d] hover:text-[#6e1616] transition-colors font-sans"
-                >
-                  <ArrowLeft className="size-3.5" />
-                  <span>Về danh sách tin</span>
-                </Link>
               </div>
 
               {/* Article Header & Title */}
@@ -290,19 +293,18 @@ export default async function BlogDetailPage({ params }: PageProps) {
                 )}
               </div>
 
-              {/* Return Button inside Frame Footer */}
-              <div className="pt-8 border-t border-[#deb887]/70 flex flex-col sm:flex-row items-center justify-between gap-4 font-sans">
+              {/* Frame Footer */}
+              <div className="pt-6 sm:pt-8 border-t border-[#deb887]/70 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#7a6455] font-sans">
+                <span className="italic">
+                  Gia phả số dòng họ – Giữ gìn cội nguồn truyền thống
+                </span>
                 <Link
                   href="/news"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 border-2 border-[#caa455] bg-[#8c1d1d] text-white text-xs sm:text-sm font-bold shadow-xs hover:bg-[#6e1616] transition-colors"
+                  className="inline-flex items-center gap-1.5 font-bold text-[#8c1d1d] hover:text-[#6e1616] hover:underline transition-colors"
                 >
-                  <ArrowLeft className="size-4" />
+                  <ArrowLeft className="size-3.5" />
                   <span>Quay lại danh sách bản tin</span>
                 </Link>
-
-                <div className="text-xs text-[#7a6455] italic">
-                  Gia phả số dòng họ – Giữ gìn cội nguồn truyền thống
-                </div>
               </div>
             </div>
           </article>
