@@ -63,17 +63,17 @@ export default async function GiaPhaHomePage() {
         {/* 3. Quick Navigation Strip (5 Cards) */}
         <LandingQuickNav />
 
-        {/* 4. Lower Content: About & Latest News Grid */}
+        {/* 4. Lower Content: About & Latest News Grid (70% / 30% split with matching heights) */}
         <section className="relative w-full py-10 sm:py-14 lg:py-16 bg-[#f5e7c7]">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-stretch">
-              {/* Left Column: Về dòng họ chúng tôi (7 cols) */}
-              <div className="lg:col-span-7">
+            <div className="grid grid-cols-1 lg:grid-cols-10 gap-6 lg:gap-8 items-stretch">
+              {/* Left Column: Về dòng họ chúng tôi (70% width) */}
+              <div className="lg:col-span-7 flex flex-col">
                 <LandingAbout />
               </div>
 
-              {/* Right Column: Tin tức mới nhất (5 cols) */}
-              <div className="lg:col-span-5">
+              {/* Right Column: Tin tức mới nhất (30% width) */}
+              <div className="lg:col-span-3 flex flex-col">
                 <LandingLatestNews news={newsItems} />
               </div>
             </div>

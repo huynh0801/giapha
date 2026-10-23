@@ -41,11 +41,11 @@ export default function LandingLatestNews({ news }: LandingLatestNewsProps) {
   const displayNews = news && news.length > 0 ? news.slice(0, 3) : fallbackNews;
 
   return (
-    <div className="relative overflow-hidden rounded-3xl bg-[#fcf5e5] border border-[#e2d0a8] shadow-[0_4px_20px_rgba(44,26,17,0.05)] p-5 sm:p-6 lg:p-7 flex flex-col justify-between h-full">
+    <div className="relative overflow-hidden rounded-2xl bg-[#f5e7c7] border border-[#cbb27a] p-4 sm:p-5 lg:p-6 flex flex-col justify-between h-full shadow-[0_2px_12px_rgba(44,26,17,0.03)]">
       {/* Header with Title and "Xem tất cả" link */}
-      <div className="flex items-center justify-between pb-3 border-b border-[#e2d0a8]/60">
+      <div className="flex items-center justify-between pb-2.5 sm:pb-3 border-b border-[#cbb27a]/50">
         <h2
-          className="text-xl sm:text-2xl lg:text-[1.65rem] font-bold text-[#183b28] tracking-tight leading-tight"
+          className="text-lg sm:text-xl lg:text-[1.35rem] font-bold text-[#183b28] tracking-tight leading-tight"
           style={{ fontFamily: '"SVN-Studio Brush", Georgia, serif' }}
         >
           Tin tức mới nhất
@@ -60,15 +60,15 @@ export default function LandingLatestNews({ news }: LandingLatestNewsProps) {
       </div>
 
       {/* List of 3 Articles with thin dividers */}
-      <div className="flex-1 flex flex-col justify-between divide-y divide-[#e2d0a8]/70 pt-2 sm:pt-2.5">
+      <div className="flex-1 flex flex-col justify-between divide-y divide-[#cbb27a]/40 pt-2">
         {displayNews.map((item) => (
           <Link
             key={item.id}
             href={item.slug.startsWith("http") ? item.slug : `/blog/${item.slug}`}
-            className="group flex gap-3 sm:gap-3.5 py-2.5 sm:py-3 first:pt-1 last:pb-0 transition-all duration-200"
+            className="group flex gap-3 sm:gap-3.5 py-2.5 first:pt-1 last:pb-0 transition-all duration-200"
           >
             {/* Thumbnail - landscape aspect ratio showing full image */}
-            <div className="relative w-18 sm:w-20 aspect-[3/2] rounded-xl overflow-hidden bg-[#eddcb7] shrink-0 border border-[#dfcda3]">
+            <div className="relative w-16 sm:w-18 lg:w-20 aspect-[3/2] rounded-xl overflow-hidden bg-[#eddcb7] shrink-0 border border-[#cbb27a]/40">
               {item.imageUrl ? (
                 <Image
                   src={item.imageUrl}
