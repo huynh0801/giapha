@@ -278,8 +278,8 @@ export default function FamilyAdminRosterPanel({
 
   return (
     <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_400px]">
-      <section className="overflow-hidden rounded-[28px] border border-stone-200 bg-white shadow-[0_18px_60px_rgba(60,42,25,0.07)]">
-        <div className="border-b border-stone-100 bg-gradient-to-r from-amber-50 via-white to-emerald-50 px-5 py-5">
+      <section className="overflow-hidden rounded-3xl border-2 border-[#deb887]/80 bg-gradient-to-br from-[#fffdf7] to-[#fbf7ed] shadow-xs">
+        <div className="border-b border-[#deb887]/50 bg-gradient-to-r from-[#fef8ea] via-[#fffdf7] to-[#eaf3ed] px-5 py-5">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.2em] text-[#b56a10]">
@@ -326,10 +326,10 @@ export default function FamilyAdminRosterPanel({
             activeAdmins.map((admin) => (
               <article
                 key={admin.profile_id}
-                className={`rounded-[28px] border p-4 shadow-sm transition-shadow hover:shadow-[0_16px_45px_rgba(60,42,25,0.08)] sm:p-5 ${
+                className={`rounded-2xl border p-4 shadow-xs transition-all sm:p-5 ${
                   admin.is_primary_admin
-                    ? "border-amber-300 bg-amber-50/70"
-                    : "border-stone-200 bg-white"
+                    ? "border-2 border-[#caa455] bg-gradient-to-r from-[#fef8ea] via-[#fffdf7] to-[#fef8ea]"
+                    : "border-2 border-[#deb887]/80 bg-[#fffdf7] hover:border-[#caa455]"
                 }`}
               >
                 <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(330px,400px)] lg:items-center">
