@@ -246,7 +246,11 @@ export default function BlogAdminPanel({
           id="editor"
           key={editingPost?.id || "new"}
           onSubmit={handleSave}
-          className="rounded-[30px] border border-stone-200 bg-white p-5 shadow-[0_22px_70px_rgba(41,37,36,0.09)] sm:p-7 lg:p-8"
+          className={`rounded-3xl border p-5 sm:p-7 lg:p-8 ${
+            isFamilyNotice
+              ? "border-2 border-[#deb887]/80 bg-gradient-to-br from-[#fffdf7] to-[#fbf7ed] shadow-xs"
+              : "border-stone-200 bg-white shadow-[0_22px_70px_rgba(41,37,36,0.09)]"
+          }`}
         >
           <input type="hidden" name="id" value={editingPost?.id || ""} />
           {scope === "family" && (
@@ -499,7 +503,11 @@ export default function BlogAdminPanel({
 
       <aside
         id="posts"
-        className={`scroll-mt-8 rounded-[30px] bg-white p-5 shadow-[0_22px_70px_rgba(41,37,36,0.09)] sm:p-6 ${
+        className={`scroll-mt-8 rounded-3xl p-5 sm:p-6 ${
+          isFamilyNotice
+            ? "border-2 border-[#deb887]/80 bg-gradient-to-br from-[#fffdf7] to-[#fbf7ed] shadow-xs"
+            : "bg-white shadow-[0_22px_70px_rgba(41,37,36,0.09)]"
+        } ${
           canEdit ? "" : "w-full"
         }`}
       >
@@ -543,7 +551,11 @@ export default function BlogAdminPanel({
               return (
                 <article
                   key={post.id}
-                  className="group rounded-2xl bg-stone-50 p-3 transition-colors hover:bg-amber-50/70"
+                  className={`group rounded-2xl p-4 transition-all ${
+                    isFamilyNotice
+                      ? "border border-[#deb887]/60 bg-[#fffdf7] hover:border-[#caa455] hover:shadow-xs"
+                      : "bg-stone-50 hover:bg-amber-50/70"
+                  }`}
                 >
                   <div className="flex gap-3">
                     {!isFamilyNotice && (
