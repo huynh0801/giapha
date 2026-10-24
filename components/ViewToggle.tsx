@@ -13,27 +13,27 @@ export default function ViewToggle() {
     {
       id: "list",
       label: "Danh sách",
-      icon: <List className="size-6 sm:size-4" />,
+      icon: <List className="size-5 sm:size-4" />,
     },
     {
       id: "tree",
       label: "Sơ đồ cây",
-      icon: <Network className="size-6 sm:size-4" />,
+      icon: <Network className="size-5 sm:size-4" />,
     },
     {
       id: "mindmap",
       label: "Mindmap",
-      icon: <ListTree className="size-6 sm:size-4" />,
+      icon: <ListTree className="size-5 sm:size-4" />,
     },
     {
       id: "bubble",
       label: "Bong bóng",
-      icon: <Circle className="size-6 sm:size-4" />,
+      icon: <Circle className="size-5 sm:size-4" />,
     },
   ] as const;
 
   return (
-    <div className="relative z-10 mx-auto mb-2 mt-4 flex w-fit rounded-full border border-stone-200/60 bg-stone-200/50 p-1.5 shadow-inner backdrop-blur-sm">
+    <div className="relative z-10 mx-auto mb-3 mt-3 flex w-fit rounded-full border-2 border-[#deb887]/80 bg-[#fffdf7] p-1.5 shadow-xs backdrop-blur-sm">
       {tabs.map((tab) => {
         const isActive = currentView === tab.id;
         return (
@@ -41,21 +41,23 @@ export default function ViewToggle() {
             key={tab.id}
             type="button"
             onClick={() => setView(tab.id as ViewMode)}
-            className={`relative z-10 flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-semibold transition-colors duration-300 ease-in-out sm:px-6 sm:py-2.5 ${
+            className={`relative z-10 flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs sm:text-sm font-bold transition-colors duration-200 sm:px-5 sm:py-2 ${
               isActive
-                ? "text-stone-900"
-                : "text-stone-500 hover:text-stone-800"
+                ? "text-white"
+                : "text-[#7a6455] hover:text-[#183b28]"
             }`}
           >
             {isActive && (
               <motion.div
                 layoutId="activeTab"
-                className="absolute inset-0 z-[-1] rounded-full border border-stone-200/60 bg-white shadow-sm"
+                className="absolute inset-0 z-[-1] rounded-full bg-gradient-to-r from-[#8c1d1d] to-[#6e1616] border border-[#6e1616] shadow-xs"
                 transition={{ type: "spring", stiffness: 450, damping: 30 }}
               />
             )}
             <span
-              className={`transition-colors duration-300 ${isActive ? "text-amber-700" : "text-stone-400"}`}
+              className={`transition-colors duration-200 ${
+                isActive ? "text-white" : "text-[#caa455]"
+              }`}
             >
               {tab.icon}
             </span>

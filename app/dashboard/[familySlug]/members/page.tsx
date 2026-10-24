@@ -2,6 +2,7 @@ import { DashboardProvider } from "@/components/DashboardContext";
 import DashboardViews from "@/components/DashboardViews";
 import MemberDetailModal from "@/components/MemberDetailModal";
 import ViewToggle, { ViewMode } from "@/components/ViewToggle";
+import HeritagePageHeader from "@/components/dashboard/HeritagePageHeader";
 import { getFamilyContextBySlug, getSupabase } from "@/utils/supabase/queries";
 import { isChildRelationshipType } from "@/utils/treeHelpers";
 import { FolderTree } from "lucide-react";
@@ -73,19 +74,27 @@ export default async function FamilyMembersPage({
       initialRootId={finalRootId}
       initialShowAvatar={initialShowAvatar}
     >
-      <ViewToggle />
-      <div className="mx-auto mt-2 flex w-full max-w-7xl flex-col gap-3 px-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
-        <div className="inline-flex min-w-0 items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-bold text-stone-700 shadow-sm ring-1 ring-stone-200">
-          <FolderTree className="size-4 shrink-0 text-amber-700" />
-          <span className="truncate">Đang mở: {context.tree.name}</span>
-        </div>
-        <Link
-          href={`/dashboard/${familySlug}/trees`}
-          className="inline-flex items-center justify-center rounded-full bg-stone-100 px-4 py-2 text-sm font-black text-stone-700 transition hover:bg-stone-200"
-        >
-          Đổi cây gia phả
-        </Link>
+      <div className="mx-auto w-full max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
+        <HeritagePageHeader
+          familySlug={familySlug}
+          familyName={context.family.name}
+          treeName={context.tree.name}
+          title="Cây Phả Hệ & Sơ Đồ Gia Tộc"
+          description={`Tra cứu danh sách thành viên, phả đồ cội nguồn, sơ đồ tư duy (mindmap) và biểu đồ bong bóng trong cây ${context.tree.name}.`}
+          actions={
+            <Link
+              href={`/dashboard/${familySlug}/trees`}
+              className="inline-flex items-center justify-center gap-1.5 rounded-xl border-2 border-[#deb887] bg-[#fffdf7] px-4 py-2 text-xs sm:text-sm font-bold text-[#8c1d1d] hover:bg-[#f5e7c7] transition-all shadow-xs"
+            >
+              <FolderTree className="size-4" />
+              <span>Đổi cây gia phả</span>
+            </Link>
+          }
+        />
       </div>
+
+      <ViewToggle />
+
       <DashboardViews
         persons={persons}
         relationships={relationships}
