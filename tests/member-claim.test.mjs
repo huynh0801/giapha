@@ -57,7 +57,7 @@ test("Option B: Genealogy approval workflow by Family Admin is fully implemented
   // Admin requests page handling of genealogy tab
   assert.match(requestsPage, /Xác nhận phả hệ & Nhận tên/);
   assert.match(requestsPage, /reviewGenealogyRequestAction/);
-  assert.match(requestsPage, /Chấp thuận & Nối cây/);
+  assert.match(requestsPage, /Chấp thuận & (Nối cây|Đồng bộ cây)/);
   assert.match(requestsPage, /Từ chối yêu cầu/);
 
   // Self edit permissions
@@ -66,4 +66,17 @@ test("Option B: Genealogy approval workflow by Family Admin is fully implemented
 
   // Kinship auto-select linked person
   assert.match(kinshipPage, /initialPersonAId/);
+});
+
+test("Member profile and family tree synchronization is fully implemented", () => {
+  const claimActions = read("app/actions/family-claim.ts");
+  const banner = read("components/dashboard/MemberClaimBanner.tsx");
+
+  // Server action for synchronization
+  assert.match(claimActions, /syncMemberProfileWithTreeAction/);
+  assert.match(claimActions, /person_details_private/);
+
+  // UI button on banner and modal
+  assert.match(banner, /Đồng bộ thông tin/);
+  assert.match(banner, /Đồng bộ từ tài khoản/);
 });

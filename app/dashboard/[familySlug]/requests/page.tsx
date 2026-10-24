@@ -419,7 +419,7 @@ export default async function FamilyJoinRequestsPage({
                             className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-black text-white transition hover:bg-emerald-700 cursor-pointer shadow-xs"
                           >
                             <CheckCircle2 className="size-4" />
-                            Chấp thuận & Nối cây
+                            Chấp thuận & Đồng bộ cây
                           </button>
                         </form>
 

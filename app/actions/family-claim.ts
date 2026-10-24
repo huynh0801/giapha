@@ -27,6 +27,8 @@ export interface GenealogyRequest {
     birth_order?: number | null;
     parent_id?: string | null;
     parent_name?: string | null;
+    avatar_url?: string | null;
+    phone_number?: string | null;
   };
   message?: string;
   status: "pending" | "approved" | "rejected" | "cancelled";
@@ -289,6 +291,7 @@ export async function addSelfToFamilyTreeAction(formData: FormData): Promise<Cla
           full_name: fullName,
           gender,
           birth_year: isNaN(birthYear as number) ? null : birthYear,
+          avatar_url: (await getProfile())?.avatar_url || null,
           is_deceased: false,
           is_in_law: false,
           birth_order: isNaN(birthOrder as number) ? null : birthOrder,
@@ -373,6 +376,8 @@ export async function addSelfToFamilyTreeAction(formData: FormData): Promise<Cla
         birth_order: isNaN(birthOrder as number) ? null : birthOrder,
         parent_id: parentId,
         parent_name: parentName,
+        avatar_url: profile?.avatar_url || null,
+        phone_number: profile?.phone_number || null,
       },
       message,
       status: "pending",
@@ -513,6 +518,7 @@ export async function reviewGenealogyRequestAction(formData: FormData): Promise<
 
     let linkedPersonId: string | null = null;
     const nowIso = new Date().toISOString();
+    const adminClient = getAdminSupabase() || supabase;
 
     if (decision === "approved") {
       if (targetRequest.type === "claim_person") {
@@ -520,6 +526,25 @@ export async function reviewGenealogyRequestAction(formData: FormData): Promise<
           throw new Error("Yêu cầu thiếu mã thành viên cần nhận.");
         }
         linkedPersonId = targetRequest.person_id;
+
+        // Auto-sync profile to claimed person
+        const requesterProfile = await getProfile(targetRequest.user_id);
+        if (requesterProfile?.avatar_url) {
+          await adminClient
+            .from("persons")
+            .update({ avatar_url: requesterProfile.avatar_url })
+            .eq("id", linkedPersonId);
+        }
+        if (requesterProfile?.phone_number) {
+          await adminClient
+            .from("person_details_private")
+            .upsert({
+              person_id: linkedPersonId,
+              family_id: context.family.id,
+              tree_id: targetRequest.tree_id || context.tree.id,
+              phone_number: requesterProfile.phone_number,
+            });
+        }
       } else if (targetRequest.type === "add_person") {
         const pData = targetRequest.new_person_data;
         if (!pData || !pData.full_name) {
@@ -527,7 +552,6 @@ export async function reviewGenealogyRequestAction(formData: FormData): Promise<
         }
 
         // 1. Create person in tree
-        const adminClient = getAdminSupabase() || supabase;
         const { data: createdPerson, error: personError } = await adminClient
           .from("persons")
           .insert({
@@ -539,6 +563,7 @@ export async function reviewGenealogyRequestAction(formData: FormData): Promise<
             is_deceased: false,
             is_in_law: false,
             birth_order: pData.birth_order ?? null,
+            avatar_url: pData.avatar_url || (await getProfile(targetRequest.user_id))?.avatar_url || null,
             generation: null,
             visibility: "private",
             created_by: user.id,
@@ -609,5 +634,107 @@ export async function reviewGenealogyRequestAction(formData: FormData): Promise<
 
   } catch (err) {
     throw new Error(err instanceof Error ? err.message : "Lỗi khi xử lý phê duyệt.");
+  }
+}
+
+export async function syncMemberProfileWithTreeAction(data: {
+  familyId: string;
+  personId?: string;
+}): Promise<ClaimActionResult> {
+  try {
+    const user = await getUser();
+    if (!user) {
+      return { success: false, error: "Bạn chưa đăng nhập." };
+    }
+
+    const context = await getFamilyContextById(data.familyId);
+    if (!context || !context.membership || context.membership.status !== "active") {
+      return { success: false, error: "Bạn không có quyền trong dòng họ này." };
+    }
+
+    const adminClient = getAdminSupabase();
+    if (!adminClient) {
+      return { success: false, error: "Lỗi kết nối máy chủ quản trị." };
+    }
+
+    const currentSettings =
+      context.family.settings && typeof context.family.settings === "object"
+        ? (context.family.settings as Record<string, unknown>)
+        : {};
+
+    const currentMemberLinks =
+      currentSettings.member_links && typeof currentSettings.member_links === "object"
+        ? (currentSettings.member_links as Record<string, string>)
+        : {};
+
+    const targetPersonId = data.personId || currentMemberLinks[user.id];
+    if (!targetPersonId) {
+      return {
+        success: false,
+        error: "Tài khoản của bạn chưa được liên kết với nhân vật nào trên cây gia phả.",
+      };
+    }
+
+    // 1. Fetch user profile
+    const profile = await getProfile(user.id);
+
+    // 2. Fetch tree person
+    const { data: person, error: personError } = await adminClient
+      .from("persons")
+      .select("id, full_name, avatar_url, family_id, tree_id")
+      .eq("id", targetPersonId)
+      .eq("family_id", data.familyId)
+      .single();
+
+    if (personError || !person) {
+      return { success: false, error: "Không tìm thấy hồ sơ thành viên trên cây gia phả." };
+    }
+
+    // 3. Synchronize avatar & name
+    const personUpdates: Record<string, unknown> = {};
+    const profileUpdates: Record<string, unknown> = {};
+
+    if (profile?.avatar_url && profile.avatar_url !== person.avatar_url) {
+      personUpdates.avatar_url = profile.avatar_url;
+    } else if (person.avatar_url && !profile?.avatar_url) {
+      profileUpdates.avatar_url = person.avatar_url;
+    }
+
+    if (profile?.full_name && profile.full_name !== person.full_name) {
+      personUpdates.full_name = profile.full_name;
+    }
+
+    if (Object.keys(personUpdates).length > 0) {
+      await adminClient.from("persons").update(personUpdates).eq("id", targetPersonId);
+    }
+
+    if (Object.keys(profileUpdates).length > 0) {
+      await adminClient.from("profiles").update(profileUpdates).eq("id", user.id);
+    }
+
+    // 4. Synchronize contact details (phone number)
+    if (profile?.phone_number) {
+      await adminClient.from("person_details_private").upsert({
+        person_id: targetPersonId,
+        family_id: context.family.id,
+        tree_id: person.tree_id || context.tree.id,
+        phone_number: profile.phone_number,
+      });
+    }
+
+    revalidatePath(`/dashboard/${context.family.slug}`);
+    revalidatePath(`/dashboard/${context.family.slug}/members`);
+    revalidatePath(`/dashboard/${context.family.slug}/members/${targetPersonId}`);
+
+    return {
+      success: true,
+      personId: targetPersonId,
+      message: "Đồng bộ thông tin giữa tài khoản và hồ sơ cây gia phả thành công!",
+    };
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "Lỗi khi đồng bộ thông tin.",
+    };
   }
 }

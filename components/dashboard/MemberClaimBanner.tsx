@@ -10,6 +10,7 @@ import {
   Edit3,
   GitBranch,
   Loader2,
+  RefreshCw,
   RotateCcw,
   Search,
   Sparkles,
@@ -24,6 +25,7 @@ import {
   addSelfToFamilyTreeAction,
   unlinkSelfAction,
   cancelGenealogyRequestAction,
+  syncMemberProfileWithTreeAction,
   GenealogyRequest,
 } from "@/app/actions/family-claim";
 
@@ -65,6 +67,7 @@ export default function MemberClaimBanner({
   const [showAddModal, setShowAddModal] = useState(false);
   const [showUnlinkModal, setShowUnlinkModal] = useState(false);
   const [dismissedRejected, setDismissedRejected] = useState(false);
+  const [syncSuccessMsg, setSyncSuccessMsg] = useState<string | null>(null);
 
   const [isPending, startTransition] = useTransition();
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -128,6 +131,24 @@ export default function MemberClaimBanner({
         window.location.reload();
       } else {
         setErrorMsg(res.error || "Không thể thêm vào cây gia phả.");
+      }
+    });
+  };
+
+  // Handle syncing user profile with tree person
+  const handleSyncInfo = () => {
+    if (!linkedPerson) return;
+    setErrorMsg(null);
+    setSyncSuccessMsg(null);
+    startTransition(async () => {
+      const res = await syncMemberProfileWithTreeAction({
+        familyId,
+        personId: linkedPerson.id,
+      });
+      if (res.success) {
+        setSyncSuccessMsg(res.message || "Đồng bộ thông tin thành công!");
+      } else {
+        setErrorMsg(res.error || "Không thể đồng bộ thông tin.");
       }
     });
   };
@@ -230,6 +251,21 @@ export default function MemberClaimBanner({
                 <span>Xem hồ sơ</span>
               </Link>
 
+              <button
+                type="button"
+                onClick={handleSyncInfo}
+                disabled={isPending}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#fffdf7] border border-[#caa455] text-[#183b28] text-xs font-bold hover:bg-[#f5e7c7] transition-colors shadow-xs cursor-pointer"
+                title="Đồng bộ họ tên, ảnh đại diện và số điện thoại giữa tài khoản cá nhân và cây gia phả"
+              >
+                {isPending ? (
+                  <Loader2 className="size-3.5 animate-spin text-[#8c1d1d]" />
+                ) : (
+                  <RefreshCw className="size-3.5 text-[#8c1d1d]" />
+                )}
+                <span>Đồng bộ thông tin</span>
+              </button>
+
               <Link
                 href={`/dashboard/${familySlug}/members/${linkedPerson.id}/edit?treeId=${treeId}`}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#fffdf7] border border-[#deb887] text-[#183b28] text-xs font-bold hover:bg-[#f5e7c7] transition-colors shadow-xs"
@@ -247,6 +283,19 @@ export default function MemberClaimBanner({
               </button>
             </div>
           </div>
+
+          {syncSuccessMsg && (
+            <div className="mt-3 p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 font-bold flex items-center justify-between">
+              <span>{syncSuccessMsg}</span>
+              <button
+                type="button"
+                onClick={() => setSyncSuccessMsg(null)}
+                className="text-emerald-700 hover:text-emerald-900 cursor-pointer ml-2 text-sm font-black"
+              >
+                ×
+              </button>
+            </div>
+          )}
         </div>
       ) : pendingRequest ? (
         /* 2. NẾU CÓ YÊU CẦU ĐANG CHỜ PHÊ DUYỆT (PHƯƠNG ÁN B) */
@@ -520,6 +569,26 @@ export default function MemberClaimBanner({
             <p className="text-xs text-[#6a594d]">
               Nhập thông tin của bạn và chọn Cha hoặc Mẹ. Ban Quản Trị dòng họ sẽ kiểm tra và phê duyệt thêm vào phả đồ:
             </p>
+
+            {/* Nút đồng bộ thông tin từ tài khoản */}
+            <div className="flex items-center justify-between p-2.5 rounded-xl bg-amber-50/80 border border-amber-200 text-xs">
+              <div className="flex items-center gap-2 text-stone-800 font-medium">
+                <Sparkles className="size-4 text-amber-600 shrink-0" />
+                <span>
+                  Đồng bộ từ tài khoản: <strong>{currentUserName || "Bạn"}</strong>
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  if (currentUserName) setFullName(currentUserName);
+                }}
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white border border-amber-300 font-bold text-amber-900 hover:bg-amber-100 transition-colors shadow-2xs cursor-pointer"
+              >
+                <RefreshCw className="size-3 text-amber-700" />
+                Tự động điền
+              </button>
+            </div>
 
             {errorMsg && (
               <div className="p-2.5 rounded-lg bg-red-50 text-red-700 text-xs font-semibold border border-red-200">
