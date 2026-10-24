@@ -1,15 +1,19 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import {
+  AlertCircle,
   Check,
   CheckCircle2,
-  ChevronRight,
+  Clock3,
+  Edit3,
   GitBranch,
   Loader2,
   RotateCcw,
   Search,
   Sparkles,
+  User,
   UserCheck,
   UserPlus,
   Users,
@@ -19,6 +23,8 @@ import {
   claimExistingPersonAction,
   addSelfToFamilyTreeAction,
   unlinkSelfAction,
+  cancelGenealogyRequestAction,
+  GenealogyRequest,
 } from "@/app/actions/family-claim";
 
 interface PersonItem {
@@ -38,6 +44,9 @@ interface MemberClaimBannerProps {
   currentUserName: string;
   linkedPerson: PersonItem | null;
   persons: PersonItem[];
+  pendingRequest?: GenealogyRequest | null;
+  rejectedRequest?: GenealogyRequest | null;
+  canManage?: boolean;
 }
 
 export default function MemberClaimBanner({
@@ -48,10 +57,14 @@ export default function MemberClaimBanner({
   currentUserName,
   linkedPerson,
   persons = [],
+  pendingRequest,
+  rejectedRequest,
+  canManage = false,
 }: MemberClaimBannerProps) {
   const [showClaimModal, setShowClaimModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showUnlinkModal, setShowUnlinkModal] = useState(false);
+  const [dismissedRejected, setDismissedRejected] = useState(false);
 
   const [isPending, startTransition] = useTransition();
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -59,6 +72,7 @@ export default function MemberClaimBanner({
   // Claim Modal States
   const [claimSearch, setClaimSearch] = useState("");
   const [selectedPersonId, setSelectedPersonId] = useState<string | null>(null);
+  const [claimMessage, setClaimMessage] = useState("");
 
   // Add Self Modal States
   const [fullName, setFullName] = useState(currentUserName || "");
@@ -67,6 +81,7 @@ export default function MemberClaimBanner({
   const [selectedParentId, setSelectedParentId] = useState("");
   const [birthOrder, setBirthOrder] = useState("1");
   const [parentSearch, setParentSearch] = useState("");
+  const [addMessage, setAddMessage] = useState("");
 
   // Handle claiming existing person
   const handleClaim = () => {
@@ -76,6 +91,7 @@ export default function MemberClaimBanner({
       const res = await claimExistingPersonAction({
         familyId,
         personId: selectedPersonId,
+        message: claimMessage.trim() || undefined,
       });
       if (res.success) {
         setShowClaimModal(false);
@@ -103,6 +119,7 @@ export default function MemberClaimBanner({
     if (birthYear.trim()) formData.set("birth_year", birthYear.trim());
     if (selectedParentId) formData.set("parent_id", selectedParentId);
     if (birthOrder.trim()) formData.set("birth_order", birthOrder.trim());
+    if (addMessage.trim()) formData.set("message", addMessage.trim());
 
     startTransition(async () => {
       const res = await addSelfToFamilyTreeAction(formData);
@@ -125,6 +142,20 @@ export default function MemberClaimBanner({
         window.location.reload();
       } else {
         setErrorMsg(res.error || "Không thể hủy liên kết.");
+      }
+    });
+  };
+
+  // Handle cancelling pending request
+  const handleCancelRequest = (requestId: string) => {
+    if (!confirm("Bạn có chắc chắn muốn hủy yêu cầu phê duyệt phả hệ này không?")) return;
+    setErrorMsg(null);
+    startTransition(async () => {
+      const res = await cancelGenealogyRequestAction({ familyId, requestId });
+      if (res.success) {
+        window.location.reload();
+      } else {
+        setErrorMsg(res.error || "Không thể hủy yêu cầu.");
       }
     });
   };
@@ -152,13 +183,13 @@ export default function MemberClaimBanner({
 
   return (
     <>
-      {/* 1. Nếu đã liên kết: Hiển thị Thẻ nhận diện vị trí của thành viên */}
+      {/* 1. NẾU ĐÃ ĐƯỢC DUYỆT & LIÊN KẾT THÀNH CÔNG */}
       {linkedPerson ? (
-        <div className="mb-6 rounded-2xl border-2 border-[#caa455] bg-[#fffdf7] p-3.5 sm:p-4 shadow-sm font-sans">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#8c1d1d] text-white shadow-xs">
-                <UserCheck className="size-5" />
+        <div className="mb-6 rounded-2xl border-2 border-[#caa455] bg-[#fffdf7] p-3.5 sm:p-5 shadow-sm font-sans">
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5">
+              <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#8c1d1d] text-white shadow-xs">
+                <UserCheck className="size-5.5" />
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
@@ -170,6 +201,9 @@ export default function MemberClaimBanner({
                       &bull; Đời thứ {linkedPerson.generation}
                     </span>
                   )}
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                    <CheckCircle2 className="size-3" /> Đã xác thực
+                  </span>
                 </div>
                 <h3 className="text-base sm:text-lg font-bold text-[#183b28] truncate mt-0.5">
                   {linkedPerson.full_name}
@@ -178,20 +212,118 @@ export default function MemberClaimBanner({
               </div>
             </div>
 
-            <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
+            {/* Quick Action Shortcuts */}
+            <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto pt-2 lg:pt-0">
+              <Link
+                href={`/dashboard/${familySlug}/kinship?p1=${linkedPerson.id}`}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#8c1d1d] text-white text-xs font-bold hover:bg-[#a62424] transition-colors shadow-xs"
+              >
+                <Sparkles className="size-3.5" />
+                <span>Tra cứu xưng hô</span>
+              </Link>
+
+              <Link
+                href={`/dashboard/${familySlug}/members/${linkedPerson.id}?treeId=${treeId}`}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#fffdf7] border border-[#deb887] text-[#183b28] text-xs font-bold hover:bg-[#f5e7c7] transition-colors shadow-xs"
+              >
+                <User className="size-3.5" />
+                <span>Xem hồ sơ</span>
+              </Link>
+
+              <Link
+                href={`/dashboard/${familySlug}/members/${linkedPerson.id}/edit?treeId=${treeId}`}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#fffdf7] border border-[#deb887] text-[#183b28] text-xs font-bold hover:bg-[#f5e7c7] transition-colors shadow-xs"
+              >
+                <Edit3 className="size-3.5" />
+                <span>Cập nhật thông tin</span>
+              </Link>
+
               <button
                 type="button"
                 onClick={() => setShowUnlinkModal(true)}
-                className="text-xs text-[#8a7667] hover:text-[#8c1d1d] hover:underline cursor-pointer px-2 py-1"
+                className="text-xs text-[#8a7667] hover:text-[#8c1d1d] hover:underline cursor-pointer px-2 py-1 ml-auto lg:ml-0"
               >
                 Đổi vị trí khác
               </button>
             </div>
           </div>
         </div>
+      ) : pendingRequest ? (
+        /* 2. NẾU CÓ YÊU CẦU ĐANG CHỜ PHÊ DUYỆT (PHƯƠNG ÁN B) */
+        <div className="mb-6 rounded-2xl border-2 border-amber-400 bg-amber-50/70 p-4 sm:p-5 shadow-sm font-sans">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-start gap-3.5">
+              <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-amber-500 text-white shadow-xs">
+                <Clock3 className="size-6 animate-pulse" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-[11px] font-extrabold uppercase tracking-wide text-amber-800 bg-amber-200 px-2 py-0.5 rounded-md border border-amber-300">
+                    Đang chờ Ban Quản Trị phê duyệt
+                  </span>
+                  <span className="text-xs text-amber-900/80">
+                    Gửi ngày {new Date(pendingRequest.created_at).toLocaleDateString("vi-VN")}
+                  </span>
+                </div>
+                <h4 className="text-base font-bold text-amber-950 mt-1">
+                  {pendingRequest.type === "claim_person" ? (
+                    <>Yêu cầu nhận danh tính: <span className="text-[#8c1d1d]">{pendingRequest.person_name}</span></>
+                  ) : (
+                    <>
+                      Yêu cầu thêm vào gia phả: <span className="text-[#8c1d1d]">{pendingRequest.new_person_data?.full_name}</span>
+                      {pendingRequest.new_person_data?.parent_name && (
+                        <span className="text-stone-600 font-normal"> (Con của: {pendingRequest.new_person_data.parent_name})</span>
+                      )}
+                    </>
+                  )}
+                </h4>
+                {pendingRequest.message && (
+                  <p className="text-xs text-amber-900/90 mt-1 italic bg-amber-100/60 p-2 rounded-lg border border-amber-200/60">
+                    &ldquo;{pendingRequest.message}&rdquo;
+                  </p>
+                )}
+                <p className="text-xs text-stone-600 mt-1.5">
+                  Tộc trưởng hoặc Admin đang đối chiếu gia phả dòng họ. Bạn sẽ nhận được thông báo ngay khi yêu cầu được duyệt.
+                </p>
+              </div>
+            </div>
+
+            <div className="shrink-0 self-end sm:self-center">
+              <button
+                type="button"
+                onClick={() => handleCancelRequest(pendingRequest.id)}
+                disabled={isPending}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-amber-300 bg-white text-stone-700 hover:text-red-700 hover:border-red-300 text-xs font-bold transition-colors cursor-pointer shadow-2xs"
+              >
+                {isPending && <Loader2 className="size-3 animate-spin" />}
+                <span>Hủy yêu cầu</span>
+              </button>
+            </div>
+          </div>
+        </div>
       ) : (
-        /* 2. Nếu chưa liên kết: Hiển thị Banner mời nhận diện / thêm tên vào cây gia phả */
+        /* 3. NẾU CHƯA LIÊN KẾT & CHƯA CÓ YÊU CẦU: HIỂN THỊ BANNER GỬI YÊU CẦU */
         <div className="mb-6 relative p-1.5 border-2 border-[#caa455] bg-[#f5e7c7]/50 shadow-sm rounded-2xl font-sans">
+          {/* Thông báo từ chối nếu có yêu cầu trước bị reject */}
+          {rejectedRequest && !dismissedRejected && (
+            <div className="mb-2 p-3 bg-red-50 border border-red-200 rounded-xl flex items-start justify-between gap-2 text-xs text-red-800">
+              <div className="flex items-start gap-2">
+                <AlertCircle className="size-4 text-red-600 shrink-0 mt-0.5" />
+                <div>
+                  <span className="font-bold">Yêu cầu phả hệ trước đó của bạn đã bị từ chối: </span>
+                  <span>{rejectedRequest.rejection_reason || "Thông tin huyết thống chưa trùng khớp. Vui lòng kiểm tra và gửi lại."}</span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setDismissedRejected(true)}
+                className="text-red-600 hover:text-red-900 font-bold shrink-0 text-[11px]"
+              >
+                Đóng
+              </button>
+            </div>
+          )}
+
           <div className="relative border border-[#deb887] bg-[#fffdf7] p-4 sm:p-5 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 rounded-xl">
             {/* 4 Traditional Corner Brackets */}
             <span className="pointer-events-none absolute top-1.5 left-1.5 size-2.5 border-t-2 border-l-2 border-[#8c1d1d]" />
@@ -212,7 +344,7 @@ export default function MemberClaimBanner({
                   Bạn chưa có tên trên Cây Gia Phả của dòng họ
                 </h4>
                 <p className="text-xs sm:text-sm text-[#6a594d] mt-1 leading-relaxed">
-                  Để hiển thị tên của bạn trong sơ đồ gia phả và các thế hệ, hãy chọn vị trí sẵn có hoặc thêm bản thân dưới tên cha/mẹ.
+                  Gửi yêu cầu nhận tên hoặc thêm bản thân dưới tên cha/mẹ. Ban Quản Trị / Tộc Trưởng sẽ xác minh và phê duyệt đưa bạn lên phả đồ.
                 </p>
               </div>
             </div>
@@ -254,20 +386,20 @@ export default function MemberClaimBanner({
               <div className="flex items-center gap-2 text-[#8c1d1d]">
                 <UserCheck className="size-5" />
                 <h3 className="text-base sm:text-lg font-bold text-[#183b28]">
-                  Nhận diện vị trí của bạn trên cây
+                  Yêu cầu nhận diện vị trí trên cây
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setShowClaimModal(false)}
-                className="text-[#8a7667] hover:text-[#8c1d1d] p-1"
+                className="text-[#8a7667] hover:text-[#8c1d1d] p-1 cursor-pointer"
               >
                 <X className="size-5" />
               </button>
             </div>
 
             <p className="text-xs text-[#6a594d]">
-              Tìm và chọn tên của bạn đã được Trưởng tộc nhập sẵn trong cây gia phả:
+              Tìm và chọn tên của bạn đã có trong cây gia phả. Yêu cầu sẽ được gửi tới Ban Quản Trị dòng họ phê duyệt:
             </p>
 
             {errorMsg && (
@@ -289,7 +421,7 @@ export default function MemberClaimBanner({
             </div>
 
             {/* Danh sách người để chọn */}
-            <div className="max-h-60 overflow-y-auto divide-y divide-[#deb887]/30 border border-[#deb887]/50 rounded-xl bg-white p-1">
+            <div className="max-h-52 overflow-y-auto divide-y divide-[#deb887]/30 border border-[#deb887]/50 rounded-xl bg-white p-1">
               {filteredClaimPersons.length > 0 ? (
                 filteredClaimPersons.map((p) => {
                   const isSelected = selectedPersonId === p.id;
@@ -329,6 +461,20 @@ export default function MemberClaimBanner({
               )}
             </div>
 
+            {/* Lời nhắn căn cứ huyết thống */}
+            <div>
+              <label className="block text-xs font-bold text-[#2c1a11] mb-1">
+                Lời nhắn / Căn cứ huyết thống (tuỳ chọn):
+              </label>
+              <textarea
+                rows={2}
+                value={claimMessage}
+                onChange={(e) => setClaimMessage(e.target.value)}
+                placeholder="Ví dụ: Cháu là con trai út của chú Bảy Nam ở chi Ba..."
+                className="w-full px-3 py-2 text-xs sm:text-sm bg-white border border-[#deb887] rounded-lg focus:outline-hidden focus:border-[#8c1d1d]"
+              />
+            </div>
+
             <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-[#deb887]/50">
               <button
                 type="button"
@@ -344,7 +490,7 @@ export default function MemberClaimBanner({
                 className="inline-flex items-center gap-1.5 px-5 py-2 rounded-lg bg-[#8c1d1d] hover:bg-[#a62424] text-white text-xs sm:text-sm font-bold shadow-xs disabled:opacity-50 cursor-pointer"
               >
                 {isPending && <Loader2 className="size-3.5 animate-spin" />}
-                <span>Xác nhận đây là tôi</span>
+                <span>{canManage ? "Xác nhận đây là tôi" : "Gửi yêu cầu phê duyệt"}</span>
               </button>
             </div>
           </div>
@@ -359,20 +505,20 @@ export default function MemberClaimBanner({
               <div className="flex items-center gap-2 text-[#8c1d1d]">
                 <UserPlus className="size-5" />
                 <h3 className="text-base sm:text-lg font-bold text-[#183b28]">
-                  Thêm bản thân vào Cây Gia Phả
+                  Yêu cầu thêm bản thân vào Cây Gia Phả
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setShowAddModal(false)}
-                className="text-[#8a7667] hover:text-[#8c1d1d] p-1"
+                className="text-[#8a7667] hover:text-[#8c1d1d] p-1 cursor-pointer"
               >
                 <X className="size-5" />
               </button>
             </div>
 
             <p className="text-xs text-[#6a594d]">
-              Nhập thông tin của bạn và chọn Cha hoặc Mẹ để hệ thống tự động cắm đúng cành nhánh trong sơ đồ phả hệ:
+              Nhập thông tin của bạn và chọn Cha hoặc Mẹ. Ban Quản Trị dòng họ sẽ kiểm tra và phê duyệt thêm vào phả đồ:
             </p>
 
             {errorMsg && (
@@ -459,9 +605,6 @@ export default function MemberClaimBanner({
                     ))}
                   </select>
                 </div>
-                <p className="text-[11px] text-[#7a6455] mt-1">
-                  * Hệ thống sẽ tự động nối bạn làm con của người này và xếp đúng đời kế tiếp.
-                </p>
               </div>
 
               {/* Thứ tự sinh */}
@@ -479,6 +622,20 @@ export default function MemberClaimBanner({
                 />
               </div>
 
+              {/* Lời nhắn căn cứ huyết thống */}
+              <div>
+                <label className="block font-bold text-[#2c1a11] mb-1">
+                  Lời nhắn / Căn cứ huyết thống (tuỳ chọn):
+                </label>
+                <textarea
+                  rows={2}
+                  value={addMessage}
+                  onChange={(e) => setAddMessage(e.target.value)}
+                  placeholder="Ví dụ: Cháu là con gái đầu của bố Nguyễn Văn A, hiện đang sinh sống tại Hà Nội..."
+                  className="w-full px-3 py-2 bg-white border border-[#deb887] rounded-lg focus:outline-hidden focus:border-[#8c1d1d]"
+                />
+              </div>
+
               <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-[#deb887]/50">
                 <button
                   type="button"
@@ -493,7 +650,7 @@ export default function MemberClaimBanner({
                   className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-[#8c1d1d] hover:bg-[#a62424] text-white text-xs sm:text-sm font-bold shadow-xs disabled:opacity-50 cursor-pointer"
                 >
                   {isPending && <Loader2 className="size-3.5 animate-spin" />}
-                  <span>Lưu & Nối tôi vào Cây Gia Phả</span>
+                  <span>{canManage ? "Lưu & Nối tôi vào Cây Gia Phả" : "Gửi yêu cầu phê duyệt"}</span>
                 </button>
               </div>
             </form>

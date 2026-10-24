@@ -19,10 +19,11 @@ export default function PersonCard({
   highlightedPersonIds,
   onHoverPerson,
 }: PersonCardProps) {
-  const { setMemberModalId } = useDashboard();
+  const { setMemberModalId, currentPersonId } = useDashboard();
 
   const isDeceased = person.is_deceased;
   const isHighlighted = highlightedPersonIds?.has(person.id) ?? false;
+  const isCurrentUser = currentPersonId === person.id;
 
   const getGenderStyle = (gender: string) => {
     if (gender === "male") return "bg-[#eaf3ed] text-[#183b28] border border-[#a3c9b2]";
@@ -48,7 +49,7 @@ export default function PersonCard({
       onFocus={() => onHoverPerson?.(person.id)}
       onBlur={() => onHoverPerson?.(null)}
       className={`group relative block w-full text-left rounded-2xl border-2 p-3 sm:p-4 shadow-[0_3px_12px_rgba(44,26,17,0.05)] transition-all duration-200 overflow-hidden cursor-pointer ${
-        isHighlighted
+        isHighlighted || isCurrentUser
           ? "border-[#8c1d1d] bg-[#fef8ea] shadow-md ring-2 ring-[#8c1d1d]/30"
           : "border-[#deb887]/80 bg-gradient-to-br from-[#ffffff] via-[#fffdf9] to-[#fbf7ed] hover:border-[#8c1d1d] hover:shadow-[0_8px_20px_rgba(140,29,29,0.12)] hover:-translate-y-0.5"
       } ${isDeceased ? "opacity-90" : ""}`}
@@ -97,8 +98,13 @@ export default function PersonCard({
 
         {/* Info */}
         <div className="flex-1 min-w-0">
-          <h3 className="text-base sm:text-lg font-bold text-[#183b28] group-hover:text-[#8c1d1d] transition-colors truncate leading-tight">
-            {person.full_name}
+          <h3 className="text-base sm:text-lg font-bold text-[#183b28] group-hover:text-[#8c1d1d] transition-colors truncate leading-tight flex items-center gap-1.5">
+            <span className="truncate">{person.full_name}</span>
+            {isCurrentUser && (
+              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-[#8c1d1d] text-white shrink-0 shadow-2xs">
+                Bạn
+              </span>
+            )}
           </h3>
 
           <div className="mt-1 flex items-center gap-1.5 text-xs font-semibold text-[#7a6455] truncate">

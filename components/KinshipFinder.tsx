@@ -39,6 +39,7 @@ interface RelEdge {
 interface Props {
   persons: PersonNode[];
   relationships: RelEdge[];
+  initialPersonAId?: string | null;
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -279,12 +280,16 @@ const KINSHIP_TERMS = [
 ];
 
 // ── Main component ────────────────────────────────────────────────────────────
-export default function KinshipFinder({ persons, relationships }: Props) {
+export default function KinshipFinder({
+  persons,
+  relationships,
+  initialPersonAId,
+}: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const p1Id = searchParams.get("p1");
+  const p1Id = searchParams.get("p1") || initialPersonAId || null;
   const p2Id = searchParams.get("p2");
 
   const personA = useMemo(
@@ -324,7 +329,7 @@ export default function KinshipFinder({ persons, relationships }: Props) {
       <HeritageFrame cornerColor="#8c1d1d">
         <div className="flex flex-col sm:flex-row items-center sm:items-end gap-3 sm:gap-4">
           <PersonSelector
-            label="Thành viên thứ nhất"
+            label={personA?.id === initialPersonAId ? "Bạn (Thành viên thứ nhất)" : "Thành viên thứ nhất"}
             variant="jade"
             selected={personA}
             onSelect={(p) => updateUrl(p.id, p2Id)}

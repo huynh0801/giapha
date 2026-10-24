@@ -11,7 +11,7 @@ import {
   computeGenealogyState,
   type GenealogyComputationResult,
 } from "@/utils/genealogyEngine";
-import { getFamilyContextById, getSupabase } from "@/utils/supabase/queries";
+import { getFamilyContextById, getSupabase, getUser } from "@/utils/supabase/queries";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 
@@ -121,17 +121,29 @@ export async function applyTreeLineage(
   return result;
 }
 
-async function getEditableContext(formData: FormData) {
+async function getEditableContext(formData: FormData, targetMemberId?: string) {
   const familyId = readString(formData, "family_id");
   const treeId = readString(formData, "tree_id");
   if (!familyId || !treeId) {
     return { error: "Thiếu thông tin dòng họ hoặc cây gia phả." } as const;
   }
   const context = await getFamilyContextById(familyId, treeId);
-  if (!context?.canEdit || context.tree.id !== treeId) {
+  if (!context || context.tree.id !== treeId) {
     return { error: "Bạn không có quyền chỉnh sửa cây gia phả này." } as const;
   }
-  return { context } as const;
+  if (context.canEdit) {
+    return { context } as const;
+  }
+  // Allow members to update their own linked person record
+  const user = await getUser();
+  if (targetMemberId && user && context.membership?.status === "active") {
+    const familySettings = (context.family.settings as Record<string, unknown>) || {};
+    const memberLinks = familySettings.member_links as Record<string, string> | undefined;
+    if (memberLinks?.[user.id] === targetMemberId) {
+      return { context, isSelfEdit: true } as const;
+    }
+  }
+  return { error: "Bạn không có quyền chỉnh sửa cây gia phả này." } as const;
 }
 
 export async function previewLineageSyncAction(formData: FormData) {
@@ -282,9 +294,9 @@ export async function deleteRelationshipAction(formData: FormData) {
 }
 
 export async function saveMemberProfileAction(formData: FormData) {
-  const access = await getEditableContext(formData);
-  if ("error" in access) return { error: access.error };
   const memberId = readString(formData, "member_id");
+  const access = await getEditableContext(formData, memberId);
+  if ("error" in access) return { error: access.error };
   const fullName = readString(formData, "full_name");
   const gender = readString(formData, "gender") as Gender;
   if (!fullName || !["male", "female", "other"].includes(gender)) {

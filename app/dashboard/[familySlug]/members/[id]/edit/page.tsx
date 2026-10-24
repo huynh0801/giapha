@@ -1,6 +1,6 @@
 import { DashboardProvider } from "@/components/DashboardContext";
 import MemberForm from "@/components/MemberForm";
-import { getFamilyContextBySlug, getSupabase } from "@/utils/supabase/queries";
+import { getFamilyContextBySlug, getSupabase, getUser } from "@/utils/supabase/queries";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -25,7 +25,13 @@ export default async function FamilyEditMemberPage({
   if (!context) notFound();
   const detailHref = `/dashboard/${familySlug}/members/${id}?treeId=${context.tree.id}`;
 
-  if (!context.canEdit) {
+  const user = await getUser();
+  const familySettings = (context.family.settings as Record<string, unknown>) || {};
+  const memberLinks = familySettings.member_links as Record<string, string> | undefined;
+  const isSelf = user && memberLinks?.[user.id] === id;
+  const canEditRecord = context.canEdit || isSelf;
+
+  if (!canEditRecord) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-stone-50">
         <div className="text-center">
@@ -33,7 +39,7 @@ export default async function FamilyEditMemberPage({
             Truy cập bị từ chối
           </h1>
           <p className="mt-2 text-stone-600">
-            Bạn không có quyền chỉnh sửa thành viên trong dòng họ này.
+            Bạn không có quyền chỉnh sửa thành viên này trong dòng họ.
           </p>
         </div>
       </div>

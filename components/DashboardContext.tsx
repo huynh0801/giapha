@@ -8,6 +8,7 @@ interface DashboardState {
   familyId: string | null;
   familySlug: string | null;
   treeId: string | null;
+  currentPersonId?: string | null;
   canEdit: boolean;
   canManage: boolean;
   memberModalId: string | null;
@@ -31,6 +32,7 @@ export function DashboardProvider({
   familyId = null,
   familySlug = null,
   treeId = null,
+  currentPersonId = null,
   canEdit = false,
   canManage = false,
   initialView,
@@ -41,6 +43,7 @@ export function DashboardProvider({
   familyId?: string | null;
   familySlug?: string | null;
   treeId?: string | null;
+  currentPersonId?: string | null;
   canEdit?: boolean;
   canManage?: boolean;
   initialView?: ViewMode;
@@ -142,6 +145,7 @@ export function DashboardProvider({
         familyId,
         familySlug,
         treeId,
+        currentPersonId,
         canEdit,
         canManage,
         memberModalId,
@@ -170,6 +174,7 @@ export function useDashboard(): DashboardState {
       familyId: null,
       familySlug: null,
       treeId: null,
+      currentPersonId: null,
       canEdit: false,
       canManage: false,
       memberModalId: null,

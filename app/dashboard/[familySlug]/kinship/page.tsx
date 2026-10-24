@@ -1,6 +1,6 @@
 import KinshipFinder from "@/components/KinshipFinder";
 import HeritagePageHeader from "@/components/dashboard/HeritagePageHeader";
-import { getFamilyContextBySlug, getSupabase } from "@/utils/supabase/queries";
+import { getFamilyContextBySlug, getSupabase, getUser } from "@/utils/supabase/queries";
 import { notFound } from "next/navigation";
 
 interface PageProps {
@@ -39,6 +39,11 @@ export default async function FamilyKinshipPage({
       .eq("tree_id", context.tree.id),
   ]);
 
+  const user = await getUser();
+  const familySettings = (context.family.settings as Record<string, unknown>) || {};
+  const memberLinks = familySettings.member_links as Record<string, string> | undefined;
+  const linkedPersonId = user ? memberLinks?.[user.id] : undefined;
+
   return (
     <div className="flex w-full flex-1 flex-col pb-16">
       <main className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
@@ -52,6 +57,7 @@ export default async function FamilyKinshipPage({
         <KinshipFinder
           persons={personsRes.data ?? []}
           relationships={relsRes.data ?? []}
+          initialPersonAId={linkedPersonId}
         />
       </main>
     </div>

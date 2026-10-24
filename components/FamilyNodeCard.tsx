@@ -28,10 +28,11 @@ export default function FamilyNodeCard({
   highlightedPersonIds,
   onHoverPerson,
 }: FamilyNodeCardProps) {
-  const { showAvatar, setMemberModalId } = useDashboard();
+  const { showAvatar, setMemberModalId, currentPersonId } = useDashboard();
 
   const isDeceased = person.is_deceased;
   const isHighlighted = highlightedPersonIds?.has(person.id) ?? false;
+  const isSelf = currentPersonId === person.id;
 
   const content = (
     <div
@@ -42,7 +43,7 @@ export default function FamilyNodeCard({
         group py-2 px-1 flex flex-col items-center justify-start transition-all duration-300 hover:-translate-y-1 rounded-2xl relative h-[112px] sm:h-[122px] md:h-[132px]
         ${isDeceased ? "grayscale-[0.4] opacity-80" : ""}
         ${showAvatar ? "w-20 sm:w-24 md:w-28 bg-white/70 hover:shadow-xl" : "px-3"}
-        ${isHighlighted ? "bg-amber-50 ring-2 ring-amber-300 shadow-xl" : ""}
+        ${isHighlighted ? "bg-amber-50 ring-2 ring-amber-300 shadow-xl" : ""} ${isSelf ? "ring-2 ring-[#8c1d1d] shadow-xl" : ""}
       `}
     >
       {isRingVisible && (
@@ -115,6 +116,11 @@ export default function FamilyNodeCard({
                 </span>
               ))}
         </div>
+        {isSelf && (
+          <span className="inline-block px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-[#8c1d1d] text-white shadow-2xs">
+            Bạn
+          </span>
+        )}
       </div>
     </div>
   );

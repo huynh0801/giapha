@@ -137,8 +137,19 @@ export default async function FamilyDashboardPage({
   const today = getVietnamDate();
   const requestHeaders = await headers();
 
-  const memberLinks = (context.family.settings as Record<string, unknown>)
-    ?.member_links as Record<string, string> | undefined;
+  const familySettings = (context.family.settings as Record<string, unknown>) || {};
+  const memberLinks = familySettings.member_links as Record<string, string> | undefined;
+  const genealogyRequests = (Array.isArray(familySettings.genealogy_requests)
+    ? familySettings.genealogy_requests
+    : []) as import("@/app/actions/family-claim").GenealogyRequest[];
+
+  const userPendingRequest = user
+    ? genealogyRequests.find((r) => r.user_id === user.id && r.status === "pending") || null
+    : null;
+  const userRejectedRequest = user
+    ? genealogyRequests.find((r) => r.user_id === user.id && r.status === "rejected") || null
+    : null;
+
   const linkedPersonId = user ? memberLinks?.[user.id] : undefined;
   const linkedPerson = linkedPersonId
     ? persons.find((p) => p.id === linkedPersonId) || null
@@ -335,6 +346,9 @@ export default async function FamilyDashboardPage({
             currentUserName={user.user_metadata?.full_name || ""}
             linkedPerson={linkedPerson}
             persons={persons}
+            pendingRequest={userPendingRequest}
+            rejectedRequest={userRejectedRequest}
+            canManage={context.canManage}
           />
         )}
 
