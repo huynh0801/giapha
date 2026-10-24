@@ -36,6 +36,7 @@ import {
   Loader2,
   Lock,
   Maximize2,
+  Minimize2,
   Minus,
   MousePointer2,
   Pencil,
@@ -54,6 +55,7 @@ import { useRouter } from "next/navigation";
 import { useDashboard } from "./DashboardContext";
 import ExcelImportWizard from "./ExcelImportWizard";
 import ExportButton from "./ExportButton";
+import RootSelector from "./RootSelector";
 import FamilyNodeCard from "./FamilyNodeCard";
 import TreeQuickAddDialog from "./TreeQuickAddDialog";
 import TreeToolbar from "./TreeToolbar";
@@ -277,6 +279,7 @@ export default function FamilyTree({
   const [miniMapState, setMiniMapState] = useState<MiniMapState | null>(null);
   const [poolPositions, setPoolPositions] = useState<PoolPositions>({});
   const [poolHydrated, setPoolHydrated] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const {
     showAvatar,
@@ -306,6 +309,7 @@ export default function FamilyTree({
   const canUseAdminTreeWorkspace = canEdit && familyAdminEditExperience;
   const effectiveCanEdit = canUseAdminTreeWorkspace && treeMode === "edit";
   const isEditWorkspace = effectiveCanEdit;
+  const isExpandedWorkspace = isEditWorkspace || isFullscreen;
 
   const adj = useMemo(
     () => buildAdjacencyLists(relationships, personsMap),
@@ -491,6 +495,11 @@ export default function FamilyTree({
         .filter((person): person is Person => Boolean(person)),
     [forestRootIds, personsMap],
   );
+
+  const displayRoots = useMemo(() => {
+    if (roots && roots.length > 0) return roots;
+    return forestRoots;
+  }, [roots, forestRoots]);
 
   const visibleTreePersonIds = useMemo(() => {
     const ids = new Set<string>();
@@ -1742,187 +1751,13 @@ export default function FamilyTree({
     );
   };
 
-  if (!canUseAdminTreeWorkspace) {
-    if (roots.length === 0) {
-      return (
-        <div className="p-10 text-center text-stone-500">
-          Không tìm thấy dữ liệu.
-        </div>
-      );
-    }
-
-    return (
-      <div className="relative h-full w-full">
-        {treeError && (
-          <div className="absolute left-1/2 top-4 z-[90] flex max-w-md -translate-x-1/2 items-start gap-3 rounded-2xl border border-red-200 bg-white px-4 py-3 text-sm font-semibold text-red-700 shadow-xl">
-            <span className="mt-1 size-2 rounded-full bg-red-500" />
-            <span className="min-w-0 flex-1">{treeError}</span>
-            <button
-              type="button"
-              onClick={() => setTreeError(null)}
-              className="text-red-400 transition hover:text-red-700"
-              aria-label="Đóng thông báo lỗi"
-            >
-              Đóng
-            </button>
-          </div>
-        )}
-
-        <TreeToolbar
-          scale={scale}
-          handleZoomIn={handleZoomIn}
-          handleZoomOut={handleZoomOut}
-          handleResetZoom={handleResetZoom}
-          handleCenter={centerTree}
-          handleExpandAll={handleExpandAll}
-          handleCollapseAll={handleCollapseAll}
-          hideExpandButtons={hideExpandButtons}
-          setHideExpandButtons={setHideExpandButtons}
-          autoCollapseLevel={autoCollapseLevel}
-          setAutoCollapseLevel={setAutoCollapseLevel}
-          hideDaughtersInLaw={hideDaughtersInLaw}
-          setHideDaughtersInLaw={setHideDaughtersInLaw}
-          hideSonsInLaw={hideSonsInLaw}
-          setHideSonsInLaw={setHideSonsInLaw}
-          hideDaughters={hideDaughters}
-          setHideDaughters={setHideDaughters}
-          hideSons={hideSons}
-          setHideSons={setHideSons}
-          hideMales={hideMales}
-          setHideMales={setHideMales}
-          hideFemales={hideFemales}
-          setHideFemales={setHideFemales}
-          canEdit={canEdit}
-        />
-
-        <div
-          ref={containerRef}
-          className={`h-full w-full overflow-auto bg-stone-50 ${
-            isPressed ? "cursor-grabbing" : "cursor-grab"
-          }`}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUpOrLeave}
-          onMouseLeave={handleMouseUpOrLeave}
-          onClickCapture={handleClickCapture}
-          onDragStart={(event) => event.preventDefault()}
-        >
-          <style
-            dangerouslySetInnerHTML={{
-              __html: `
-        .css-tree ul {
-          padding-top: 38px;
-          position: relative;
-          display: flex;
-          justify-content: center;
-          padding-left: 0;
-          user-select: none;
-        }
-
-        .css-tree li {
-          float: left;
-          text-align: center;
-          list-style-type: none;
-          position: relative;
-          padding: 38px 12px 0 12px;
-        }
-
-        .css-tree li::before,
-        .css-tree li::after {
-          content: '';
-          position: absolute;
-          top: 0;
-          right: 50%;
-          border-top: 2px solid #e4d4bb;
-          width: 50%;
-          height: 38px;
-        }
-
-        .css-tree li::after {
-          right: auto;
-          left: 50%;
-          border-left: 2px solid #e4d4bb;
-        }
-
-        .css-tree li:only-child::after {
-          display: none;
-        }
-
-        .css-tree li:only-child::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 50%;
-          border-left: 2px solid #e4d4bb;
-          width: 0;
-          height: 38px;
-        }
-
-        .css-tree ul:first-child > li {
-          padding-top: 0;
-        }
-
-        .css-tree ul:first-child > li::before {
-          display: none;
-        }
-
-        .css-tree li:first-child::before,
-        .css-tree li:last-child::after {
-          border: 0 none;
-        }
-
-        .css-tree li:last-child::before {
-          border-right: 2px solid #e4d4bb;
-          border-radius: 0 12px 0 0;
-        }
-
-        .css-tree li:first-child::after {
-          border-radius: 12px 0 0 0;
-        }
-
-        .css-tree ul ul::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 50%;
-          border-left: 2px solid #e4d4bb;
-          width: 0;
-          height: 38px;
-        }
-      `,
-            }}
-          />
-
-          <div
-            id="export-container"
-            className={`css-tree mx-auto w-max min-w-full p-4 transition-all duration-200 ${
-              isDragging ? "opacity-90" : ""
-            }`}
-            style={{
-              transform: `scale(${scale})`,
-              transformOrigin: "top center",
-            }}
-          >
-            <ul>
-              {roots.map((root) => (
-                <React.Fragment key={root.id}>
-                  {renderTreeNode(root.id)}
-                </React.Fragment>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div
       ref={workspaceRef}
       className={
-        isEditWorkspace
+        isExpandedWorkspace
           ? "fixed inset-0 z-[2147483600] h-[100dvh] w-screen overflow-hidden bg-[#f5f6f1]"
-          : "relative h-full w-full overflow-hidden bg-[#f7f3ec]"
+          : "relative h-full w-full overflow-hidden bg-[#f5f6f1]"
       }
     >
       <TreeQuickAddDialog
@@ -2047,7 +1882,8 @@ export default function FamilyTree({
       )}
 
       <div className="relative h-full min-h-0 w-full overflow-hidden bg-[#f5f6f1]">
-          {canUseAdminTreeWorkspace && (
+          {/* Top Workspace Header */
+          true && (
             <div className="pointer-events-none absolute inset-x-3 top-3 z-[120] flex justify-center sm:inset-x-5 sm:top-5">
               <div
                 data-no-pan
@@ -2069,7 +1905,7 @@ export default function FamilyTree({
                     {effectiveCanEdit ? (
                       <Link2 className="size-4" />
                     ) : (
-                      <Lock className="size-4" />
+                      <Users className="size-4" />
                     )}
                   </div>
                   <div className="min-w-0">
@@ -2086,62 +1922,110 @@ export default function FamilyTree({
                             : "bg-stone-100 text-stone-600"
                         }`}
                       >
-                        {isEditWorkspace ? "Toàn màn hình" : "Chế độ xem"}
+                        {isEditWorkspace ? "Chế độ nối" : "Chế độ xem"}
                       </span>
+                      {isFullscreen && (
+                        <span className="hidden shrink-0 rounded-full bg-amber-100 px-2.5 py-1 text-[10px] font-black uppercase text-amber-900 sm:inline-block">
+                          Toàn màn hình
+                        </span>
+                      )}
                     </div>
                     <p className="mt-0.5 truncate text-xs font-bold text-stone-500">
                       {isEditWorkspace
                         ? "Lăn chuột để zoom · kéo nền để di chuyển · kéo chấm để nối quan hệ"
-                        : `${forestRoots.length.toLocaleString("vi-VN")} nhánh · ${persons.length.toLocaleString("vi-VN")} thành viên · ${unlinkedPersons.length.toLocaleString("vi-VN")} chưa nối`}
+                        : `${displayRoots.length.toLocaleString("vi-VN")} cành · ${persons.length.toLocaleString("vi-VN")} thành viên · kéo thả tự do để xem rõ cây`}
                     </p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-2 sm:flex sm:shrink-0 sm:items-center">
+                <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
+                  <div className="hidden lg:block">
+                    <RootSelector persons={persons} currentRootId={rootId} />
+                  </div>
+
+                  <button
+                    type="button"
+                    data-no-pan
+                    onClick={() => {
+                      setIsFullscreen((prev) => !prev);
+                      requestAnimationFrame(() => {
+                        fitTreeToView();
+                        requestAnimationFrame(updateMiniMap);
+                      });
+                    }}
+                    className={`inline-flex min-h-10 items-center justify-center gap-2 rounded-2xl border px-3 text-xs font-black shadow-sm transition hover:-translate-y-0.5 sm:px-4 sm:text-sm ${
+                      isFullscreen
+                        ? "border-amber-300 bg-amber-50 text-amber-900"
+                        : "border-stone-200 bg-white text-stone-800 hover:border-amber-300 hover:bg-amber-50"
+                    }`}
+                    title={
+                      isFullscreen
+                        ? "Thu nhỏ về giao diện trang (Esc)"
+                        : "Mở rộng toàn màn hình để xem cây rõ nhất"
+                    }
+                  >
+                    {isFullscreen ? (
+                      <>
+                        <Minimize2 className="size-4 text-amber-700" />
+                        <span className="hidden sm:inline">Thu nhỏ</span>
+                      </>
+                    ) : (
+                      <>
+                        <Maximize2 className="size-4 text-stone-600" />
+                        <span className="hidden sm:inline">Toàn màn hình</span>
+                      </>
+                    )}
+                  </button>
+
                   <button
                     type="button"
                     data-no-pan
                     onClick={() => setShowMemberListDialog(true)}
                     className="inline-flex min-h-10 items-center justify-center gap-2 rounded-2xl border border-stone-200 bg-white px-3 text-xs font-black text-stone-800 shadow-sm transition hover:-translate-y-0.5 hover:border-amber-300 hover:bg-amber-50 sm:px-4 sm:text-sm"
+                    title="Tìm và xem danh sách thành viên"
                   >
                     <Users className="size-4 text-amber-700" />
-                    <span className="hidden sm:inline">Thành viên</span>
+                    <span className="hidden sm:inline">Tìm người</span>
                     <span className="rounded-full bg-stone-950 px-2 py-0.5 text-[11px] text-white">
                       {persons.length.toLocaleString("vi-VN")}
                     </span>
                   </button>
 
-                  <button
-                    type="button"
-                    data-no-pan
-                    onClick={() => setShowImportDialog(true)}
-                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 text-xs font-black text-emerald-800 shadow-sm transition hover:-translate-y-0.5 hover:bg-emerald-100 sm:px-4 sm:text-sm"
-                  >
-                    <FileSpreadsheet className="size-4" />
-                    <span className="hidden sm:inline">Nhập Excel</span>
-                    <span className="sm:hidden">Nhập</span>
-                  </button>
+                  {canEdit && (
+                    <button
+                      type="button"
+                      data-no-pan
+                      onClick={() => setShowImportDialog(true)}
+                      className="inline-flex min-h-10 items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 text-xs font-black text-emerald-800 shadow-sm transition hover:-translate-y-0.5 hover:bg-emerald-100 sm:px-4 sm:text-sm"
+                    >
+                      <FileSpreadsheet className="size-4" />
+                      <span className="hidden sm:inline">Nhập Excel</span>
+                      <span className="sm:hidden">Nhập</span>
+                    </button>
+                  )}
 
-                  <button
-                    type="button"
-                    data-no-pan
-                    onClick={
-                      isEditWorkspace ? exitEditWorkspace : enterEditWorkspace
-                    }
-                    className={`inline-flex min-h-10 items-center justify-center gap-2 rounded-2xl border px-3 text-xs font-black shadow-sm transition hover:-translate-y-0.5 sm:px-4 sm:text-sm ${
-                      isEditWorkspace
-                        ? "border-red-200 bg-red-50 text-red-700 hover:bg-red-100"
-                        : "border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100"
-                    }`}
-                    aria-pressed={isEditWorkspace}
-                  >
-                    {isEditWorkspace ? (
-                      <X className="size-4" />
-                    ) : (
-                      <Link2 className="size-4" />
-                    )}
-                    <span>{isEditWorkspace ? "Thoát sửa" : "Nối"}</span>
-                  </button>
+                  {canUseAdminTreeWorkspace && (
+                    <button
+                      type="button"
+                      data-no-pan
+                      onClick={
+                        isEditWorkspace ? exitEditWorkspace : enterEditWorkspace
+                      }
+                      className={`inline-flex min-h-10 items-center justify-center gap-2 rounded-2xl border px-3 text-xs font-black shadow-sm transition hover:-translate-y-0.5 sm:px-4 sm:text-sm ${
+                        isEditWorkspace
+                          ? "border-red-200 bg-red-50 text-red-700 hover:bg-red-100"
+                          : "border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100"
+                      }`}
+                      aria-pressed={isEditWorkspace}
+                    >
+                      {isEditWorkspace ? (
+                        <X className="size-4" />
+                      ) : (
+                        <Link2 className="size-4" />
+                      )}
+                      <span>{isEditWorkspace ? "Thoát sửa" : "Nối"}</span>
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -2210,7 +2094,7 @@ export default function FamilyTree({
             </div>
           )}
 
-          {isEditWorkspace && showCanvasTools ? (
+          {showCanvasTools ? (
             <TreeCanvasTools
               scale={scale}
               canEdit={canEdit}
@@ -2242,7 +2126,7 @@ export default function FamilyTree({
               onHideFemalesChange={setHideFemales}
               onClose={() => setShowCanvasTools(false)}
             />
-          ) : isEditWorkspace ? (
+          ) : (
             <button
               type="button"
               data-no-pan
@@ -2253,7 +2137,7 @@ export default function FamilyTree({
               <SlidersHorizontal className="size-4" />
               Công cụ
             </button>
-          ) : null}
+          )}
 
           <div
             ref={containerRef}
@@ -2391,9 +2275,9 @@ export default function FamilyTree({
                     </button>
                   )}
                 </div>
-              ) : !isEditWorkspace && forestRoots.length > 0 ? (
+              ) : !isEditWorkspace && displayRoots.length > 0 ? (
                 <ViewTreePlane
-                  branchRoots={forestRoots}
+                  branchRoots={displayRoots}
                   renderBranch={(root) => (
                     <ul>
                       {renderTreeNode(root.id)}
@@ -2407,7 +2291,7 @@ export default function FamilyTree({
                 />
               ) : (
                 <IntegratedTreePlane
-                  branchRoots={forestRoots}
+                  branchRoots={displayRoots}
                   standalonePersons={isEditWorkspace ? poolPersons : []}
                   positions={poolPositions}
                   canEdit={effectiveCanEdit}

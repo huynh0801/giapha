@@ -137,13 +137,13 @@ test("TreeToolbar provides Expand All and Collapse All buttons", () => {
 
   assert.match(
     familyTree,
-    /handleExpandAll=\{handleExpandAll\}/,
-    "FamilyTree must pass handleExpandAll to TreeToolbar",
+    /onExpandAll=\{handleExpandAll\}/,
+    "FamilyTree must pass handleExpandAll to TreeCanvasTools",
   );
   assert.match(
     familyTree,
-    /handleCollapseAll=\{handleCollapseAll\}/,
-    "FamilyTree must pass handleCollapseAll to TreeToolbar",
+    /onCollapseAll=\{handleCollapseAll\}/,
+    "FamilyTree must pass handleCollapseAll to TreeCanvasTools",
   );
 });
 
@@ -168,3 +168,39 @@ test("RootSelector allows viewing all branches (Toàn bộ cành nhánh)", () =>
     "DashboardViews must use findForestRoots when no rootId is selected",
   );
 });
+
+test("FamilyTree leverages the connect mode canvas for viewing with fullscreen toggle", () => {
+  const familyTree = read("components/FamilyTree.tsx");
+
+  assert.match(
+    familyTree,
+    /isFullscreen/,
+    "FamilyTree must maintain isFullscreen state",
+  );
+  assert.match(
+    familyTree,
+    /isExpandedWorkspace/,
+    "FamilyTree must support isExpandedWorkspace",
+  );
+  assert.match(
+    familyTree,
+    /Toàn màn hình/,
+    "FamilyTree must offer Toàn màn hình button for viewing",
+  );
+  assert.match(
+    familyTree,
+    /Thu nhỏ/,
+    "FamilyTree must offer Thu nhỏ button to exit fullscreen",
+  );
+  assert.match(
+    familyTree,
+    /ViewTreePlane/,
+    "FamilyTree must render ViewTreePlane for spacious canvas viewing",
+  );
+  assert.match(
+    familyTree,
+    /TreeCanvasTools/,
+    "FamilyTree must render TreeCanvasTools",
+  );
+});
+
