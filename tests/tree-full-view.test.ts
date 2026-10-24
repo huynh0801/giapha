@@ -171,11 +171,27 @@ test("RootSelector allows viewing all branches (Toàn bộ cành nhánh)", () =>
 
 test("FamilyTree supports free canvas zoom and clean unobstructed view", () => {
   const familyTree = read("components/FamilyTree.tsx");
+  const usePanZoom = read("hooks/usePanZoom.ts");
 
   assert.match(
     familyTree,
     /const handleWheel = \(event: WheelEvent\) =>/,
     "FamilyTree must implement handleWheel for canvas zoom",
+  );
+  assert.match(
+    familyTree,
+    /translate3d\(\$\{pan\.x\}px,\s*\$\{pan\.y\}px,\s*0\)\s*scale\(\$\{scale\}\)/,
+    "FamilyTree must translate and scale canvas with 2D pan coordinates",
+  );
+  assert.match(
+    usePanZoom,
+    /const \[pan, setPan\] = useState<PanCoordinates>\(\{ x: 0, y: 0 \}\);/,
+    "usePanZoom must maintain 2D pan coordinates",
+  );
+  assert.match(
+    usePanZoom,
+    /zoomAt/,
+    "usePanZoom must export zoomAt for smooth cursor-centered zoom",
   );
   assert.match(
     familyTree,

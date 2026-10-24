@@ -32,7 +32,7 @@ export default function TreeToolbar({
           onClick={handleZoomOut}
           className="px-3 h-full hover:bg-stone-100/50 text-stone-600 transition-colors disabled:opacity-50"
           title="Thu nhỏ"
-          disabled={scale <= 0.3}
+          disabled={scale <= 0.2}
         >
           <ZoomOut className="size-4" />
         </button>
@@ -47,7 +47,7 @@ export default function TreeToolbar({
           onClick={handleZoomIn}
           className="px-3 h-full hover:bg-stone-100/50 text-stone-600 transition-colors disabled:opacity-50"
           title="Phóng to"
-          disabled={scale >= 2}
+          disabled={scale >= 2.5}
         >
           <ZoomIn className="size-4" />
         </button>

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, {
   useCallback,
@@ -292,8 +292,11 @@ export default function FamilyTree({
   } = useDashboard();
   const {
     scale,
+    pan,
+    setPan,
     isPressed,
     isDragging,
+    zoomAt,
     handlers: {
       handleMouseDown,
       handleMouseMove,
@@ -701,20 +704,57 @@ export default function FamilyTree({
   const centerTree = useCallback(() => {
     if (!containerRef.current) return;
     const el = containerRef.current;
-    const inner = el.querySelector("#export-container");
+    const inner = el.querySelector<HTMLElement>("#export-container");
+    if (!inner) return;
 
-    if (inner) {
-      const innerRect = inner.getBoundingClientRect();
-      const containerRect = el.getBoundingClientRect();
-      el.scrollLeft +=
-        innerRect.left +
-        innerRect.width / 2 -
-        (containerRect.left + containerRect.width / 2);
-      return;
+    const containerRect = el.getBoundingClientRect();
+    if (containerRect.width === 0 || containerRect.height === 0) return;
+
+    const personElements = el.querySelectorAll<HTMLElement>("[data-tree-person-id]");
+    if (personElements.length > 0) {
+      let minLeft = Infinity;
+      let maxRight = -Infinity;
+      let minTop = Infinity;
+
+      personElements.forEach((node) => {
+        const r = node.getBoundingClientRect();
+        if (r.width > 0 && r.height > 0) {
+          if (r.left < minLeft) minLeft = r.left;
+          if (r.right > maxRight) maxRight = r.right;
+          if (r.top < minTop) minTop = r.top;
+        }
+      });
+
+      if (minLeft < maxRight && minTop !== Infinity) {
+        const treeCenterX = (minLeft + maxRight) / 2;
+        const viewportCenterX = containerRect.left + containerRect.width / 2;
+        const deltaX = viewportCenterX - treeCenterX;
+
+        const targetTop = containerRect.top + (isEditWorkspace ? 48 : 36);
+        const deltaY = targetTop - minTop;
+
+        setPan((currentPan) => ({
+          x: Math.round(currentPan.x + deltaX),
+          y: Math.round(currentPan.y + deltaY),
+        }));
+        return;
+      }
     }
 
-    el.scrollLeft = (el.scrollWidth - el.clientWidth) / 2;
-  }, []);
+    const innerRect = inner.getBoundingClientRect();
+    if (innerRect.width > 0) {
+      const innerCenterX = innerRect.left + innerRect.width / 2;
+      const viewportCenterX = containerRect.left + containerRect.width / 2;
+      const deltaX = viewportCenterX - innerCenterX;
+      const targetTop = containerRect.top + (isEditWorkspace ? 48 : 36);
+      const deltaY = targetTop - innerRect.top;
+
+      setPan((currentPan) => ({
+        x: Math.round(currentPan.x + deltaX),
+        y: Math.round(currentPan.y + deltaY),
+      }));
+    }
+  }, [isEditWorkspace, setPan]);
 
   const updateMiniMap = useCallback(() => {
     const el = containerRef.current;
@@ -724,21 +764,30 @@ export default function FamilyTree({
     const nodeElements = Array.from(
       el.querySelectorAll<HTMLElement>("[data-tree-person-id]"),
     );
+
+    const currentScale = Math.max(scale || 1, 0.2);
+    const currentPan = pan;
+
     const nodes = nodeElements
       .map((node) => {
         const id = node.dataset.treePersonId;
         if (!id) return null;
         const rect = node.getBoundingClientRect();
+        const contentX =
+          (rect.left - containerRect.left - currentPan.x) / currentScale;
+        const contentY =
+          (rect.top - containerRect.top - currentPan.y) / currentScale;
         return {
           id,
-          x: el.scrollLeft + rect.left - containerRect.left,
-          y: el.scrollTop + rect.top - containerRect.top,
-          width: rect.width,
-          height: rect.height,
+          x: contentX,
+          y: contentY,
+          width: rect.width / currentScale,
+          height: rect.height / currentScale,
           linked: linkedPersonIds.has(id),
         };
       })
       .filter((node): node is NonNullable<typeof node> => Boolean(node));
+
     const nodeById = new Map(nodes.map((node) => [node.id, node]));
     const connections = relationships.flatMap((relationship) => {
       const source = nodeById.get(relationship.person_a);
@@ -755,35 +804,95 @@ export default function FamilyTree({
       ];
     });
 
+    let minX = 0;
+    let maxX = el.clientWidth / currentScale;
+    let minY = 0;
+    let maxY = el.clientHeight / currentScale;
+
+    if (nodes.length > 0) {
+      minX = Math.min(...nodes.map((n) => n.x));
+      maxX = Math.max(...nodes.map((n) => n.x + n.width));
+      minY = Math.min(...nodes.map((n) => n.y));
+      maxY = Math.max(...nodes.map((n) => n.y + n.height));
+    }
+
+    const contentWidth = Math.max(maxX - minX + 200, el.clientWidth / currentScale);
+    const contentHeight = Math.max(maxY - minY + 200, el.clientHeight / currentScale);
+
     setMiniMapState({
-      contentWidth: Math.max(el.scrollWidth, 1),
-      contentHeight: Math.max(el.scrollHeight, 1),
-      viewportWidth: el.clientWidth,
-      viewportHeight: el.clientHeight,
-      scrollLeft: el.scrollLeft,
-      scrollTop: el.scrollTop,
+      contentWidth,
+      contentHeight,
+      viewportWidth: el.clientWidth / currentScale,
+      viewportHeight: el.clientHeight / currentScale,
+      scrollLeft: Math.max(0, -currentPan.x / currentScale),
+      scrollTop: Math.max(0, -currentPan.y / currentScale),
       nodes,
       connections,
     });
-  }, [linkedPersonIds, relationships]);
+  }, [linkedPersonIds, pan, relationships, scale]);
 
   const fitTreeToView = useCallback(() => {
     const el = containerRef.current;
-    const inner = el?.querySelector<HTMLElement>("#export-container");
-    if (!el || !inner) return;
+    if (!el) return;
+    const containerRect = el.getBoundingClientRect();
+    if (containerRect.width === 0 || containerRect.height === 0) return;
 
-    const widthRatio = el.clientWidth / Math.max(inner.scrollWidth, 1);
-    const heightRatio = el.clientHeight / Math.max(inner.scrollHeight, 1);
-    const nextScale = Math.min(
-      1,
-      Math.max(0.3, Math.min(widthRatio, heightRatio) * 0.92),
-    );
+    const currentScale = Math.max(scale || 1, 0.2);
+    const personElements = el.querySelectorAll<HTMLElement>("[data-tree-person-id]");
+
+    if (personElements.length > 0) {
+      let minLeft = Infinity;
+      let maxRight = -Infinity;
+      let minTop = Infinity;
+      let maxBottom = -Infinity;
+
+      personElements.forEach((node) => {
+        const r = node.getBoundingClientRect();
+        if (r.width > 0 && r.height > 0) {
+          if (r.left < minLeft) minLeft = r.left;
+          if (r.right > maxRight) maxRight = r.right;
+          if (r.top < minTop) minTop = r.top;
+          if (r.bottom > maxBottom) maxBottom = r.bottom;
+        }
+      });
+
+      if (minLeft < maxRight && minTop < maxBottom) {
+        const unscaledTreeWidth = (maxRight - minLeft) / currentScale;
+        const unscaledTreeHeight = (maxBottom - minTop) / currentScale;
+
+        const availWidth = Math.max(containerRect.width - 100, 200);
+        const availHeight = Math.max(containerRect.height - 100, 200);
+
+        const fitScale = Math.min(
+          1.2,
+          Math.max(0.2, Math.min(availWidth / unscaledTreeWidth, availHeight / unscaledTreeHeight)),
+        );
+
+        handleSetScale(fitScale);
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            centerTree();
+            requestAnimationFrame(updateMiniMap);
+          });
+        });
+        return;
+      }
+    }
+
+    const inner = el.querySelector<HTMLElement>("#export-container");
+    if (!inner) return;
+    const innerRect = inner.getBoundingClientRect();
+    const widthRatio = (containerRect.width - 80) / Math.max(innerRect.width / currentScale, 1);
+    const heightRatio = (containerRect.height - 80) / Math.max(innerRect.height / currentScale, 1);
+    const nextScale = Math.min(1.2, Math.max(0.2, Math.min(widthRatio, heightRatio)));
     handleSetScale(nextScale);
     requestAnimationFrame(() => {
-      centerTree();
-      requestAnimationFrame(updateMiniMap);
+      requestAnimationFrame(() => {
+        centerTree();
+        requestAnimationFrame(updateMiniMap);
+      });
     });
-  }, [centerTree, handleSetScale, updateMiniMap]);
+  }, [centerTree, handleSetScale, scale, updateMiniMap]);
 
   const workspacePoint = useCallback((clientX: number, clientY: number) => {
     const rect = workspaceRef.current?.getBoundingClientRect();
@@ -803,19 +912,20 @@ export default function FamilyTree({
       if (container && node) {
         const nodeRect = node.getBoundingClientRect();
         const containerRect = container.getBoundingClientRect();
-        container.scrollTo({
-          left:
-            container.scrollLeft +
-            nodeRect.left +
-            nodeRect.width / 2 -
-            (containerRect.left + containerRect.width / 2),
-          top:
-            container.scrollTop +
-            nodeRect.top +
-            nodeRect.height / 2 -
-            (containerRect.top + containerRect.height / 2),
-          behavior: "smooth",
-        });
+        const deltaX =
+          containerRect.left +
+          containerRect.width / 2 -
+          (nodeRect.left + nodeRect.width / 2);
+        const deltaY =
+          containerRect.top +
+          containerRect.height / 2 -
+          (nodeRect.top + nodeRect.height / 2);
+
+        setPan((prev) => ({
+          x: Math.round(prev.x + deltaX),
+          y: Math.round(prev.y + deltaY),
+        }));
+
         onHoverPerson?.(person.id);
         window.setTimeout(() => onHoverPerson?.(null), 900);
         return;
@@ -823,7 +933,7 @@ export default function FamilyTree({
       setRootId(person.id);
       requestAnimationFrame(() => requestAnimationFrame(centerTree));
     },
-    [centerTree, onHoverPerson, setRootId],
+    [centerTree, onHoverPerson, setPan, setRootId],
   );
 
   const movePoolPerson = useCallback((personId: string, position: PoolPosition) => {
@@ -884,27 +994,26 @@ export default function FamilyTree({
     if (!el) return;
     const rect = el.getBoundingClientRect();
     const margin = 76;
-    const maxStep = 28;
+    const maxStep = 24;
     let dx = 0;
     let dy = 0;
 
     if (event.clientX < rect.left + margin) {
-      dx = -maxStep;
-    } else if (event.clientX > rect.right - margin) {
       dx = maxStep;
+    } else if (event.clientX > rect.right - margin) {
+      dx = -maxStep;
     }
     if (event.clientY < rect.top + margin) {
-      dy = -maxStep;
-    } else if (event.clientY > rect.bottom - margin) {
       dy = maxStep;
+    } else if (event.clientY > rect.bottom - margin) {
+      dy = -maxStep;
     }
 
     if (dx || dy) {
-      el.scrollLeft += dx;
-      el.scrollTop += dy;
+      setPan((prev) => ({ x: prev.x + dx, y: prev.y + dy }));
       updateMiniMap();
     }
-  }, [updateMiniMap]);
+  }, [setPan, updateMiniMap]);
 
   useEffect(() => {
     if (!isEditWorkspace || typeof document === "undefined") return;
@@ -925,14 +1034,15 @@ export default function FamilyTree({
     const handleWheel = (event: WheelEvent) => {
       event.preventDefault();
       event.stopPropagation();
-      if (event.deltaY > 0) handleZoomOut();
-      else handleZoomIn();
+      const zoomFactor = event.deltaY < 0 ? 1.12 : 0.88;
+      const nextScale = scale * zoomFactor;
+      zoomAt(nextScale, event.clientX, event.clientY);
       requestAnimationFrame(updateMiniMap);
     };
 
     el.addEventListener("wheel", handleWheel, { passive: false });
     return () => el.removeEventListener("wheel", handleWheel);
-  }, [handleZoomIn, handleZoomOut, isEditWorkspace, updateMiniMap]);
+  }, [scale, updateMiniMap, zoomAt]);
 
   const openExistingRelationshipDraft = useCallback(
     (relationship: Relationship) => {
@@ -1998,17 +2108,17 @@ export default function FamilyTree({
 
           <div
             ref={containerRef}
-            className={`h-full w-full overflow-hidden bg-[#f5f6f1] [background-image:linear-gradient(rgba(68,64,60,0.07)_1px,transparent_1px),linear-gradient(90deg,rgba(68,64,60,0.07)_1px,transparent_1px)] [background-size:34px_34px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
-              isEditWorkspace ? "[touch-action:none]" : ""
-            } ${
+            className={`h-full w-full overflow-hidden select-none [touch-action:none] bg-[#f5f6f1] [background-image:linear-gradient(rgba(68,64,60,0.07)_1px,transparent_1px),linear-gradient(90deg,rgba(68,64,60,0.07)_1px,transparent_1px)] [background-size:34px_34px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
               isPressed ? "cursor-grabbing" : "cursor-grab"
             }`}
+            style={{
+              backgroundPosition: `${pan.x % 34}px ${pan.y % 34}px`,
+            }}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUpOrLeave}
             onMouseLeave={handleMouseUpOrLeave}
             onClickCapture={handleClickCapture}
-            onScroll={updateMiniMap}
             onDragStart={(event) => event.preventDefault()}
           >
             <style
@@ -2099,14 +2209,16 @@ export default function FamilyTree({
 
             <div
               id="export-container"
-              className={`css-tree relative mx-auto w-max min-w-full overflow-visible px-10 pb-10 transition-all duration-200 ${
-                isEditWorkspace ? "pt-36" : "pt-10"
+              className={`css-tree relative w-max min-w-full overflow-visible px-10 pb-10 ${
+                isDragging
+                  ? "transition-none select-none opacity-90"
+                  : "transition-transform duration-150 ease-out"
               } ${
-                isDragging ? "opacity-90" : ""
+                isEditWorkspace ? "pt-36" : "pt-10"
               }`}
               style={{
-                transform: `scale(${scale})`,
-                transformOrigin: "top center",
+                transform: `translate3d(${pan.x}px, ${pan.y}px, 0) scale(${scale})`,
+                transformOrigin: "0 0",
                 minWidth: poolPlaneSize.minWidth,
                 minHeight: poolPlaneSize.minHeight,
               }}
@@ -2184,15 +2296,14 @@ export default function FamilyTree({
               state={miniMapState}
               onJump={(xRatio, yRatio) => {
                 const el = containerRef.current;
-                if (!el) return;
-                el.scrollLeft = Math.max(
-                  0,
-                  xRatio * el.scrollWidth - el.clientWidth / 2,
-                );
-                el.scrollTop = Math.max(
-                  0,
-                  yRatio * el.scrollHeight - el.clientHeight / 2,
-                );
+                if (!el || !miniMapState) return;
+                const currentScale = Math.max(scale || 1, 0.2);
+                const targetContentX = xRatio * miniMapState.contentWidth;
+                const targetContentY = yRatio * miniMapState.contentHeight;
+                setPan({
+                  x: Math.round(el.clientWidth / 2 - targetContentX * currentScale),
+                  y: Math.round(el.clientHeight / 2 - targetContentY * currentScale),
+                });
                 requestAnimationFrame(updateMiniMap);
               }}
             />
