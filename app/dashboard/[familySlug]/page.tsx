@@ -7,7 +7,8 @@ import {
 } from "@/components/dashboard/HeritageUI";
 import { getTodayLunar } from "@/utils/dateHelpers";
 import { computeEvents } from "@/utils/eventHelpers";
-import { getFamilyContextBySlug, getSupabase } from "@/utils/supabase/queries";
+import { getFamilyContextBySlug, getSupabase, getUser } from "@/utils/supabase/queries";
+import MemberClaimBanner from "@/components/dashboard/MemberClaimBanner";
 import {
   ArrowUpRight,
   BarChart2,
@@ -100,12 +101,13 @@ export default async function FamilyDashboardPage({
   if (!context) notFound();
 
   const supabase = await getSupabase();
-  const [personsRes, relationshipsRes, eventsRes, adminContactsRes] =
+  const [user, personsRes, relationshipsRes, eventsRes, adminContactsRes] =
     await Promise.all([
+      getUser(),
       supabase
         .from("persons")
         .select(
-          "id, full_name, birth_year, birth_month, birth_day, death_year, death_month, death_day, death_lunar_year, death_lunar_month, death_lunar_day, is_deceased",
+          "id, full_name, gender, birth_year, birth_month, birth_day, death_year, death_month, death_day, death_lunar_year, death_lunar_month, death_lunar_day, is_deceased, generation",
         )
         .eq("family_id", context.family.id)
         .eq("tree_id", context.tree.id),
@@ -134,6 +136,13 @@ export default async function FamilyDashboardPage({
   const lunar = getTodayLunar();
   const today = getVietnamDate();
   const requestHeaders = await headers();
+
+  const memberLinks = (context.family.settings as Record<string, unknown>)
+    ?.member_links as Record<string, string> | undefined;
+  const linkedPersonId = user ? memberLinks?.[user.id] : undefined;
+  const linkedPerson = linkedPersonId
+    ? persons.find((p) => p.id === linkedPersonId) || null
+    : null;
 
   const base = `/dashboard/${familySlug}`;
   const treeQuery = `?treeId=${context.tree.id}`;
@@ -315,6 +324,19 @@ export default async function FamilyDashboardPage({
             </div>
           </HeritageFrame>
         </section>
+
+        {/* Banner Nhận diện / Thêm tên vào Cây Gia Phả */}
+        {user && (
+          <MemberClaimBanner
+            familyId={context.family.id}
+            familySlug={familySlug}
+            treeId={context.tree.id}
+            currentUserId={user.id}
+            currentUserName={user.user_metadata?.full_name || ""}
+            linkedPerson={linkedPerson}
+            persons={persons}
+          />
+        )}
 
         {/* 3 Heritage Stat Cards */}
         <section className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">

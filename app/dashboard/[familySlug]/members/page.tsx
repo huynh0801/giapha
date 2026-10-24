@@ -4,7 +4,8 @@ import MemberDetailModal from "@/components/MemberDetailModal";
 import ViewToggle, { ViewMode } from "@/components/ViewToggle";
 import HeritagePageHeader from "@/components/dashboard/HeritagePageHeader";
 import { HeritageBadge } from "@/components/dashboard/HeritageUI";
-import { getFamilyContextBySlug, getSupabase } from "@/utils/supabase/queries";
+import MemberClaimBanner from "@/components/dashboard/MemberClaimBanner";
+import { getFamilyContextBySlug, getSupabase, getUser } from "@/utils/supabase/queries";
 import { isChildRelationshipType } from "@/utils/treeHelpers";
 import { FolderTree } from "lucide-react";
 import Link from "next/link";
@@ -35,7 +36,8 @@ export default async function FamilyMembersPage({
   const initialShowAvatar = avatar !== "hide";
   const supabase = await getSupabase();
 
-  const [personsRes, relsRes] = await Promise.all([
+  const [user, personsRes, relsRes] = await Promise.all([
+    getUser(),
     supabase
       .from("persons")
       .select("*")
@@ -52,6 +54,13 @@ export default async function FamilyMembersPage({
   const persons = personsRes.data || [];
   const relationships = relsRes.data || [];
   const personsMap = new Map(persons.map((person) => [person.id, person]));
+
+  const memberLinks = (context.family.settings as Record<string, unknown>)
+    ?.member_links as Record<string, string> | undefined;
+  const linkedPersonId = user ? memberLinks?.[user.id] : undefined;
+  const linkedPerson = linkedPersonId
+    ? persons.find((p) => p.id === linkedPersonId) || null
+    : null;
   const childIds = new Set(
     relationships
       .filter((rel) => isChildRelationshipType(rel.type))
@@ -97,6 +106,21 @@ export default async function FamilyMembersPage({
             </Link>
           }
         />
+
+        {/* Banner Nhận diện / Thêm tên vào Cây Gia Phả */}
+        {user && (
+          <div className="mt-4">
+            <MemberClaimBanner
+              familyId={context.family.id}
+              familySlug={familySlug}
+              treeId={context.tree.id}
+              currentUserId={user.id}
+              currentUserName={user.user_metadata?.full_name || ""}
+              linkedPerson={linkedPerson}
+              persons={persons}
+            />
+          </div>
+        )}
       </div>
 
       <ViewToggle />
