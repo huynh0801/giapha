@@ -22,6 +22,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import CustomEventModal from "./CustomEventModal";
 import { useDashboard } from "./DashboardContext";
+import { HeritageBadge, HeritageFrame } from "./dashboard/HeritageUI";
 
 interface EventsListProps {
   persons: {
@@ -73,6 +74,7 @@ function EventCard({
 }) {
   const isBirthday = event.type === "birthday";
   const isCustom = event.type === "custom_event";
+  const isDeathAnniversary = event.type === "death_anniversary";
   const isToday = event.daysUntil === 0;
   const isPast = event.daysUntil < 0;
   const isSoon = event.daysUntil > 0 && event.daysUntil <= 7;
@@ -94,7 +96,7 @@ function EventCard({
     const diff = now - event.originYear;
     if (diff <= 0) return null;
     if (isBirthday) return `${diff} tuổi`;
-    if (event.type === "death_anniversary") return `${diff} năm`;
+    if (event.type === "death_anniversary") return `Kỵ nhật lần thứ ${diff}`;
     return null;
   })();
 
@@ -114,12 +116,9 @@ function EventCard({
     const month = (d.getMonth() + 1).toString().padStart(2, "0");
     const year = d.getFullYear();
 
-    let label = `${dayOfWeek}, ngày ${day}/${month}`;
+    let label = `${dayOfWeek}, ${day}/${month}`;
     if (event.type === "custom_event") {
       label += `/${year}`;
-    }
-    if (event.type === "death_anniversary") {
-      label += ` (Âm lịch: ${event.eventDateLabel.replace(" ÂL", "")})`;
     }
     return label;
   })();
@@ -130,102 +129,137 @@ function EventCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, delay: index * 0.04 }}
       onClick={handleClick}
-      className={`w-full text-left flex items-start gap-3 sm:gap-4 p-3.5 sm:p-4 rounded-2xl border transition-all cursor-pointer active:scale-[0.98] hover:shadow-md group ${
+      className={`group relative w-full text-left flex items-start gap-3.5 sm:gap-4 p-4 rounded-2xl border-2 transition-all cursor-pointer active:scale-[0.99] shadow-xs hover:shadow-md ${
         isToday
-          ? "bg-amber-50 border-amber-300 shadow-sm"
+          ? "bg-gradient-to-r from-[#fffdf7] via-[#fef8ea] to-[#fffdf7] border-[#8c1d1d]"
           : isPast
-            ? "bg-stone-50/60 border-stone-200/50"
-            : isBirthday
-              ? "bg-white/80 border-stone-200/60 hover:border-blue-200"
-              : isCustom
-                ? "bg-white/80 border-stone-200/60 hover:border-purple-200"
-                : "bg-white/80 border-stone-200/60 hover:border-rose-200"
+            ? "bg-[#fffdf7]/60 border-[#deb887]/40 opacity-75"
+            : isDeathAnniversary
+              ? "bg-[#fffdf7] border-[#deb887]/80 hover:border-[#8c1d1d]"
+              : isBirthday
+                ? "bg-[#fffdf7] border-[#deb887]/80 hover:border-[#caa455]"
+                : "bg-[#fffdf7] border-[#deb887]/80 hover:border-[#183b28]"
       }`}
     >
-      {/* Icon */}
+      {/* Decorative corner marker */}
+      <span
+        className={`pointer-events-none absolute top-1.5 right-1.5 size-2 border-t-2 border-r-2 opacity-60 transition-colors ${
+          isDeathAnniversary
+            ? "border-[#8c1d1d] group-hover:opacity-100"
+            : isBirthday
+              ? "border-[#caa455] group-hover:opacity-100"
+              : "border-[#183b28] group-hover:opacity-100"
+        }`}
+      />
+
+      {/* Icon Badge */}
       <div
-        className={`shrink-0 size-10 sm:size-11 flex items-center justify-center rounded-xl ${
+        className={`shrink-0 size-11 flex items-center justify-center rounded-xl border shadow-xs transition-transform group-hover:scale-105 ${
           isToday
-            ? "bg-amber-100 text-amber-600"
-            : isPast
-              ? "bg-stone-100 text-stone-400"
+            ? "bg-[#8c1d1d] text-white border-[#6e1616]"
+            : isDeathAnniversary
+              ? "bg-[#fbeaea] text-[#8c1d1d] border-[#f0bcbc]"
               : isBirthday
-                ? "bg-blue-50 text-blue-500"
-                : isCustom
-                  ? "bg-purple-50 text-purple-500"
-                  : "bg-rose-50 text-rose-500"
+                ? "bg-[#fef8ea] text-[#92540b] border-[#e8ce8a]"
+                : "bg-[#eaf3ed] text-[#183b28] border-[#a3c9b2]"
         }`}
       >
         {isBirthday ? (
-          <Cake className="size-[18px] sm:size-5" />
+          <Cake className="size-5" />
         ) : isCustom ? (
-          <Star className="size-[18px] sm:size-5" />
+          <Star className="size-5" />
         ) : (
-          <Flower className="size-[18px] sm:size-5" />
+          <Flower className="size-5" />
         )}
       </div>
 
-      {/* Info */}
+      {/* Info Container */}
       <div className="flex-1 min-w-0">
-        {/* Top row: name + badge */}
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-          <p
-            className={`font-semibold text-[15px] sm:text-base truncate transition-colors ${
-              isPast
-                ? "text-stone-500"
-                : "text-stone-800 group-hover:text-amber-700"
-            }`}
-          >
-            {event.personName}
-          </p>
-          {isBirthday &&
-            event.originDay &&
-            event.originMonth &&
-            getZodiacSign(event.originDay, event.originMonth) && (
-              <span className="shrink-0 text-[10px] font-sans font-bold text-indigo-700 bg-indigo-50 border border-indigo-200/60 rounded-md px-1.5 py-0.5 whitespace-nowrap shadow-xs tracking-wider">
-                {getZodiacSign(event.originDay, event.originMonth)}
-              </span>
+        {/* Top row: name + badges */}
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-2 min-w-0">
+            <p
+              className={`font-bold text-base truncate transition-colors ${
+                isPast
+                  ? "text-[#7a6455]"
+                  : "text-[#183b28] group-hover:text-[#8c1d1d]"
+              }`}
+            >
+              {event.personName}
+            </p>
+
+            {isDeathAnniversary && (
+              <HeritageBadge variant="crimson" className="text-[10px] px-2 py-0.5">
+                Kỵ nhật (Giỗ)
+              </HeritageBadge>
             )}
-          {/* Days badge — inline with name */}
+
+            {isBirthday && (
+              <HeritageBadge variant="amber" className="text-[10px] px-2 py-0.5">
+                Sinh nhật
+              </HeritageBadge>
+            )}
+
+            {isCustom && (
+              <HeritageBadge variant="jade" className="text-[10px] px-2 py-0.5">
+                Việc họ
+              </HeritageBadge>
+            )}
+
+            {isBirthday &&
+              event.originDay &&
+              event.originMonth &&
+              getZodiacSign(event.originDay, event.originMonth) && (
+                <span className="text-[10px] font-bold text-[#7a6455] bg-[#f5e7c7]/60 border border-[#deb887] rounded-md px-1.5 py-0.5">
+                  {getZodiacSign(event.originDay, event.originMonth)}
+                </span>
+              )}
+          </div>
+
+          {/* Days badge */}
           <span
-            className={`shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-bold leading-tight whitespace-nowrap ${
+            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-black shadow-xs ${
               isToday
-                ? "bg-amber-400 text-white"
+                ? "bg-[#8c1d1d] text-white animate-pulse"
                 : isPast
-                  ? "bg-stone-200/80 text-stone-500"
+                  ? "bg-[#f4efe6] text-[#7a6455] border border-[#deb887]/60"
                   : isSoon
-                    ? "bg-red-100 text-red-600"
-                    : "bg-stone-100 text-stone-500"
+                    ? "bg-[#fbeaea] text-[#8c1d1d] border border-[#f0bcbc]"
+                    : "bg-[#fef8ea] text-[#92540b] border border-[#e8ce8a]"
             }`}
           >
-            {isToday && (
-              <span className="relative flex size-1.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-200 opacity-75" />
-                <span className="relative inline-flex rounded-full size-1.5 bg-white" />
-              </span>
-            )}
-            {!isToday && <Clock className="size-2.5" />}
+            {!isToday && <Clock className="size-3" />}
             {daysUntilLabel(event.daysUntil)}
           </span>
         </div>
 
-        {/* Details */}
-        <div className="flex flex-col gap-0.5 mt-1">
-          <p className="text-[13px] sm:text-sm text-stone-500 flex items-center gap-1.5 leading-snug">
-            <CalendarDays className="size-3.5 shrink-0" />
-            <span className="font-medium text-stone-600">{dateLabel}</span>
-            {yearsInfo && <span className="text-stone-400">· {yearsInfo}</span>}
-          </p>
+        {/* Date & lunar specifics */}
+        <div className="flex flex-col gap-1 mt-2">
+          <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-[#5c4a3e]">
+            <span className="flex items-center gap-1 font-semibold text-[#183b28]">
+              <CalendarDays className="size-3.5 text-[#8c1d1d]" />
+              {dateLabel}
+            </span>
+
+            {isDeathAnniversary && (
+              <span className="inline-flex items-center gap-1 rounded bg-[#f5e7c7]/60 px-2 py-0.5 font-bold text-[#8c1d1d] border border-[#deb887]">
+                Âm lịch: {event.eventDateLabel.replace(" ÂL", "")}
+              </span>
+            )}
+
+            {yearsInfo && <span className="text-[#7a6455]">· {yearsInfo}</span>}
+          </div>
 
           {event.location && (
-            <p className="text-[13px] sm:text-sm text-stone-500 flex items-center gap-1.5 leading-snug">
-              <MapPin className="size-3.5 shrink-0" />
+            <p className="text-xs sm:text-sm text-[#7a6455] flex items-center gap-1.5 leading-snug">
+              <MapPin className="size-3.5 shrink-0 text-[#caa455]" />
               <span className="truncate">{event.location}</span>
             </p>
           )}
+
           {event.content && (
-            <p className="text-[13px] sm:text-sm text-stone-400 flex items-start gap-1.5 leading-snug mt-0.5">
-              <AlignLeft className="size-3.5 shrink-0 mt-0.5" />
+            <p className="text-xs sm:text-sm text-[#5c4a3e] flex items-start gap-1.5 leading-snug mt-0.5">
+              <AlignLeft className="size-3.5 shrink-0 text-[#deb887] mt-0.5" />
               <span className="line-clamp-2">{event.content}</span>
             </p>
           )}
@@ -281,7 +315,7 @@ export default function EventsList({
       "Thứ bảy",
     ];
     const dayOfWeek = weekdays[today.getDay()];
-    const solarStr = `${dayOfWeek}, ngày ${today.getDate()} tháng ${today.getMonth() + 1} năm ${today.getFullYear()}`;
+    const solarStr = `${dayOfWeek}, ${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;
     let lunarStr = "";
     try {
       const solar = Solar.fromYmd(
@@ -309,10 +343,9 @@ export default function EventsList({
   const filtered = useMemo(() => {
     let result = allEvents;
     if (filter === "past") {
-      // Past tab: all event types from the past year
       return result
         .filter((e) => e.daysUntil < 0 && e.daysUntil >= -365)
-        .sort((a, b) => b.daysUntil - a.daysUntil); // most recent first
+        .sort((a, b) => b.daysUntil - a.daysUntil);
     }
     if (filter !== "all") {
       result = result.filter((e) => e.type === filter);
@@ -320,7 +353,6 @@ export default function EventsList({
     if (!showDeceasedBirthdays) {
       result = result.filter((e) => !(e.type === "birthday" && e.isDeceased));
     }
-    // Only show upcoming events (daysUntil >= 0) for non-past tabs
     return result.filter((e) => e.daysUntil >= 0 && e.daysUntil <= 365);
   }, [allEvents, filter, showDeceasedBirthdays]);
 
@@ -332,100 +364,82 @@ export default function EventsList({
   ).length;
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       {/* Summary banner */}
-      <motion.div
-        initial={{ opacity: 0, y: -8 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-3xl bg-white border border-stone-200/60 shadow-sm hover:shadow-stone-100 hover:border-stone-400 transition-all duration-300 mb-8 p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6"
-      >
-        {/* Subtle background flair */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-amber-50/50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none opacity-50"></div>
-
-        <div className="relative flex items-center gap-4 sm:gap-6">
-          <div className="size-16 rounded-2xl bg-stone-50 flex items-center justify-center shrink-0 border border-stone-100 shadow-sm text-stone-600">
-            <CalendarDays className="size-8" />
-          </div>
-          <div>
-            <p className="text-xl sm:text-2xl font-bold text-stone-800 tracking-tight">
-              {todayDate.solar}
-            </p>
-            {todayDate.lunar && (
-              <div className="mt-2.5 inline-flex flex-wrap items-center gap-2 px-3.5 py-1 rounded-full bg-stone-50 border border-stone-100">
-                <span className="text-xs font-medium text-stone-500 uppercase tracking-wider">
-                  Âm lịch:
-                </span>
-                <span className="text-sm font-semibold text-stone-700">
-                  {todayDate.lunar}
-                </span>
-              </div>
-            )}
-            {(todayCount > 0 || soonCount > 0) && (
-              <p className="text-sm text-stone-500 mt-3 flex items-start sm:items-center gap-2.5 font-medium">
-                <span className="relative flex size-2.5 shrink-0 mt-1 sm:mt-0">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full size-2.5 bg-amber-500"></span>
-                </span>
-                <span className="flex flex-wrap items-center gap-1.5">
-                  {todayCount > 0 && (
-                    <span className="font-semibold text-stone-700">
-                      {todayCount} sự kiện hôm nay
-                    </span>
-                  )}
-                  {todayCount > 0 && soonCount > 0 && (
-                    <span className="hidden sm:inline">·</span>
-                  )}
-                  {soonCount > 0 && (
-                    <span>{soonCount} sự kiện trong 7 ngày tới</span>
-                  )}
-                </span>
+      <HeritageFrame cornerColor="#8c1d1d">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+          <div className="flex items-center gap-4">
+            <div className="size-14 rounded-2xl bg-gradient-to-br from-[#f5e7c7] to-[#deb887] border-2 border-[#caa455] flex items-center justify-center shrink-0 shadow-sm text-[#8c1d1d]">
+              <CalendarDays className="size-7" />
+            </div>
+            <div>
+              <p
+                className="text-xl sm:text-2xl font-bold text-[#183b28]"
+                style={{
+                  fontFamily: '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
+                }}
+              >
+                Hôm nay: {todayDate.solar}
               </p>
-            )}
+              {todayDate.lunar && (
+                <div className="mt-1.5 flex items-center gap-2">
+                  <HeritageBadge variant="crimson">
+                    Âm lịch: {todayDate.lunar}
+                  </HeritageBadge>
+                  {(todayCount > 0 || soonCount > 0) && (
+                    <HeritageBadge variant="amber">
+                      {todayCount > 0
+                        ? `${todayCount} sự kiện hôm nay`
+                        : `${soonCount} sự kiện 7 ngày tới`}
+                    </HeritageBadge>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
+
+          {canEdit && (
+            <button
+              type="button"
+              onClick={handleOpenCreateModal}
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#8c1d1d] to-[#6e1616] text-white font-bold text-sm shadow-sm hover:from-[#6e1616] hover:to-[#500e0e] active:scale-95 transition-all border border-[#8c1d1d]"
+            >
+              <Plus className="size-4.5" />
+              <span>Thêm sự kiện gia tộc</span>
+            </button>
+          )}
         </div>
+      </HeritageFrame>
 
-        {canEdit && (
-        <button
-          onClick={handleOpenCreateModal}
-          className="relative z-10 w-full sm:w-auto px-5 py-3 rounded-xl bg-stone-800 text-white font-semibold hover:bg-stone-900 active:scale-95 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
-        >
-          <Plus className="size-5 text-stone-300" />
-          <span>Thêm sự kiện</span>
-        </button>
-        )}
-      </motion.div>
-
-      {/* Controls */}
+      {/* Controls & Filter tabs */}
       <div className="flex flex-col gap-3">
-        {/* Filter tabs */}
         <div className="flex flex-wrap items-center gap-2">
           {(
             [
-              { key: "all", label: "Tất cả" },
+              { key: "all", label: "Tất cả sự kiện" },
+              { key: "death_anniversary", label: "Ngày giỗ (Kỵ nhật)" },
               { key: "birthday", label: "Sinh nhật" },
-              { key: "death_anniversary", label: "Ngày giỗ" },
-              { key: "custom_event", label: "Tuỳ chỉnh" },
+              { key: "custom_event", label: "Việc họ & Tế lễ" },
               { key: "past", label: "Đã qua" },
             ] as const
           ).map((tab) => (
             <button
+              type="button"
               key={tab.key}
               onClick={() => {
                 setFilter(tab.key);
                 setShowCount(20);
               }}
-              className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
                 filter === tab.key
-                  ? filter === "past"
-                    ? "bg-stone-600 text-white shadow-sm"
-                    : "bg-amber-500 text-white shadow-sm"
-                  : "bg-white/80 text-stone-600 border border-stone-200/60 hover:border-amber-200 hover:text-amber-700"
+                  ? "bg-[#8c1d1d] text-white shadow-xs border-2 border-[#6e1616]"
+                  : "bg-[#fffdf7] text-[#7a6455] border-2 border-[#deb887]/70 hover:border-[#caa455] hover:text-[#183b28]"
               }`}
             >
               {tab.label}
             </button>
           ))}
-          <span className="ml-auto text-xs text-stone-400 self-center">
+          <span className="ml-auto text-xs font-bold text-[#7a6455] self-center">
             {filtered.length} sự kiện{filter === "past" ? " trong năm qua" : ""}
           </span>
         </div>
@@ -433,14 +447,14 @@ export default function EventsList({
         {/* Toggle options — hide when viewing past events */}
         {filter !== "past" && (
           <div className="flex px-1">
-            <label className="flex items-center gap-2.5 text-sm font-medium text-stone-600 cursor-pointer hover:text-stone-900 transition-colors select-none">
+            <label className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-[#7a6455] cursor-pointer hover:text-[#183b28] select-none">
               <input
                 type="checkbox"
                 checked={showDeceasedBirthdays}
                 onChange={(e) => setShowDeceasedBirthdays(e.target.checked)}
-                className="rounded-md border-stone-300 text-amber-500 focus:ring-amber-500 size-4 transition-all"
+                className="rounded border-[#deb887] text-[#8c1d1d] focus:ring-[#8c1d1d] size-4 transition-all accent-[#8c1d1d]"
               />
-              Hiển thị sinh nhật của người đã mất
+              Hiển thị sinh nhật của tiền nhân đã quy tiên
             </label>
           </div>
         )}
@@ -448,15 +462,15 @@ export default function EventsList({
 
       {/* Event list */}
       {visible.length === 0 ? (
-        <div className="text-center py-16 text-stone-400">
-          <CalendarDays className="size-10 mx-auto mb-3 opacity-40" />
-          <p className="font-medium">Không có sự kiện nào</p>
-          <p className="text-sm mt-1">
-            Hãy bổ sung ngày sinh hoặc ngày mất cho thành viên
+        <div className="text-center py-16 rounded-2xl border-2 border-dashed border-[#deb887]/60 bg-[#fffdf7]/50 text-[#7a6455]">
+          <CalendarDays className="size-10 mx-auto mb-3 text-[#deb887]" />
+          <p className="font-bold">Không có sự kiện nào trong danh mục này</p>
+          <p className="text-xs mt-1 text-[#7a6455]/80">
+            Hãy bổ sung ngày sinh hoặc ngày mất (dương lịch hoặc âm lịch) cho thành viên
           </p>
         </div>
       ) : (
-        <div className="space-y-2.5">
+        <div className="space-y-3">
           {visible.map((event, i) => (
             <EventCard
               key={`${event.personId}-${event.type}-${event.eventDateLabel}`}
@@ -472,10 +486,11 @@ export default function EventsList({
       {/* Load more */}
       {filtered.length > showCount && (
         <button
+          type="button"
           onClick={() => setShowCount((n) => n + 20)}
-          className="w-full py-3 text-sm font-semibold text-stone-500 hover:text-amber-600 transition-colors"
+          className="w-full py-3 text-sm font-bold text-[#8c1d1d] hover:text-[#6e1616] transition-colors rounded-xl border border-[#deb887] bg-[#fffdf7]"
         >
-          Xem thêm {filtered.length - showCount} sự kiện…
+          Xem thêm {filtered.length - showCount} sự kiện khác…
         </button>
       )}
 

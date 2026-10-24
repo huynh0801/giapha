@@ -185,7 +185,7 @@ export default function CustomEventModal({
   };
 
   const inputClasses =
-    "bg-white text-stone-900 placeholder-stone-500 block w-full rounded-xl border border-stone-300 shadow-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 focus:bg-white text-sm px-4 py-3 transition-all outline-none!";
+    "bg-white text-[#183b28] placeholder-[#7a6455]/60 block w-full rounded-xl border-2 border-[#deb887]/80 shadow-xs focus:border-[#caa455] focus:ring-2 focus:ring-[#caa455]/20 text-sm px-4 py-3 transition-all outline-none font-medium";
 
   return (
     <AnimatePresence>
@@ -195,7 +195,7 @@ export default function CustomEventModal({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-100 flex items-center justify-center p-4 sm:p-6 bg-stone-900/40 backdrop-blur-sm"
+          className="fixed inset-0 z-100 flex items-center justify-center p-4 sm:p-6 bg-black/50 backdrop-blur-xs"
         >
           {/* Click-away backdrop */}
           <div className="absolute inset-0 cursor-pointer" onClick={onClose} />
@@ -206,24 +206,40 @@ export default function CustomEventModal({
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 20 }}
             transition={{ type: "spring", stiffness: 350, damping: 25 }}
-            className="relative bg-white/95 backdrop-blur-2xl rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col border border-stone-200"
+            className="relative bg-gradient-to-br from-[#fffdf7] to-[#fbf7ed] rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col border-2 border-[#caa455]"
           >
-            {/* Sticky Header Actions */}
+            {/* Corner Decorative Elements */}
+            <span className="pointer-events-none absolute top-2 left-2 size-3 border-t-2 border-l-2 border-[#8c1d1d]" />
+            <span className="pointer-events-none absolute top-2 right-2 size-3 border-t-2 border-r-2 border-[#8c1d1d]" />
+            <span className="pointer-events-none absolute bottom-2 left-2 size-3 border-b-2 border-l-2 border-[#8c1d1d]" />
+            <span className="pointer-events-none absolute bottom-2 right-2 size-3 border-b-2 border-r-2 border-[#8c1d1d]" />
+
+            {/* Close Button */}
             <div className="absolute top-4 right-4 sm:top-5 sm:right-5 z-20 flex items-center gap-2">
               <button
                 type="button"
                 onClick={onClose}
-                className="size-10 flex items-center justify-center bg-stone-100/80 text-stone-600 rounded-full hover:bg-stone-200 hover:text-stone-900 shadow-sm border border-stone-200/50 transition-colors"
+                className="size-9 flex items-center justify-center bg-[#fffdf7] text-[#7a6455] rounded-full hover:bg-[#f5e7c7] hover:text-[#8c1d1d] shadow-xs border border-[#deb887] transition-colors"
                 aria-label="Đóng"
               >
-                <X className="size-5" />
+                <X className="size-4.5" />
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto custom-scrollbar px-4 sm:px-8 pt-16 pb-8">
-              <h2 className="text-xl font-serif font-bold text-stone-800 mb-6">
-                {eventToEdit ? "Sửa Sự Kiện" : "Thêm Sự Kiện Tuỳ Chỉnh"}
-              </h2>
+            <div className="flex-1 overflow-y-auto custom-scrollbar px-5 sm:px-8 pt-10 pb-8">
+              <div className="mb-6 border-b border-[#deb887]/50 pb-3">
+                <h2
+                  className="text-2xl font-bold text-[#183b28]"
+                  style={{
+                    fontFamily: '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
+                  }}
+                >
+                  {eventToEdit ? "Chỉnh Sửa Sự Kiện Gia Tộc" : "Khởi Tạo Sự Kiện Mới"}
+                </h2>
+                <p className="mt-1 text-xs text-[#5c4a3e]">
+                  Lưu lại các mốc thời gian kỵ nhật, lễ tế tổ, mừng thọ hoặc việc họ trọng đại.
+                </p>
+              </div>
 
               <AnimatePresence>
                 {error && (
@@ -231,7 +247,7 @@ export default function CustomEventModal({
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95 }}
-                    className="mb-6 p-4 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl text-sm font-medium flex items-start gap-3 shadow-sm"
+                    className="mb-6 p-4 bg-[#fbeaea] border border-[#f0bcbc] text-[#8c1d1d] rounded-xl text-sm font-semibold flex items-start gap-3 shadow-xs"
                   >
                     <AlertCircle className="size-5 shrink-0 mt-0.5" />
                     <p>{error}</p>
@@ -239,22 +255,22 @@ export default function CustomEventModal({
                 )}
               </AnimatePresence>
 
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-5">
                 <motion.div
                   variants={formSectionVariants}
                   initial="hidden"
                   animate="show"
-                  className="bg-white/80 p-5 sm:p-6 rounded-2xl shadow-sm border border-stone-200/80 space-y-5"
+                  className="bg-[#fffdf7] p-5 sm:p-6 rounded-2xl shadow-xs border border-[#deb887] space-y-4"
                 >
                   <div>
-                    <label className="block text-sm font-semibold text-stone-700 mb-1.5">
-                      Tên sự kiện <span className="text-red-500">*</span>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#7a6455] mb-1.5">
+                      Tên sự kiện / Việc họ <span className="text-[#8c1d1d]">*</span>
                     </label>
                     <input
                       required
                       type="text"
                       className={inputClasses}
-                      placeholder="VD: Lễ Tảo Mộ Kỷ Tỵ"
+                      placeholder="VD: Lễ Tảo Mộ Thanh Minh, Đại Lễ Kỵ Nhật..."
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                     />
@@ -262,8 +278,8 @@ export default function CustomEventModal({
 
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
-                      <label className="block text-sm font-semibold text-stone-700">
-                        Ngày diễn ra <span className="text-red-500">*</span>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-[#7a6455]">
+                        Ngày diễn ra <span className="text-[#8c1d1d]">*</span>
                       </label>
                       <button
                         type="button"
@@ -273,17 +289,17 @@ export default function CustomEventModal({
                           );
                           setLunarConvertError(null);
                         }}
-                        className="flex items-center gap-1.5 text-xs font-medium text-stone-500 hover:text-amber-700 transition-colors px-2.5 py-1 rounded-lg bg-stone-50 hover:bg-amber-50 border border-stone-200/60"
+                        className="flex items-center gap-1.5 text-xs font-bold text-[#8c1d1d] hover:text-[#6e1616] transition-colors px-2.5 py-1 rounded-lg bg-[#f5e7c7]/50 hover:bg-[#f5e7c7] border border-[#deb887]"
                       >
                         {dateMode === "solar" ? (
                           <>
                             <Moon className="size-3" />
-                            Nhập Âm lịch
+                            Đổi sang nhập Âm lịch
                           </>
                         ) : (
                           <>
                             <Sun className="size-3" />
-                            Nhập Dương lịch
+                            Đổi sang Dương lịch
                           </>
                         )}
                       </button>
@@ -291,7 +307,7 @@ export default function CustomEventModal({
 
                     {dateMode === "solar" ? (
                       <div className="relative">
-                        <CalendarIcon className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-stone-400" />
+                        <CalendarIcon className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-[#deb887]" />
                         <input
                           required
                           type="date"
@@ -305,7 +321,7 @@ export default function CustomEventModal({
                         <div className="grid grid-cols-3 gap-3">
                           <input
                             type="number"
-                            placeholder="Ngày"
+                            placeholder="Ngày (ÂL)"
                             min="1"
                             max="30"
                             value={lunarDay}
@@ -318,7 +334,7 @@ export default function CustomEventModal({
                           />
                           <input
                             type="number"
-                            placeholder="Tháng"
+                            placeholder="Tháng (ÂL)"
                             min="1"
                             max="12"
                             value={lunarMonth}
@@ -331,7 +347,7 @@ export default function CustomEventModal({
                           />
                           <input
                             type="number"
-                            placeholder="Năm"
+                            placeholder="Năm (ÂL)"
                             value={lunarYear}
                             onChange={(e) =>
                               setLunarYear(
@@ -342,16 +358,16 @@ export default function CustomEventModal({
                           />
                         </div>
                         {lunarConvertError && (
-                          <p className="text-xs text-rose-500 font-medium flex items-center gap-1">
+                          <p className="text-xs text-[#8c1d1d] font-semibold flex items-center gap-1">
                             <AlertCircle className="size-3" />
                             {lunarConvertError}
                           </p>
                         )}
                         {eventDate && !lunarConvertError && (
-                          <p className="text-xs text-stone-500 flex items-center gap-1.5">
-                            <Sun className="size-3 text-amber-500" />
-                            Dương lịch:{" "}
-                            <span className="font-semibold text-stone-700">
+                          <p className="text-xs text-[#5c4a3e] flex items-center gap-1.5 font-medium">
+                            <Sun className="size-3.5 text-[#caa455]" />
+                            Tương ứng Dương lịch:{" "}
+                            <span className="font-bold text-[#183b28]">
                               {eventDate.split("-").reverse().join("/")}
                             </span>
                           </p>
@@ -361,15 +377,15 @@ export default function CustomEventModal({
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-stone-700 mb-1.5">
-                      Địa điểm
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#7a6455] mb-1.5">
+                      Địa điểm tổ chức
                     </label>
                     <div className="relative">
-                      <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-stone-400" />
+                      <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-[#deb887]" />
                       <input
                         type="text"
                         className={`${inputClasses} pl-11`}
-                        placeholder="VD: Nhà từ đường"
+                        placeholder="VD: Từ đường chi phái, Nhà thờ tổ..."
                         value={location}
                         onChange={(e) => setLocation(e.target.value)}
                       />
@@ -377,15 +393,15 @@ export default function CustomEventModal({
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-stone-700 mb-1.5">
-                      Nội dung chi tiết
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#7a6455] mb-1.5">
+                      Ghi chú / Chương trình tế lễ
                     </label>
                     <div className="relative">
-                      <AlignLeft className="absolute left-4 top-4 size-4 text-stone-400" />
+                      <AlignLeft className="absolute left-4 top-4 size-4 text-[#deb887]" />
                       <textarea
                         rows={3}
                         className={`${inputClasses} pl-11 resize-none custom-scrollbar`}
-                        placeholder="Ghi chú thêm về sự kiện..."
+                        placeholder="Ghi chú thêm về quy định lễ phục, giờ dâng hương..."
                         value={content}
                         onChange={(e) => setContent(e.target.value)}
                       />
@@ -398,19 +414,19 @@ export default function CustomEventModal({
                   initial="hidden"
                   animate="show"
                   transition={{ delay: 0.1 }}
-                  className="flex justify-between items-center gap-4 pt-4 sm:pt-6"
+                  className="flex justify-between items-center gap-4 pt-3"
                 >
                   {eventToEdit ? (
                     <button
                       type="button"
                       onClick={handleDelete}
                       disabled={loading}
-                      className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-xl transition-colors disabled:opacity-50 border border-rose-200/50"
+                      className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-[#8c1d1d] bg-[#fbeaea] hover:bg-[#f8d4d4] rounded-xl transition-colors disabled:opacity-50 border border-[#f0bcbc]"
                     >
-                      Xoá sự kiện
+                      Xoá sự kiện này
                     </button>
                   ) : (
-                    <div /> /* Empty div to push right buttons to end */
+                    <div />
                   )}
 
                   <div className="flex gap-3">
@@ -418,17 +434,17 @@ export default function CustomEventModal({
                       type="button"
                       onClick={onClose}
                       disabled={loading}
-                      className="btn"
+                      className="px-5 py-2.5 rounded-xl border-2 border-[#deb887] text-[#7a6455] font-bold text-sm bg-white hover:bg-[#f5e7c7]/30 transition-all"
                     >
                       Huỷ bỏ
                     </button>
                     <button
                       type="submit"
                       disabled={loading}
-                      className="btn-primary"
+                      className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#8c1d1d] to-[#6e1616] text-white font-bold text-sm shadow-sm hover:from-[#6e1616] hover:to-[#500e0e] active:scale-95 transition-all"
                     >
                       {loading && <Loader2 className="size-4 animate-spin" />}
-                      {loading ? "Đang lưu..." : "Lưu sự kiện"}
+                      <span>{loading ? "Đang lưu..." : "Lưu sự kiện"}</span>
                     </button>
                   </div>
                 </motion.div>

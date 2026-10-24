@@ -1,6 +1,7 @@
 import { DashboardProvider } from "@/components/DashboardContext";
 import EventsList from "@/components/EventsList";
 import MemberDetailModal from "@/components/MemberDetailModal";
+import HeritagePageHeader from "@/components/dashboard/HeritagePageHeader";
 import { getFamilyContextBySlug, getSupabase } from "@/utils/supabase/queries";
 import { notFound } from "next/navigation";
 
@@ -47,14 +48,15 @@ export default async function FamilyEventsPage({
       canEdit={context.canEdit}
       canManage={context.canManage}
     >
-      <div className="flex w-full flex-1 flex-col pb-12">
-        <div className="mx-auto w-full max-w-3xl px-4 py-6 sm:px-6 lg:px-8">
-          <h1 className="title">Sự kiện gia phả</h1>
-          <p className="mt-1 text-sm text-stone-500">
-            Sinh nhật, ngày giỗ và sự kiện nội bộ của {context.family.name}
-          </p>
-        </div>
-        <main className="mx-auto w-full max-w-3xl flex-1 px-4 sm:px-6 lg:px-8">
+      <div className="flex w-full flex-1 flex-col pb-16">
+        <main className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
+          <HeritagePageHeader
+            familySlug={familySlug}
+            familyName={context.family.name}
+            treeName={context.tree.name}
+            title="Lịch Sự Kiện & Ngày Kỵ Nhật"
+            description={`Theo dõi ngày giỗ chạp cổ truyền, mừng thọ, sinh nhật và các sự kiện tế lễ của dòng họ ${context.family.name}.`}
+          />
           <EventsList
             persons={personsRes.data ?? []}
             customEvents={customEventsRes.data ?? []}
