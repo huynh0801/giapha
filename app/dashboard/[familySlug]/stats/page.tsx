@@ -1,4 +1,5 @@
 import FamilyStats from "@/components/FamilyStats";
+import HeritagePageHeader from "@/components/dashboard/HeritagePageHeader";
 import { getFamilyContextBySlug, getSupabase } from "@/utils/supabase/queries";
 import { notFound } from "next/navigation";
 
@@ -36,14 +37,15 @@ export default async function FamilyStatsPage({
   ]);
 
   return (
-    <div className="flex w-full flex-1 flex-col pb-12">
-      <div className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
-        <h1 className="title">Thống kê gia phả</h1>
-        <p className="mt-1 text-sm text-stone-500">
-          Dữ liệu thống kê trong dòng họ {context.family.name}
-        </p>
-      </div>
-      <main className="mx-auto w-full max-w-5xl flex-1 px-4 sm:px-6 lg:px-8">
+    <div className="flex w-full flex-1 flex-col pb-16">
+      <main className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
+        <HeritagePageHeader
+          familySlug={familySlug}
+          familyName={context.family.name}
+          treeName={context.tree.name}
+          title="Bảng Vàng Thống Kê Gia Tộc"
+          description={`Tổng hợp số liệu nhân đinh, các thế hệ, tỷ lệ nam nữ và phân bố gia tộc trong dòng họ ${context.family.name}.`}
+        />
         <FamilyStats
           persons={personsRes.data ?? []}
           relationships={relsRes.data ?? []}
