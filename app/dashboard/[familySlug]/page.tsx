@@ -9,6 +9,7 @@ import { getTodayLunar } from "@/utils/dateHelpers";
 import { computeEvents } from "@/utils/eventHelpers";
 import { getFamilyContextBySlug, getSupabase } from "@/utils/supabase/queries";
 import {
+  ArrowUpRight,
   BarChart2,
   BookOpen,
   CalendarDays,
@@ -41,6 +42,7 @@ type Feature = {
   icon: ReactNode;
   iconBg: string;
   iconColor: string;
+  tag?: string;
 };
 
 type FamilyAdminContact = {
@@ -141,60 +143,67 @@ export default async function FamilyDashboardPage({
 
   const features: Feature[] = [
     {
-      title: "Cây gia phả",
+      title: "Cây Gia Phả",
+      tag: "Phả đồ & Cội nguồn",
       description:
-        "Xem danh sách, cây, mindmap và bubble map trong đúng dòng họ.",
+        "Xem danh sách, phả đồ cây, mindmap và biểu đồ bong bóng trong dòng họ.",
       href: treeHref("members"),
       icon: <Network className="size-6" />,
       iconBg: "bg-[#f5e7c7]",
       iconColor: "text-[#8c1d1d]",
     },
     {
-      title: "Tra danh xưng",
-      description: "Tính cách gọi giữa hai thành viên trong cây hiện tại.",
+      title: "Tra Danh Xưng",
+      tag: "Gia lễ & Xưng hô",
+      description: "Tính cách gọi chuẩn xác giữa hai thành viên theo tôn ti trật tự.",
       href: treeHref("kinship"),
       icon: <GitMerge className="size-6" />,
       iconBg: "bg-[#eaf3ed]",
       iconColor: "text-[#183b28]",
     },
     {
-      title: "Thống kê",
-      description: "Tổng quan thành viên, thế hệ và quan hệ trong dòng họ.",
+      title: "Bảng Vàng Thống Kê",
+      tag: "Số liệu nhân đinh",
+      description: "Tổng quan thành viên, phân bố thế hệ, tỷ lệ nam nữ và địa chi.",
       href: treeHref("stats"),
       icon: <BarChart2 className="size-6" />,
       iconBg: "bg-[#fef8ea]",
       iconColor: "text-[#92540b]",
     },
     {
-      title: "Sự kiện",
-      description: "Sinh nhật, ngày giỗ và sự kiện nội bộ của dòng họ.",
+      title: "Sự Kiện & Kỵ Nhật",
+      tag: "Tế tự & Giỗ chạp",
+      description: "Theo dõi ngày giỗ âm lịch, mừng thọ, sinh nhật và việc họ trọng đại.",
       href: treeHref("events"),
       icon: <CalendarDays className="size-6" />,
       iconBg: "bg-[#f5e7c7]",
       iconColor: "text-[#8c1d1d]",
     },
     {
-      title: "Hồ sơ dòng họ",
+      title: "Hồ Sơ & Gia Sử",
+      tag: "Chứng thư dòng tộc",
       description:
-        "Xem nguồn gốc, mô tả và thông tin giới thiệu riêng của dòng họ.",
+        "Xem nguồn gốc phát tích, nhà thờ tổ, câu đối gia huấn và lời tựa.",
       href: `${base}/about`,
       icon: <FileText className="size-6" />,
       iconBg: "bg-[#eaf3ed]",
       iconColor: "text-[#183b28]",
     },
     {
-      title: "Thông tin dòng họ",
+      title: "Thông Tin & Chiếu Thư",
+      tag: "Bảng tin nội bộ",
       description:
-        "Đọc tin nội bộ, thông báo và ghi chép chỉ dành cho thành viên.",
+        "Đọc tin nội bộ, thông báo và ghi chép tế lễ chỉ dành cho thành viên.",
       href: `${base}/blog`,
       icon: <BookOpen className="size-6" />,
       iconBg: "bg-[#fef8ea]",
       iconColor: "text-[#92540b]",
     },
     {
-      title: "Người phụ trách",
+      title: "Ban Trị Sự Dòng Họ",
+      tag: "Hội đồng tộc biểu",
       description:
-        "Xem danh sách người phụ trách dòng họ; Phụ trách chính có thể thêm hoặc bớt người hỗ trợ.",
+        "Danh sách Tộc trưởng và các vị phụ trách hỗ trợ vận hành gia phả.",
       href: `${base}/admins`,
       icon: <UserCog className="size-6" />,
       iconBg: "bg-[#f5e7c7]",
@@ -206,17 +215,19 @@ export default async function FamilyDashboardPage({
     ...(context.canManage
       ? [
           {
-            title: "Quản lý cây",
+            title: "Quản Lý Cây Phả",
+            tag: "Không gian phả hệ",
             description:
-              "Tạo cây gia phả, đặt cây chính và chuẩn bị phạm vi nhập liệu.",
+              "Tạo cây gia phả mới, đặt cây chính và chuẩn bị phạm vi nhập liệu.",
             href: `${base}/trees`,
             icon: <FolderTree className="size-6" />,
             iconBg: "bg-[#f5e7c7]",
             iconColor: "text-[#8c1d1d]",
           },
           {
-            title: "Yêu cầu tham gia",
-            description: "Duyệt hoặc từ chối người dùng xin tham gia dòng họ.",
+            title: "Xét Duyệt Thành Viên",
+            tag: "Ghi danh nhập tộc",
+            description: "Duyệt hoặc từ chối người dùng xin tham gia vào dòng họ.",
             href: `${base}/requests`,
             icon: <UserPlus className="size-6" />,
             iconBg: "bg-[#eaf3ed]",
@@ -227,18 +238,20 @@ export default async function FamilyDashboardPage({
     ...(context.canEdit
       ? [
           {
-            title: "Thứ tự gia phả",
+            title: "Thứ Tự Phả Hệ",
+            tag: "Định vị thứ bậc",
             description:
-              "Tính thế hệ, thứ tự sinh và dâu/rể theo cây hiện tại.",
+              "Tính thế hệ, thứ tự sinh và dâu/rể theo cây gia phả hiện tại.",
             href: treeHref("lineage"),
             icon: <Users className="size-6" />,
             iconBg: "bg-[#fef8ea]",
             iconColor: "text-[#92540b]",
           },
           {
-            title: "Sao lưu riêng tư",
+            title: "Sao Lưu & Xuất Dữ Liệu",
+            tag: "Bảo tồn an toàn",
             description:
-              "Import/export chỉ trong family_id và tree_id hiện tại.",
+              "Import/export dữ liệu Excel an toàn trong không gian riêng tư.",
             href: treeHref("data"),
             icon: <Database className="size-6" />,
             iconBg: "bg-[#f5e7c7]",
@@ -252,261 +265,278 @@ export default async function FamilyDashboardPage({
     <div className="relative flex-1 w-full overflow-hidden">
       <BackgroundDecor subtle />
       <main className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-8 sm:px-6 lg:px-8">
-        {/* Hero Banner: Identity & Court Calendar framed cleanly */}
-      <section className="mb-6">
-        <HeritageFrame innerClassName="p-6 sm:p-8">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-            <div className="flex-1 min-w-0">
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#deb887] bg-[#f5e7c7]/60 px-3.5 py-1 text-xs font-black uppercase tracking-wide text-[#8c1d1d]">
-                <ShieldCheck className="size-3.5" />
-                Không gian riêng tư
-              </div>
-              <h1
-                className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[#183b28] leading-tight"
-                style={{
-                  fontFamily:
-                    '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
-                }}
-              >
-                {context.family.name}
-              </h1>
-              {context.family.description && (
-                <p className="mt-3 max-w-2xl text-sm sm:text-base leading-relaxed text-[#5c4a3e]">
-                  {context.family.description}
-                </p>
-              )}
-            </div>
-
-            {/* Imperial Court Calendar Tablet */}
-            <div className="rounded-2xl border border-[#deb887] bg-gradient-to-br from-[#fffdf7] to-[#fbf7ed] p-4 sm:p-5 shadow-xs shrink-0 lg:w-72">
-              <p className="text-xs font-black uppercase tracking-wider text-[#8c1d1d]">
-                Thời khắc gia tộc
-              </p>
-              <p className="mt-1.5 text-base sm:text-lg font-bold text-[#183b28] capitalize">
-                {formatDate(today)}
-              </p>
-              <div className="mt-2.5 pt-2.5 border-t border-[#deb887]/50">
-                <p className="text-xs font-semibold text-[#7a6455]">
-                  Âm lịch:{" "}
-                  <span className="font-bold text-[#8c1d1d]">
-                    {lunar.lunarDayStr}
-                  </span>
-                </p>
-                <p className="text-xs font-semibold text-[#7a6455] mt-0.5">
-                  Năm:{" "}
-                  <span className="font-bold text-[#183b28]">
-                    {lunar.lunarYear}
-                  </span>
-                </p>
-              </div>
-            </div>
-          </div>
-        </HeritageFrame>
-      </section>
-
-      {/* 3 Heritage Stat Cards (Framed inside each card) */}
-      <section className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <HeritageStatCard
-          title="Thành viên"
-          value={persons.length.toLocaleString("vi-VN")}
-          icon={<Users className="size-5" />}
-          subtext="Đã ghi chép trong cây"
-        />
-        <HeritageStatCard
-          title="Mối quan hệ"
-          value={relationships.length.toLocaleString("vi-VN")}
-          icon={<GitMerge className="size-5" />}
-          subtext="Huyết thống & hôn phối"
-        />
-        <HeritageStatCard
-          title="Sự kiện 30 ngày"
-          value={upcomingEvents.length.toLocaleString("vi-VN")}
-          icon={<CalendarDays className="size-5" />}
-          subtext="Giỗ chạp & ngày kỷ niệm"
-        />
-      </section>
-
-      {/* Admin Contacts Section */}
-      <section className="mb-8">
-        <HeritageFrame innerClassName="p-5 sm:p-6">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b border-[#deb887]/50 pb-4">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.2em] text-[#8c1d1d]">
-                Danh bạ phụ trách
-              </p>
-              <h2
-                className="mt-1 text-xl sm:text-2xl font-bold text-[#183b28]"
-                style={{
-                  fontFamily:
-                    '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
-                }}
-              >
-                Người phụ trách dòng họ
-              </h2>
-            </div>
-            <div className="flex items-center gap-3">
-              <HeritageBadge variant="amber">
-                {adminContacts.length} người phụ trách
-              </HeritageBadge>
-              <Link
-                href={`${base}/admins`}
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#deb887] bg-[#fffdf7] px-4 py-2 text-xs sm:text-sm font-black text-[#5c4a3e] shadow-xs transition hover:bg-[#f5e7c7]/60 hover:text-[#8c1d1d]"
-              >
-                <UserCog className="size-4 text-[#8c1d1d]" />
-                Xem ban phụ trách
-              </Link>
-            </div>
-          </div>
-
-          <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-            {adminContacts.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-[#deb887] bg-[#fffdf7] px-4 py-3 text-sm font-semibold text-[#7a6455]">
-                Chưa có người phụ trách.
-              </div>
-            ) : (
-              adminContacts.map((admin) => (
-                <div
-                  key={admin.profile_id}
-                  className="rounded-xl border border-[#deb887]/50 bg-[#fffdf7] p-4 shadow-xs"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <p className="font-bold text-base text-[#183b28]">
-                      {admin.full_name || "Người phụ trách"}
-                    </p>
-                    <HeritageBadge
-                      variant={admin.is_primary_admin ? "crimson" : "jade"}
-                    >
-                      {admin.is_primary_admin
-                        ? "Phụ trách chính"
-                        : "Phụ trách phụ"}
-                    </HeritageBadge>
-                  </div>
-
-                  <div className="mt-3 space-y-1.5 text-xs sm:text-sm">
-                    {admin.email && (
-                      <a
-                        href={`mailto:${admin.email}`}
-                        className="flex max-w-full items-center gap-2 font-medium text-[#5c4a3e] hover:text-[#8c1d1d]"
-                      >
-                        <Mail className="size-3.5 shrink-0 text-[#deb887]" />
-                        <span className="truncate">{admin.email}</span>
-                      </a>
-                    )}
-                    {admin.phone_number && (
-                      <p className="flex items-center gap-2 font-medium text-[#7a6455]">
-                        <Phone className="size-3.5 shrink-0 text-[#deb887]" />
-                        {admin.phone_number}
-                      </p>
-                    )}
-                  </div>
+        {/* Hero Banner: Identity & Court Calendar */}
+        <section className="mb-6">
+          <HeritageFrame innerClassName="p-6 sm:p-8">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+              <div className="flex-1 min-w-0">
+                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#deb887] bg-[#f5e7c7]/60 px-3.5 py-1 text-xs font-black uppercase tracking-wide text-[#8c1d1d]">
+                  <ShieldCheck className="size-3.5" />
+                  Không gian riêng tư dòng họ
                 </div>
-              ))
-            )}
-          </div>
-        </HeritageFrame>
-      </section>
+                <h1
+                  className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[#183b28] leading-tight"
+                  style={{
+                    fontFamily:
+                      '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
+                  }}
+                >
+                  {context.family.name}
+                </h1>
+                {context.family.description && (
+                  <p className="mt-3 max-w-2xl text-sm sm:text-base leading-relaxed text-[#5c4a3e]">
+                    {context.family.description}
+                  </p>
+                )}
+              </div>
 
-      {/* QR Card if Editor/Admin */}
-      {context.canEdit && (
-        <section className="mb-8">
-          <FamilyQrCard
-            familyName={context.family.name}
-            treeName={context.tree.name}
-            url={qrUrl}
+              {/* Imperial Court Calendar Tablet */}
+              <div className="rounded-2xl border-2 border-[#deb887] bg-gradient-to-br from-[#fffdf7] via-[#fbf7ed] to-[#f6eedf] p-4.5 sm:p-5 shadow-xs shrink-0 lg:w-76">
+                <div className="flex items-center justify-between border-b border-[#deb887]/50 pb-2 mb-2.5">
+                  <p className="text-xs font-black uppercase tracking-wider text-[#8c1d1d]">
+                    Thời khắc gia tộc
+                  </p>
+                  <HeritageBadge variant="amber" className="text-[10px] px-2 py-0.5">
+                    Hôm nay
+                  </HeritageBadge>
+                </div>
+                <p className="text-base sm:text-lg font-bold text-[#183b28] capitalize">
+                  {formatDate(today)}
+                </p>
+                <div className="mt-2.5 pt-2.5 border-t border-[#deb887]/40 space-y-1">
+                  <p className="text-xs font-semibold text-[#7a6455] flex items-center justify-between">
+                    <span>Âm lịch:</span>
+                    <span className="font-bold text-[#8c1d1d]">
+                      {lunar.lunarDayStr}
+                    </span>
+                  </p>
+                  <p className="text-xs font-semibold text-[#7a6455] flex items-center justify-between">
+                    <span>Năm:</span>
+                    <span className="font-bold text-[#183b28]">
+                      {lunar.lunarYear}
+                    </span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </HeritageFrame>
+        </section>
+
+        {/* 3 Heritage Stat Cards */}
+        <section className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <HeritageStatCard
+            title="Thành viên"
+            value={persons.length.toLocaleString("vi-VN")}
+            icon={<Users className="size-5" />}
+            subtext="Đã ghi chép trong cây"
+          />
+          <HeritageStatCard
+            title="Mối quan hệ"
+            value={relationships.length.toLocaleString("vi-VN")}
+            icon={<GitMerge className="size-5" />}
+            subtext="Huyết thống & hôn phối"
+          />
+          <HeritageStatCard
+            title="Sự kiện 30 ngày"
+            value={upcomingEvents.length.toLocaleString("vi-VN")}
+            icon={<CalendarDays className="size-5" />}
+            subtext="Giỗ chạp & ngày kỷ niệm"
           />
         </section>
-      )}
 
-      {/* Main Features Grid */}
-      <section className="mb-10">
-        <div className="mb-4 flex items-center justify-between">
-          <h2
-            className="text-2xl font-bold text-[#183b28]"
-            style={{
-              fontFamily:
-                '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
-            }}
-          >
-            Chức năng gia phả
-          </h2>
-        </div>
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
-          {features.map((feature) => (
-            <FeatureCard key={feature.href} feature={feature} />
-          ))}
-        </div>
-      </section>
+        {/* Admin Contacts Section */}
+        <section className="mb-8">
+          <HeritageFrame innerClassName="p-5 sm:p-6">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b border-[#deb887]/50 pb-4">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.2em] text-[#8c1d1d]">
+                  Danh bạ phụ trách
+                </p>
+                <h2
+                  className="mt-1 text-xl sm:text-2xl font-bold text-[#183b28]"
+                  style={{
+                    fontFamily:
+                      '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
+                  }}
+                >
+                  Người phụ trách dòng họ
+                </h2>
+              </div>
+              <div className="flex items-center gap-3">
+                <HeritageBadge variant="amber">
+                  {adminContacts.length} người phụ trách
+                </HeritageBadge>
+                <Link
+                  href={`${base}/admins`}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#deb887] bg-[#fffdf7] px-4 py-2 text-xs sm:text-sm font-black text-[#5c4a3e] shadow-xs transition hover:bg-[#f5e7c7]/60 hover:text-[#8c1d1d]"
+                >
+                  <UserCog className="size-4 text-[#8c1d1d]" />
+                  Xem ban phụ trách
+                </Link>
+              </div>
+            </div>
 
-      {/* Admin Features Section */}
-      {adminFeatures.length > 0 && (
+            <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+              {adminContacts.length === 0 ? (
+                <div className="rounded-xl border border-dashed border-[#deb887] bg-[#fffdf7] px-4 py-3 text-sm font-semibold text-[#7a6455]">
+                  Chưa có người phụ trách.
+                </div>
+              ) : (
+                adminContacts.map((admin) => (
+                  <div
+                    key={admin.profile_id}
+                    className="rounded-xl border-2 border-[#deb887]/70 bg-gradient-to-br from-[#fffdf7] to-[#fbf7ed] p-4 shadow-xs"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <p className="font-bold text-base text-[#183b28]">
+                        {admin.full_name || "Người phụ trách"}
+                      </p>
+                      <HeritageBadge
+                        variant={admin.is_primary_admin ? "crimson" : "jade"}
+                      >
+                        {admin.is_primary_admin
+                          ? "Phụ trách chính"
+                          : "Phụ trách phụ"}
+                      </HeritageBadge>
+                    </div>
+
+                    <div className="mt-3 space-y-1.5 text-xs sm:text-sm">
+                      {admin.email && (
+                        <a
+                          href={`mailto:${admin.email}`}
+                          className="flex max-w-full items-center gap-2 font-medium text-[#5c4a3e] hover:text-[#8c1d1d]"
+                        >
+                          <Mail className="size-3.5 shrink-0 text-[#deb887]" />
+                          <span className="truncate">{admin.email}</span>
+                        </a>
+                      )}
+                      {admin.phone_number && (
+                        <p className="flex items-center gap-2 font-medium text-[#7a6455]">
+                          <Phone className="size-3.5 shrink-0 text-[#deb887]" />
+                          {admin.phone_number}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </HeritageFrame>
+        </section>
+
+        {/* QR Card if Editor/Admin */}
+        {context.canEdit && (
+          <section className="mb-8">
+            <FamilyQrCard
+              familyName={context.family.name}
+              treeName={context.tree.name}
+              url={qrUrl}
+            />
+          </section>
+        )}
+
+        {/* Main Features Grid */}
         <section className="mb-10">
-          <div className="mb-4 flex items-center justify-between">
-            <h2
-              className="text-2xl font-bold text-[#183b28]"
-              style={{
-                fontFamily:
-                  '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
-              }}
-            >
-              Nghiệp vụ dòng họ
-            </h2>
-            <HeritageBadge variant="crimson">Công cụ phụ trách</HeritageBadge>
+          <div className="mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-[#deb887]/50 pb-3">
+            <div className="flex items-center gap-2.5">
+              <span className="size-2 rounded-full bg-[#8c1d1d]" />
+              <h2
+                className="text-2xl font-bold text-[#183b28]"
+                style={{
+                  fontFamily:
+                    '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
+                }}
+              >
+                Chức Năng Gia Phả
+              </h2>
+            </div>
+            <HeritageBadge variant="amber">
+              {features.length} chức năng phả hệ
+            </HeritageBadge>
           </div>
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-            {adminFeatures.map((feature) => (
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
+            {features.map((feature) => (
               <FeatureCard key={feature.href} feature={feature} />
             ))}
           </div>
         </section>
-      )}
 
-      {/* Upcoming Events Section (Framed INSIDE each event item) */}
-      {upcomingEvents.length > 0 && (
-        <section className="mb-8">
-          <div className="mb-4 flex items-center justify-between border-b border-[#deb887]/50 pb-3">
-            <div className="flex items-center gap-2.5">
-              <CalendarDays className="size-5 text-[#8c1d1d]" />
-              <h2
-                className="text-xl sm:text-2xl font-bold text-[#183b28]"
-                style={{
-                  fontFamily:
-                    '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
-                }}
-              >
-                Sự kiện & Giỗ chạp sắp tới (30 ngày)
-              </h2>
-            </div>
-            <HeritageBadge variant="amber">
-              {upcomingEvents.length} sự kiện
-            </HeritageBadge>
-          </div>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            {upcomingEvents.map((event, index) => (
-              <div
-                key={`${event.personId || "event"}-${index}`}
-                className="rounded-xl border border-[#deb887]/70 bg-gradient-to-br from-[#fffdf7] to-[#fbf7ed] p-4 shadow-xs"
-              >
-                <p className="font-bold text-base text-[#183b28]">
-                  {event.personName}
-                </p>
-                <div className="mt-2 flex items-center justify-between">
-                  <span className="text-xs font-semibold text-[#7a6455]">
-                    {event.content || "Ngày kỵ nhật"}
-                  </span>
-                  <HeritageBadge
-                    variant={event.daysUntil === 0 ? "crimson" : "amber"}
-                  >
-                    {event.daysUntil === 0
-                      ? "Hôm nay"
-                      : `${event.daysUntil} ngày nữa`}
-                  </HeritageBadge>
-                </div>
+        {/* Admin Features Section */}
+        {adminFeatures.length > 0 && (
+          <section className="mb-10">
+            <div className="mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-[#deb887]/50 pb-3">
+              <div className="flex items-center gap-2.5">
+                <span className="size-2 rounded-full bg-[#183b28]" />
+                <h2
+                  className="text-2xl font-bold text-[#183b28]"
+                  style={{
+                    fontFamily:
+                      '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
+                  }}
+                >
+                  Nghiệp Vụ Quản Trị
+                </h2>
               </div>
-            ))}
-          </div>
-        </section>
-      )}
-    </main>
+              <HeritageBadge variant="crimson">Công cụ phụ trách</HeritageBadge>
+            </div>
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
+              {adminFeatures.map((feature) => (
+                <FeatureCard key={feature.href} feature={feature} />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Upcoming Events Section (Framed with Heritage Frame) */}
+        {upcomingEvents.length > 0 && (
+          <section className="mb-8">
+            <HeritageFrame cornerColor="#8c1d1d">
+              <div className="mb-4 flex items-center justify-between border-b border-[#deb887]/50 pb-3">
+                <div className="flex items-center gap-2.5">
+                  <CalendarDays className="size-5 text-[#8c1d1d]" />
+                  <h2
+                    className="text-xl sm:text-2xl font-bold text-[#183b28]"
+                    style={{
+                      fontFamily:
+                        '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
+                    }}
+                  >
+                    Sự kiện & Giỗ chạp sắp tới (30 ngày)
+                  </h2>
+                </div>
+                <HeritageBadge variant="amber">
+                  {upcomingEvents.length} sự kiện
+                </HeritageBadge>
+              </div>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                {upcomingEvents.map((event, index) => (
+                  <div
+                    key={`${event.personId || "event"}-${index}`}
+                    className="group relative rounded-2xl border-2 border-[#deb887]/80 bg-gradient-to-br from-[#fffdf7] to-[#fbf7ed] p-4.5 shadow-xs transition-all hover:border-[#caa455] hover:shadow-sm"
+                  >
+                    <span className="pointer-events-none absolute top-1.5 right-1.5 size-2 border-t-2 border-r-2 border-[#deb887] opacity-60 group-hover:border-[#8c1d1d] group-hover:opacity-100 transition-colors" />
+                    <p className="font-bold text-base text-[#183b28] group-hover:text-[#8c1d1d] transition-colors">
+                      {event.personName}
+                    </p>
+                    <div className="mt-2.5 flex items-center justify-between">
+                      <span className="text-xs font-bold text-[#7a6455]">
+                        {event.content || "Ngày kỵ nhật"}
+                      </span>
+                      <HeritageBadge
+                        variant={event.daysUntil === 0 ? "crimson" : "amber"}
+                      >
+                        {event.daysUntil === 0
+                          ? "Hôm nay"
+                          : `${event.daysUntil} ngày nữa`}
+                      </HeritageBadge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </HeritageFrame>
+          </section>
+        )}
+      </main>
     </div>
   );
 }
@@ -515,28 +545,55 @@ function FeatureCard({ feature }: { feature: Feature }) {
   return (
     <Link
       href={feature.href}
-      className="group relative block rounded-2xl border-2 border-[#deb887]/80 bg-[#fffdf7] p-5 shadow-xs transition-all duration-200 hover:-translate-y-1 hover:border-[#caa455] hover:shadow-md"
+      className="group relative flex flex-col justify-between rounded-2xl border-2 border-[#deb887]/80 bg-gradient-to-br from-[#fffdf7] via-[#fdfbf6] to-[#f6eedf] p-5 shadow-[0_4px_16px_rgba(44,26,17,0.05)] transition-all duration-300 hover:-translate-y-1.5 hover:border-[#8c1d1d] hover:shadow-[0_14px_30px_rgba(140,29,29,0.12)] overflow-hidden"
     >
-      {/* Subtle corner marker */}
-      <span className="pointer-events-none absolute top-2 right-2 size-2 border-t-2 border-r-2 border-[#deb887] opacity-60 transition-colors group-hover:border-[#8c1d1d] group-hover:opacity-100" />
+      {/* 4 Traditional Corner Brackets with hover animation */}
+      <span className="pointer-events-none absolute top-2 left-2 size-2.5 border-t-2 border-l-2 border-[#caa455] opacity-60 transition-all duration-300 group-hover:border-[#8c1d1d] group-hover:opacity-100 group-hover:size-3" />
+      <span className="pointer-events-none absolute top-2 right-2 size-2.5 border-t-2 border-r-2 border-[#caa455] opacity-60 transition-all duration-300 group-hover:border-[#8c1d1d] group-hover:opacity-100 group-hover:size-3" />
+      <span className="pointer-events-none absolute bottom-2 left-2 size-2.5 border-b-2 border-l-2 border-[#caa455] opacity-60 transition-all duration-300 group-hover:border-[#8c1d1d] group-hover:opacity-100 group-hover:size-3" />
+      <span className="pointer-events-none absolute bottom-2 right-2 size-2.5 border-b-2 border-r-2 border-[#caa455] opacity-60 transition-all duration-300 group-hover:border-[#8c1d1d] group-hover:opacity-100 group-hover:size-3" />
 
-      <div
-        className={`mb-4 flex size-12 items-center justify-center rounded-xl border border-[#deb887]/50 ${feature.iconBg} ${feature.iconColor} shadow-xs transition-transform duration-200 group-hover:scale-105`}
-      >
-        {feature.icon}
+      {/* Decorative subtle background aura on hover */}
+      <div className="pointer-events-none absolute -top-12 -right-12 size-32 rounded-full bg-[#caa455]/10 blur-2xl transition-opacity duration-300 opacity-0 group-hover:opacity-100" />
+
+      <div className="relative z-10">
+        {/* Top Header Row with Icon & Tag */}
+        <div className="flex items-center justify-between mb-4">
+          <div
+            className={`flex size-12 items-center justify-center rounded-2xl border-2 border-[#deb887]/70 ${feature.iconBg} ${feature.iconColor} shadow-xs transition-all duration-300 group-hover:scale-105 group-hover:border-[#caa455] group-hover:shadow-sm`}
+          >
+            {feature.icon}
+          </div>
+          {feature.tag && (
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[#92540b] bg-[#fef8ea] border border-[#e8ce8a] px-2.5 py-0.5 rounded-full shadow-2xs">
+              {feature.tag}
+            </span>
+          )}
+        </div>
+
+        {/* Title: Using a crisp, dignified Serif typography to eliminate ligature overlap glitches */}
+        <h3
+          className="text-lg font-bold text-[#183b28] transition-colors duration-200 group-hover:text-[#8c1d1d]"
+          style={{
+            fontFamily: '"Playfair Display", Georgia, "SVN-Studio Brush", serif',
+          }}
+        >
+          {feature.title}
+        </h3>
+
+        {/* Description: High readability, warm tone */}
+        <p className="mt-2 text-xs sm:text-sm leading-relaxed text-[#5c4a3e]">
+          {feature.description}
+        </p>
       </div>
-      <h3
-        className="text-lg font-bold text-[#183b28] transition-colors group-hover:text-[#8c1d1d]"
-        style={{
-          fontFamily:
-            '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
-        }}
-      >
-        {feature.title}
-      </h3>
-      <p className="mt-1.5 text-xs sm:text-sm leading-relaxed text-[#5c4a3e]">
-        {feature.description}
-      </p>
+
+      {/* Interactive Bottom Action Bar */}
+      <div className="relative z-10 mt-5 pt-3 border-t border-[#deb887]/40 flex items-center justify-between text-xs font-bold text-[#7a6455] group-hover:text-[#8c1d1d] transition-colors duration-200">
+        <span className="inline-flex items-center gap-1 font-semibold">
+          Khám phá
+        </span>
+        <ArrowUpRight className="size-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+      </div>
     </Link>
   );
 }

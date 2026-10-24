@@ -3,6 +3,7 @@
 import { Check, Copy, Download, ExternalLink, QrCode } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { useRef, useState } from "react";
+import { HeritageFrame, HeritageBadge } from "./dashboard/HeritageUI";
 
 interface FamilyQrCardProps {
   familyName: string;
@@ -43,41 +44,51 @@ export default function FamilyQrCard({
   };
 
   return (
-    <section className="rounded-2xl border border-amber-200 bg-[#fffaf0] p-4 shadow-sm">
-      <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+    <HeritageFrame cornerColor="#caa455">
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex items-start gap-4">
-          <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-white text-amber-700 shadow-sm">
-            <QrCode className="size-6" />
+          <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl border-2 border-[#deb887] bg-gradient-to-br from-[#f5e7c7] to-[#deb887] text-[#8c1d1d] shadow-xs">
+            <QrCode className="size-7" />
           </div>
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-700">
-              Mã QR truy cập gia phả
-            </p>
-            <h2 className="mt-1 text-xl font-black text-stone-950">
+            <div className="flex items-center gap-2 mb-1">
+              <HeritageBadge variant="amber">
+                Ấn Tín Điện Tử
+              </HeritageBadge>
+              <span className="text-xs font-black uppercase tracking-wider text-[#8c1d1d]">
+                Mã QR Gia Tộc
+              </span>
+            </div>
+            <h2
+              className="mt-1 text-2xl font-bold text-[#183b28]"
+              style={{
+                fontFamily:
+                  '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
+              }}
+            >
               {familyName}
             </h2>
-            <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-stone-600">
-              In mã này đặt tại nhà thờ tổ hoặc đưa vào tài liệu giấy. Con cháu
-              quét bằng điện thoại để mở trang hồ sơ dòng họ, xem thông tin chung
-              rồi bấm vào cây gia phả “{treeName}” khi có quyền truy cập.
+            <p className="mt-2 max-w-2xl text-xs sm:text-sm leading-relaxed text-[#5c4a3e]">
+              In mã ấn tín này đặt tại nhà thờ tổ hoặc tài liệu lưu hành nội bộ. Con cháu
+              quét bằng điện thoại để mở nhanh hồ sơ dòng họ và cây gia phả “{treeName}”.
             </p>
-            <p className="mt-3 break-all rounded-xl bg-white px-3 py-2 text-xs font-bold text-stone-500">
+            <p className="mt-3 break-all rounded-xl border border-[#deb887]/60 bg-[#fffdf7] px-3.5 py-2 text-xs font-bold text-[#7a6455]">
               {url}
             </p>
           </div>
         </div>
 
-        <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center lg:flex-col">
+        <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center lg:flex-col lg:items-end shrink-0">
           <div
             ref={qrRef}
-            className="rounded-2xl border border-stone-200 bg-white p-3 shadow-sm"
+            className="rounded-2xl border-2 border-[#deb887] bg-white p-3 shadow-xs"
           >
             <QRCodeSVG
               value={url}
-              size={148}
+              size={136}
               level="H"
               marginSize={2}
-              fgColor="#1c1917"
+              fgColor="#183b28"
               bgColor="#ffffff"
             />
           </div>
@@ -85,31 +96,31 @@ export default function FamilyQrCard({
             <button
               type="button"
               onClick={copyUrl}
-              className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-xs font-black text-stone-700 shadow-sm transition hover:bg-amber-50"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-[#deb887] bg-[#fffdf7] px-3 py-2 text-xs font-bold text-[#183b28] shadow-xs transition hover:bg-[#f5e7c7]"
             >
-              {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
-              {copied ? "Đã copy" : "Copy link"}
+              {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
+              <span>{copied ? "Đã copy" : "Copy link"}</span>
             </button>
             <button
               type="button"
               onClick={downloadSvg}
-              className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-xs font-black text-stone-700 shadow-sm transition hover:bg-amber-50"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-[#deb887] bg-[#fffdf7] px-3 py-2 text-xs font-bold text-[#183b28] shadow-xs transition hover:bg-[#f5e7c7]"
             >
-              <Download className="size-4" />
-              Tải SVG
+              <Download className="size-3.5" />
+              <span>Tải SVG</span>
             </button>
             <a
               href={url}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-2 rounded-full bg-[#800000] px-3 py-2 text-xs font-black text-white shadow-sm transition hover:bg-[#650000]"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-[#8c1d1d] to-[#6e1616] px-3.5 py-2 text-xs font-bold text-white shadow-xs transition hover:from-[#6e1616] hover:to-[#500e0e]"
             >
-              <ExternalLink className="size-4" />
-              Mở thử
+              <ExternalLink className="size-3.5" />
+              <span>Mở thử</span>
             </a>
           </div>
         </div>
       </div>
-    </section>
+    </HeritageFrame>
   );
 }
