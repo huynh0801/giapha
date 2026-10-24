@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --test tests/multitenant-private.test.mjs tests/security-hardening.test.mjs tests/landing-page.test.mjs tests/user-profile.test.mjs tests/heritage-ui.test.mjs tests/pwa-and-auth-redirect.test.mjs && node --import tsx --test tests/genealogy-engine.test.ts tests/excel-import.test.ts",
+    "test": "node --test tests/multitenant-private.test.mjs tests/security-hardening.test.mjs tests/landing-page.test.mjs tests/user-profile.test.mjs tests/heritage-ui.test.mjs tests/pwa-and-auth-redirect.test.mjs tests/news-search.test.mjs && node --import tsx --test tests/genealogy-engine.test.ts tests/excel-import.test.ts",
     "db:link": "npx supabase link --project-ref",
     "db:pull": "npx supabase db pull",
     "db:push": "npx supabase db push",

@@ -3,15 +3,17 @@ import Link from "next/link";
 import {
   ArrowRight,
   BookOpen,
-  CalendarDays,
   ChevronLeft,
   ChevronRight,
+  RotateCcw,
+  SearchX,
 } from "lucide-react";
 import { BlogPost } from "@/types";
 import { getSupabase } from "@/utils/supabase/queries";
 import LandingHeader from "@/components/landing/LandingHeader";
 import LandingFooter from "@/components/landing/LandingFooter";
 import BackgroundDecor from "@/components/landing/BackgroundDecor";
+import NewsSearchBar from "@/components/news/NewsSearchBar";
 import { getCurrentUserAction } from "@/app/actions/auth";
 
 export const dynamic = "force-dynamic";
@@ -49,11 +51,13 @@ function formatDate(value: string | null) {
 }
 
 interface NewsPageProps {
-  searchParams?: Promise<{ page?: string }>;
+  searchParams?: Promise<{ page?: string; q?: string; category?: string }>;
 }
 
 export default async function NewsPage({ searchParams }: NewsPageProps) {
   const resolvedSearchParams = (await searchParams) || {};
+  const query = (resolvedSearchParams.q || "").trim();
+  const selectedCategory = (resolvedSearchParams.category || "").trim();
   const rawPage = parseInt(resolvedSearchParams.page || "1", 10);
   const requestedPage = isNaN(rawPage) || rawPage < 1 ? 1 : rawPage;
 
@@ -62,32 +66,82 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
     getCurrentUserAction(),
   ]);
 
-  // 1. Get exact total count of published system blog posts
-  const { count } = await supabase
+  // 1. Fetch available categories from all published system blog posts
+  const { data: categoryData } = await supabase
+    .from("blog_posts")
+    .select("category")
+    .eq("scope", "system")
+    .eq("is_published", true);
+
+  const categories = Array.from(
+    new Set((categoryData || []).map((row) => row.category).filter(Boolean))
+  ) as string[];
+
+  // 2. Count matching posts
+  let countQuery = supabase
     .from("blog_posts")
     .select("id", { count: "exact", head: true })
     .eq("scope", "system")
     .eq("is_published", true);
 
+  if (query) {
+    countQuery = countQuery.or(
+      `title.ilike.%${query}%,excerpt.ilike.%${query}%,content.ilike.%${query}%`
+    );
+  }
+  if (selectedCategory && selectedCategory !== "all") {
+    countQuery = countQuery.eq("category", selectedCategory);
+  }
+
+  const { count } = await countQuery;
   const totalCount = count || 0;
   const totalPages = Math.max(1, Math.ceil(totalCount / ITEMS_PER_PAGE));
   const currentPage = Math.min(requestedPage, totalPages);
 
-  // 2. Fetch paginated range of posts
+  // 3. Fetch paginated range of posts
   const from = (currentPage - 1) * ITEMS_PER_PAGE;
   const to = from + ITEMS_PER_PAGE - 1;
 
-  const { data } = await supabase
+  let postsQuery = supabase
     .from("blog_posts")
     .select(
       "id,title,slug,excerpt,category,cover_image_url,published_at,created_at",
     )
     .eq("scope", "system")
-    .eq("is_published", true)
+    .eq("is_published", true);
+
+  if (query) {
+    postsQuery = postsQuery.or(
+      `title.ilike.%${query}%,excerpt.ilike.%${query}%,content.ilike.%${query}%`
+    );
+  }
+  if (selectedCategory && selectedCategory !== "all") {
+    postsQuery = postsQuery.eq("category", selectedCategory);
+  }
+
+  const { data } = await postsQuery
     .order("published_at", { ascending: false })
     .range(from, to);
 
   const posts = (data || []) as NewsPost[];
+
+  // Helper to preserve search filters in pagination links
+  const getPageUrl = (pageNum: number) => {
+    const params = new URLSearchParams();
+    if (pageNum > 1) {
+      params.set("page", pageNum.toString());
+    }
+    if (query) {
+      params.set("q", query);
+    }
+    if (selectedCategory) {
+      params.set("category", selectedCategory);
+    }
+    const qs = params.toString();
+    return qs ? `/news?${qs}` : "/news";
+  };
+
+  const isFiltering = Boolean(query || selectedCategory);
 
   return (
     <div className="min-h-screen flex flex-col bg-[#f5e7c7] text-[#2c1a11]">
@@ -98,7 +152,7 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
         <BackgroundDecor />
 
         <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-10">
-          {/* Page Header: Thoáng đãng, không bị đóng khung chung */}
+          {/* Page Header: Thoáng đãng, trang nghiêm truyền thống */}
           <div className="text-center">
             <div className="inline-flex items-center justify-center gap-3 sm:gap-5 mb-2.5">
               <div className="relative w-9 h-5 sm:w-14 sm:h-7 opacity-85">
@@ -145,6 +199,14 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
               <span className="h-[1px] w-16 sm:w-28 bg-[#caa455]" />
             </div>
           </div>
+
+          {/* Thanh Tìm Kiếm & Lọc Chủ Đề (Royal Heritage Search Bar) */}
+          <NewsSearchBar
+            initialQuery={query}
+            initialCategory={selectedCategory}
+            categories={categories}
+            totalResults={totalCount}
+          />
 
           {/* Grid of Articles: Từng mục tin tức có khung riêng biệt */}
           {posts.length > 0 && (
@@ -226,7 +288,7 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
                   {/* Nút Trang Trước */}
                   {currentPage > 1 ? (
                     <Link
-                      href={currentPage - 1 === 1 ? "/news" : `/news?page=${currentPage - 1}`}
+                      href={getPageUrl(currentPage - 1)}
                       className="inline-flex items-center gap-1 px-3 py-1.5 border border-[#deb887] bg-[#fffdf7] text-xs font-bold text-[#183b28] hover:border-[#8c1d1d] hover:text-[#8c1d1d] transition-colors shadow-2xs"
                     >
                       <ChevronLeft className="size-3.5" />
@@ -252,7 +314,7 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
                     ) : (
                       <Link
                         key={pageNum}
-                        href={pageNum === 1 ? "/news" : `/news?page=${pageNum}`}
+                        href={getPageUrl(pageNum)}
                         className="size-8 flex items-center justify-center border border-[#deb887] bg-[#fffdf7] text-xs font-bold text-[#183b28] hover:border-[#8c1d1d] hover:text-[#8c1d1d] transition-colors shadow-2xs"
                       >
                         {pageNum}
@@ -263,7 +325,7 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
                   {/* Nút Trang Sau */}
                   {currentPage < totalPages ? (
                     <Link
-                      href={`/news?page=${currentPage + 1}`}
+                      href={getPageUrl(currentPage + 1)}
                       className="inline-flex items-center gap-1 px-3 py-1.5 border border-[#deb887] bg-[#fffdf7] text-xs font-bold text-[#183b28] hover:border-[#8c1d1d] hover:text-[#8c1d1d] transition-colors shadow-2xs"
                     >
                       <span>Sau</span>
@@ -280,18 +342,23 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
             </div>
           )}
 
-          {/* Empty State */}
+          {/* Empty State: Khi không có kết quả */}
           {posts.length === 0 && (
             <div className="relative p-1.5 border-2 border-[#caa455] bg-[#f5e7c7]/30 max-w-xl mx-auto my-12">
-              <div className="relative border border-[#deb887] bg-[#fffdf7] p-8 sm:p-10 text-center space-y-3">
+              <div className="relative border border-[#deb887] bg-[#fffdf7] p-8 sm:p-10 text-center space-y-4">
                 <span className="pointer-events-none absolute top-1.5 left-1.5 size-3.5 border-t-2 border-l-2 border-[#8c1d1d]" />
                 <span className="pointer-events-none absolute top-1.5 right-1.5 size-3.5 border-t-2 border-r-2 border-[#8c1d1d]" />
                 <span className="pointer-events-none absolute bottom-1.5 left-1.5 size-3.5 border-b-2 border-l-2 border-[#8c1d1d]" />
                 <span className="pointer-events-none absolute bottom-1.5 right-1.5 size-3.5 border-b-2 border-r-2 border-[#8c1d1d]" />
 
-                <div className="inline-flex items-center justify-center size-12 border border-[#caa455] bg-[#fcf5e5] text-[#8c1d1d]">
-                  <BookOpen className="size-6" />
+                <div className="inline-flex items-center justify-center size-14 border border-[#caa455] bg-[#fcf5e5] text-[#8c1d1d] shadow-2xs">
+                  {isFiltering ? (
+                    <SearchX className="size-7" />
+                  ) : (
+                    <BookOpen className="size-7" />
+                  )}
                 </div>
+
                 <h3
                   className="text-lg sm:text-xl font-bold text-[#183b28]"
                   style={{
@@ -299,12 +366,42 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
                       '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
                   }}
                 >
-                  Chưa Có Bản Tin Nào
+                  {isFiltering
+                    ? "Không Tìm Thấy Bản Tin Phù Hợp"
+                    : "Chưa Có Bản Tin Nào"}
                 </h3>
+
                 <p className="text-xs sm:text-sm text-[#5c4a3e] max-w-md mx-auto leading-relaxed font-sans">
-                  Nội dung sự kiện, lễ giỗ tổ và các hoạt động dòng tộc sẽ sớm
-                  được ban biên tập cập nhật và đăng tải tại đây.
+                  {isFiltering ? (
+                    query ? (
+                      <>
+                        Không tìm thấy bài viết nào khớp với từ khóa &ldquo;
+                        <strong className="text-[#8c1d1d]">{query}</strong>&rdquo;
+                        {selectedCategory ? ` trong chuyên mục "${selectedCategory}"` : ""}.
+                        Vui lòng thử từ khóa khác hoặc xóa bộ lọc.
+                      </>
+                    ) : (
+                      <>
+                        Không có bài viết nào trong chuyên mục &ldquo;
+                        <strong className="text-[#8c1d1d]">{selectedCategory}</strong>&rdquo;.
+                      </>
+                    )
+                  ) : (
+                    "Nội dung sự kiện, lễ giỗ tổ và các hoạt động dòng tộc sẽ sớm được ban biên tập cập nhật và đăng tải tại đây."
+                  )}
                 </p>
+
+                {isFiltering && (
+                  <div className="pt-2 font-sans">
+                    <Link
+                      href="/news"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#8c1d1d] hover:bg-[#a62424] text-white text-xs sm:text-sm font-bold border border-[#caa455] transition-colors shadow-xs"
+                    >
+                      <RotateCcw className="size-3.5" />
+                      <span>Xem tất cả bản tin</span>
+                    </Link>
+                  </div>
+                )}
               </div>
             </div>
           )}
