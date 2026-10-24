@@ -17,6 +17,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import DefaultAvatar from "./DefaultAvatar";
 import { FemaleIcon, MaleIcon } from "./GenderIcons";
+import { HeritageBadge, HeritageFrame } from "./dashboard/HeritageUI";
 
 interface PersonNode {
   id: string;
@@ -42,9 +43,9 @@ interface Props {
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 const getGenderStyle = (gender: string) => {
-  if (gender === "male") return "bg-sky-100 text-sky-600";
-  if (gender === "female") return "bg-rose-100 text-rose-600";
-  return "bg-stone-100 text-stone-600";
+  if (gender === "male") return "bg-[#eaf3ed] text-[#183b28] border border-[#a3c9b2]";
+  if (gender === "female") return "bg-[#fbeaea] text-[#8c1d1d] border border-[#f0bcbc]";
+  return "bg-[#f5f1ea] text-[#7a6455] border border-[#deb887]";
 };
 
 // ── Person selector dropdown ──────────────────────────────────────────────────
@@ -54,12 +55,14 @@ function PersonSelector({
   onSelect,
   persons,
   disabledId,
+  variant = "jade",
 }: {
   label: string;
   selected: PersonNode | null;
   onSelect: (p: PersonNode) => void;
   persons: PersonNode[];
   disabledId?: string;
+  variant?: "jade" | "crimson";
 }) {
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
@@ -78,21 +81,27 @@ function PersonSelector({
 
   return (
     <div className="w-full flex-1 min-w-0 relative">
-      <p className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-2">
-        {label}
-      </p>
+      <div className="flex items-center justify-between mb-2">
+        <p className="text-xs font-bold text-[#7a6455] uppercase tracking-wider">
+          {label}
+        </p>
+        <HeritageBadge variant={variant === "jade" ? "jade" : "crimson"}>
+          {variant === "jade" ? "Người A" : "Người B"}
+        </HeritageBadge>
+      </div>
       <button
+        type="button"
         onClick={() => setOpen((v) => !v)}
-        className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl border text-left transition-all ${
+        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 text-left transition-all ${
           selected
-            ? "bg-amber-50 border-amber-300 text-stone-800"
-            : "bg-white/80 border-stone-200 text-stone-400 hover:border-amber-200"
+            ? "bg-[#fffdf7] border-[#caa455] text-[#183b28] shadow-sm"
+            : "bg-[#fffdf7]/80 border-[#deb887]/70 text-[#7a6455] hover:border-[#caa455]"
         }`}
       >
         <div className="relative shrink-0">
           <div
-            className={`size-10 rounded-full flex items-center justify-center text-sm font-bold text-white overflow-hidden ring-2 ring-white shadow-sm
-            ${selected ? getAvatarBg(selected.gender) : "bg-stone-100 text-stone-400"}`}
+            className={`size-10 rounded-full flex items-center justify-center text-sm font-bold text-white overflow-hidden ring-2 ring-[#deb887]/60 shadow-xs
+            ${selected ? getAvatarBg(selected.gender) : "bg-[#f5e7c7] text-[#7a6455]"}`}
           >
             {selected ? (
               selected.avatar_url ? (
@@ -124,11 +133,11 @@ function PersonSelector({
           )}
         </div>
 
-        <span className="font-semibold truncate">
+        <span className="font-bold text-sm sm:text-base truncate text-[#183b28]">
           {selected ? selected.full_name : "Chọn thành viên..."}
         </span>
         {selected?.birth_year && (
-          <span className="text-xs text-stone-400 shrink-0">
+          <span className="text-xs text-[#7a6455] font-semibold shrink-0">
             ({selected.birth_year})
           </span>
         )}
@@ -141,39 +150,40 @@ function PersonSelector({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 6, scale: 0.97 }}
             transition={{ duration: 0.15 }}
-            className="absolute top-full mt-2 left-0 right-0 z-50 bg-white rounded-2xl shadow-xl border border-stone-200/60 overflow-hidden"
+            className="absolute top-full mt-2 left-0 right-0 z-50 bg-[#fffdf7] rounded-xl shadow-xl border-2 border-[#caa455] overflow-hidden"
           >
-            <div className="p-3 border-b border-stone-100">
+            <div className="p-3 border-b border-[#deb887]/40 bg-[#fbf7ed]">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-stone-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-[#7a6455]" />
                 <input
                   autoFocus
-                  placeholder="Tìm tên..."
-                  className="w-full pl-9 pr-4 py-2 text-base sm:text-sm rounded-xl border border-stone-200 focus:outline-none focus:border-amber-400"
+                  placeholder="Tìm tên thành viên..."
+                  className="w-full pl-9 pr-4 py-2 text-base sm:text-sm rounded-lg border border-[#deb887] bg-white focus:outline-none focus:border-[#8c1d1d]"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
               </div>
             </div>
-            <div className="max-h-52 overflow-y-auto">
+            <div className="max-h-52 overflow-y-auto divide-y divide-[#deb887]/20">
               {filtered.length === 0 ? (
-                <p className="text-center py-6 text-sm text-stone-400">
-                  Không tìm thấy
+                <p className="text-center py-6 text-sm text-[#7a6455]">
+                  Không tìm thấy thành viên phù hợp
                 </p>
               ) : (
                 filtered.map((p) => (
                   <button
+                    type="button"
                     key={p.id}
                     onClick={() => {
                       onSelect(p);
                       setOpen(false);
                       setSearch("");
                     }}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-amber-50 transition-colors text-left"
+                    className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-[#f5e7c7]/40 transition-colors text-left"
                   >
                     <div className="relative shrink-0">
                       <div
-                        className={`size-8 rounded-full flex items-center justify-center text-xs font-bold text-white overflow-hidden ring-1 ring-white shadow-xs
+                        className={`size-8 rounded-full flex items-center justify-center text-xs font-bold text-white overflow-hidden ring-1 ring-[#deb887] shadow-xs
                         ${getAvatarBg(p.gender)}`}
                       >
                         {p.avatar_url ? (
@@ -200,18 +210,18 @@ function PersonSelector({
                       </div>
                     </div>
 
-                    <span className="text-sm font-medium text-stone-700 truncate">
+                    <span className="text-sm font-bold text-[#183b28] truncate">
                       {p.full_name}
                     </span>
                     {p.birth_year && (
-                      <span className="text-xs text-stone-400 ml-auto shrink-0">
+                      <span className="text-xs text-[#7a6455] ml-auto shrink-0">
                         {p.birth_year}
                       </span>
                     )}
                     {p.generation != null && (
-                      <span className="text-xs text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-md shrink-0">
+                      <HeritageBadge variant="amber" className="ml-1 text-[10px] px-1.5 py-0.5">
                         Đ.{p.generation}
-                      </span>
+                      </HeritageBadge>
                     )}
                   </button>
                 ))
@@ -310,32 +320,35 @@ export default function KinshipFinder({ persons, relationships }: Props) {
 
   return (
     <div className="space-y-6">
-      {/* ── Selector row ── */}
-      <div className="bg-white/80 border border-stone-200/60 rounded-2xl p-4 sm:p-6 shadow-sm">
+      {/* ── Selector Heritage Frame ── */}
+      <HeritageFrame cornerColor="#8c1d1d">
         <div className="flex flex-col sm:flex-row items-center sm:items-end gap-3 sm:gap-4">
           <PersonSelector
-            label="Thành viên A"
+            label="Thành viên thứ nhất"
+            variant="jade"
             selected={personA}
             onSelect={(p) => updateUrl(p.id, p2Id)}
             persons={persons}
             disabledId={personB?.id}
           />
           <button
+            type="button"
             onClick={swap}
-            title="Đổi chỗ"
-            className="size-10 shrink-0 sm:mb-0.5 flex items-center justify-center rounded-xl bg-stone-100 hover:bg-amber-100 hover:text-amber-600 text-stone-500 transition-all border border-stone-200"
+            title="Đổi chiều quan hệ"
+            className="size-11 shrink-0 sm:mb-0.5 flex items-center justify-center rounded-xl bg-gradient-to-br from-[#fffdf7] to-[#fbf7ed] hover:from-[#f5e7c7] hover:to-[#e8ce8a] text-[#8c1d1d] transition-all border-2 border-[#deb887] shadow-xs active:scale-95"
           >
-            <ArrowLeftRight className="size-4 rotate-90 sm:rotate-0" />
+            <ArrowLeftRight className="size-4.5 rotate-90 sm:rotate-0" />
           </button>
           <PersonSelector
-            label="Thành viên B"
+            label="Thành viên thứ hai"
+            variant="crimson"
             selected={personB}
             onSelect={(p) => updateUrl(p1Id, p.id)}
             persons={persons}
             disabledId={personA?.id}
           />
         </div>
-      </div>
+      </HeritageFrame>
 
       {/* ── Result ── */}
       <AnimatePresence mode="wait">
@@ -345,14 +358,22 @@ export default function KinshipFinder({ persons, relationships }: Props) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="text-center py-16 text-stone-400"
+            className="text-center py-12 rounded-2xl border-2 border-dashed border-[#deb887]/60 bg-[#fffdf7]/50"
           >
-            <Users className="size-12 mx-auto mb-3 opacity-30" />
-            <p className="font-medium">Chọn hai thành viên để tính quan hệ</p>
+            <Users className="size-12 mx-auto mb-3 text-[#deb887]" />
+            <p className="font-bold text-[#7a6455]">
+              Vui lòng chọn hai thành viên để phân tích danh xưng
+            </p>
+            <p className="mt-1 text-xs text-[#7a6455]/80">
+              Hệ thống sẽ tự động đối chiếu phả đồ và gia lễ truyền thống
+            </p>
           </motion.div>
         ) : result === null ? (
-          <motion.div key="same" className="text-center py-8 text-stone-400">
-            Hãy chọn hai người khác nhau.
+          <motion.div
+            key="same"
+            className="text-center py-8 rounded-2xl border-2 border-[#deb887]/60 bg-[#fffdf7] text-[#7a6455]"
+          >
+            Hãy chọn hai thành viên khác nhau trong dòng họ.
           </motion.div>
         ) : (
           <motion.div
@@ -361,45 +382,51 @@ export default function KinshipFinder({ persons, relationships }: Props) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.35 }}
-            className="space-y-4"
+            className="space-y-5"
           >
             {/* Description badge */}
-            <div className="bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4 flex items-center gap-3">
-              <Sparkles className="size-5 text-amber-500 shrink-0" />
-              <p className="text-amber-800 font-semibold">
+            <div className="rounded-xl border-2 border-[#caa455] bg-gradient-to-r from-[#fef8ea] via-[#fffdf7] to-[#fef8ea] p-4 sm:p-5 flex items-center gap-3 shadow-xs">
+              <Sparkles className="size-5 text-[#caa455] shrink-0" />
+              <p className="text-sm font-bold text-[#92540b] leading-relaxed">
                 {result.description}
               </p>
             </div>
 
             {/* Main kinship cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <motion.div
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 }}
-                className="bg-white/90 border border-stone-200/60 rounded-2xl p-5 shadow-sm"
-              >
-                <p className="text-xs font-semibold uppercase tracking-wider text-stone-400 mb-3">
-                  {personA.full_name} gọi {personB.full_name} là
-                </p>
-                <p className="text-4xl font-serif font-bold text-amber-600 capitalize">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <HeritageFrame cornerColor="#183b28">
+                <div className="flex items-center justify-between mb-3 border-b border-[#deb887]/40 pb-2">
+                  <p className="text-xs font-bold uppercase tracking-wider text-[#7a6455]">
+                    {personA.full_name} gọi {personB.full_name} là:
+                  </p>
+                  <HeritageBadge variant="jade">Xưng hô A → B</HeritageBadge>
+                </div>
+                <p
+                  className="text-3xl sm:text-4xl font-bold text-[#8c1d1d] capitalize my-2"
+                  style={{
+                    fontFamily: '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
+                  }}
+                >
                   {result.aCallsB}
                 </p>
-              </motion.div>
+              </HeritageFrame>
 
-              <motion.div
-                initial={{ opacity: 0, x: 10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.15 }}
-                className="bg-white/90 border border-stone-200/60 rounded-2xl p-5 shadow-sm"
-              >
-                <p className="text-xs font-semibold uppercase tracking-wider text-stone-400 mb-3">
-                  {personB.full_name} gọi {personA.full_name} là
-                </p>
-                <p className="text-4xl font-serif font-bold text-amber-600 capitalize">
+              <HeritageFrame cornerColor="#8c1d1d">
+                <div className="flex items-center justify-between mb-3 border-b border-[#deb887]/40 pb-2">
+                  <p className="text-xs font-bold uppercase tracking-wider text-[#7a6455]">
+                    {personB.full_name} gọi {personA.full_name} là:
+                  </p>
+                  <HeritageBadge variant="crimson">Xưng hô B → A</HeritageBadge>
+                </div>
+                <p
+                  className="text-3xl sm:text-4xl font-bold text-[#183b28] capitalize my-2"
+                  style={{
+                    fontFamily: '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
+                  }}
+                >
                   {result.bCallsA}
                 </p>
-              </motion.div>
+              </HeritageFrame>
             </div>
 
             {/* Path info */}
@@ -408,23 +435,21 @@ export default function KinshipFinder({ persons, relationships }: Props) {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.25 }}
-                className="bg-stone-50 border border-stone-200/60 rounded-2xl px-6 py-5"
+                className="rounded-2xl border-2 border-[#deb887]/80 bg-[#fffdf7] p-5 sm:p-6 shadow-xs"
               >
-                <div className="flex items-center gap-2 mb-4">
-                  <GitMerge className="size-4 text-stone-400" />
-                  <p className="text-xs font-semibold uppercase tracking-wider text-stone-400">
-                    Phân tích con đường quan hệ
+                <div className="flex items-center gap-2 mb-4 border-b border-[#deb887]/40 pb-2.5">
+                  <GitMerge className="size-4 text-[#8c1d1d]" />
+                  <p className="text-xs font-black uppercase tracking-wider text-[#183b28]">
+                    Con đường huyết thống & Thứ bậc gia phả
                   </p>
                 </div>
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {result.pathLabels.map((label, i) => (
-                    <div key={i} className="flex items-start gap-4">
-                      <div className="size-6 rounded-full bg-white border border-stone-200 flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
-                        <span className="text-[10px] font-bold text-stone-400">
-                          {i + 1}
-                        </span>
+                    <div key={i} className="flex items-start gap-3.5">
+                      <div className="size-6 rounded-full bg-gradient-to-br from-[#caa455] to-[#92540b] text-white font-black text-xs flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
+                        {i + 1}
                       </div>
-                      <p className="text-sm text-stone-600 leading-relaxed pt-1">
+                      <p className="text-xs sm:text-sm text-[#5c4a3e] font-medium leading-relaxed pt-0.5">
                         {label}
                       </p>
                     </div>
@@ -436,9 +461,8 @@ export default function KinshipFinder({ persons, relationships }: Props) {
             {/* Disclaimer for ambiguous terms */}
             {(result.aCallsB.includes("/") ||
               result.aCallsB.includes("họ hàng")) && (
-              <p className="text-xs text-stone-400 italic px-1">
-                * Danh xưng chính xác dựa trên giới tính, thứ tự sinh của các
-                nhánh và vế Nội/Ngoại.
+              <p className="text-xs text-[#7a6455] italic px-1">
+                * Danh xưng chi tiết có thể linh hoạt theo phong tục địa phương, thứ bậc sinh của các nhánh và vai vế Nội/Ngoại.
               </p>
             )}
           </motion.div>
@@ -446,13 +470,14 @@ export default function KinshipFinder({ persons, relationships }: Props) {
       </AnimatePresence>
 
       {/* ── Guide & reference section ── */}
-      <div className="border-t border-stone-200/60 pt-6 space-y-4">
+      <div className="border-t border-[#deb887]/60 pt-6 space-y-4">
         <button
+          type="button"
           onClick={() => setShowGuide((v) => !v)}
-          className="flex items-center gap-2 text-sm font-semibold text-stone-500 hover:text-amber-600 transition-colors"
+          className="inline-flex items-center gap-2 text-sm font-bold text-[#8c1d1d] hover:text-[#6e1616] transition-colors"
         >
           <BookOpen className="size-4" />
-          {showGuide ? "Ẩn hướng dẫn" : "Hướng dẫn sử dụng & Bảng danh xưng"}
+          <span>{showGuide ? "Thu gọn quy ước xưng hô" : "Xem quy ước danh xưng & gia lễ truyền thống"}</span>
         </button>
 
         <AnimatePresence>
@@ -464,87 +489,52 @@ export default function KinshipFinder({ persons, relationships }: Props) {
               transition={{ duration: 0.25 }}
               className="overflow-hidden"
             >
-              <div className="space-y-5">
+              <div className="space-y-4 pt-2">
                 {/* How it works */}
-                <div className="bg-blue-50/60 border border-blue-100 rounded-2xl p-5">
-                  <p className="text-sm font-bold text-blue-700 flex items-center gap-2 mb-3">
-                    <Info className="size-4" />
-                    Cách hoạt động
+                <div className="rounded-xl border border-[#deb887] bg-gradient-to-br from-[#fffdf7] to-[#fbf7ed] p-5 shadow-xs">
+                  <p className="text-sm font-bold text-[#183b28] flex items-center gap-2 mb-3">
+                    <Info className="size-4 text-[#8c1d1d]" />
+                    Nguyên lý tính toán danh xưng
                   </p>
-                  <ol className="space-y-2 text-sm text-blue-800">
+                  <ol className="space-y-2 text-xs sm:text-sm text-[#5c4a3e]">
                     <li className="flex gap-2">
-                      <span className="font-bold shrink-0">1.</span>
-                      Hệ thống xây dựng đồ thị gia phả từ toàn bộ quan hệ huyết
-                      thống và hôn nhân.
+                      <span className="font-bold text-[#8c1d1d] shrink-0">1.</span>
+                      Hệ thống dựng đồ thị liên kết huyết thống và hôn phối trong cây gia phả.
                     </li>
                     <li className="flex gap-2">
-                      <span className="font-bold shrink-0">2.</span>
-                      Tìm <strong>Tổ tiên chung gần nhất (LCA)</strong> để xác
-                      định khoảng cách thế hệ.
+                      <span className="font-bold text-[#8c1d1d] shrink-0">2.</span>
+                      Tìm <strong>Tổ tiên chung gần nhất (LCA)</strong> để xác định bậc cách thế hệ.
                     </li>
                     <li className="flex gap-2">
-                      <span className="font-bold shrink-0">3.</span>
-                      Xác định <strong>vế Nội/Ngoại</strong> dựa trên giới tính
-                      của tổ tiên tại điểm rẽ nhánh.
+                      <span className="font-bold text-[#8c1d1d] shrink-0">3.</span>
+                      Xác định <strong>vế Nội / Ngoại</strong> từ điểm rẽ nhánh của tổ tiên.
                     </li>
                     <li className="flex gap-2">
-                      <span className="font-bold shrink-0">4.</span>
-                      So sánh <strong>thứ bậc (seniority)</strong> giữa các
-                      nhanh từ tổ tiên chung để quyết định quan hệ
-                      &quot;Anh/Em&quot; hoặc &quot;Bác/Chú&quot;.
-                    </li>
-                    <li className="flex gap-2">
-                      <span className="font-bold shrink-0">5.</span>
-                      Tra bảng danh xưng tiếng Việt chuyên sâu bao gồm cả các
-                      mối quan hệ thông qua hôn nhân.
+                      <span className="font-bold text-[#8c1d1d] shrink-0">4.</span>
+                      So sánh <strong>thứ tự sinh (Seniority)</strong> giữa các chi phái để định danh &quot;Bác/Chú&quot; hoặc &quot;Anh/Em&quot;.
                     </li>
                   </ol>
                 </div>
 
-                {/* Data requirements */}
-                <div className="bg-amber-50/60 border border-amber-100 rounded-2xl p-5">
-                  <p className="text-sm font-bold text-amber-700 flex items-center gap-2 mb-2">
-                    <Info className="size-4" />
-                    Yêu cầu dữ liệu để kết quả chính xác
-                  </p>
-                  <ul className="space-y-1.5 text-sm text-amber-800">
-                    <li className="flex gap-2">
-                      <span className="text-amber-400 shrink-0">•</span>
-                      Nhập đầy đủ quan hệ <strong>Bố/Mẹ - Con</strong> và{" "}
-                      <strong>Kết hôn</strong>.
-                    </li>
-                    <li className="flex gap-2">
-                      <span className="text-amber-400 shrink-0">•</span>
-                      <strong>Giới tính</strong> chính xác để phân biệt Cô/Dì,
-                      Chú/Cậu.
-                    </li>
-                    <li className="flex gap-2">
-                      <span className="text-amber-400 shrink-0">•</span>
-                      <strong>Thứ tự sinh (Birth Order)</strong> là yếu tố then
-                      chốt để phân định thứ bậc Anh/Em trong dòng họ.
-                    </li>
-                  </ul>
-                </div>
-
                 {/* Reference table */}
-                <div className="bg-white/80 border border-stone-200/60 rounded-2xl overflow-hidden">
-                  <div className="px-5 py-3 border-b border-stone-100 bg-stone-50/50">
-                    <p className="text-sm font-bold text-stone-600">
-                      Bảng danh xưng tham khảo
+                <div className="rounded-xl border border-[#deb887] bg-[#fffdf7] overflow-hidden shadow-xs">
+                  <div className="px-5 py-3 border-b border-[#deb887]/40 bg-[#f5e7c7]/30">
+                    <p className="text-xs font-bold uppercase tracking-wider text-[#183b28]">
+                      Bảng tra cứu danh xưng mẫu
                     </p>
                   </div>
-                  <div className="divide-y divide-stone-100">
+                  <div className="divide-y divide-[#deb887]/20">
                     {KINSHIP_TERMS.map((row) => (
                       <div
                         key={row.relation}
-                        className="flex items-start gap-4 px-5 py-3"
+                        className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 px-5 py-2.5"
                       >
-                        <span className="text-sm font-bold text-amber-700 w-48 shrink-0">
+                        <span className="text-sm font-bold text-[#8c1d1d] sm:w-44 shrink-0">
                           {row.relation}
                         </span>
                         <div className="min-w-0">
-                          <p className="text-sm text-stone-600">{row.desc}</p>
-                          <p className="text-xs text-stone-400 mt-0.5">
+                          <p className="text-xs sm:text-sm text-[#5c4a3e]">{row.desc}</p>
+                          <p className="text-[11px] text-[#7a6455] italic">
                             {row.example}
                           </p>
                         </div>

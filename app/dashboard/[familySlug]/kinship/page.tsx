@@ -1,4 +1,5 @@
 import KinshipFinder from "@/components/KinshipFinder";
+import HeritagePageHeader from "@/components/dashboard/HeritagePageHeader";
 import { getFamilyContextBySlug, getSupabase } from "@/utils/supabase/queries";
 import { notFound } from "next/navigation";
 
@@ -39,14 +40,15 @@ export default async function FamilyKinshipPage({
   ]);
 
   return (
-    <div className="flex w-full flex-1 flex-col pb-12">
-      <div className="mx-auto w-full max-w-3xl px-4 py-6 sm:px-6 lg:px-8">
-        <h1 className="title">Tra cứu danh xưng</h1>
-        <p className="mt-1 text-sm text-stone-500">
-          Chỉ tính quan hệ trong cây {context.tree.name}
-        </p>
-      </div>
-      <main className="mx-auto w-full max-w-3xl flex-1 px-4 sm:px-6 lg:px-8">
+    <div className="flex w-full flex-1 flex-col pb-16">
+      <main className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
+        <HeritagePageHeader
+          familySlug={familySlug}
+          familyName={context.family.name}
+          treeName={context.tree.name}
+          title="Tra Cứu Danh Xưng & Quan Hệ"
+          description={`Tính toán và giải thích cách xưng hô chuẩn mực giữa hai thành viên trong cây ${context.tree.name} theo gia lễ truyền thống.`}
+        />
         <KinshipFinder
           persons={personsRes.data ?? []}
           relationships={relsRes.data ?? []}
