@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { applyTreeLineage } from "@/app/actions/genealogy";
 import {
+  getAdminSupabase,
   getFamilyContextById,
   getProfile,
   getSupabase,
@@ -100,7 +101,7 @@ export async function claimExistingPersonAction(data: {
         },
       };
 
-      const { error: updateError } = await supabase
+      const { error: updateError } = await (getAdminSupabase() || supabase)
         .from("families")
         .update({ settings: nextSettings })
         .eq("id", data.familyId);
@@ -144,7 +145,7 @@ export async function claimExistingPersonAction(data: {
       genealogy_requests: nextRequests,
     };
 
-    const { error: updateError } = await supabase
+    const { error: updateError } = await (getAdminSupabase() || supabase)
       .from("families")
       .update({ settings: nextSettings })
       .eq("id", data.familyId);
@@ -204,7 +205,7 @@ export async function unlinkSelfAction(data: {
       member_links: nextLinks,
     };
 
-    await supabase
+    await (getAdminSupabase() || supabase)
       .from("families")
       .update({ settings: nextSettings })
       .eq("id", data.familyId);
@@ -279,7 +280,8 @@ export async function addSelfToFamilyTreeAction(formData: FormData): Promise<Cla
     // If caller is an Admin / canManage, auto-approve immediately
     if (context.canManage) {
       // 1. Create the new person in persons table
-      const { data: createdPerson, error: personError } = await supabase
+      const adminClient = getAdminSupabase() || supabase;
+      const { data: createdPerson, error: personError } = await adminClient
         .from("persons")
         .insert({
           family_id: context.family.id,
@@ -308,7 +310,7 @@ export async function addSelfToFamilyTreeAction(formData: FormData): Promise<Cla
 
       // 2. If parent was selected, add biological_child relationship
       if (parentId) {
-        await supabase.from("relationships").insert({
+        await (getAdminSupabase() || supabase).from("relationships").insert({
           family_id: context.family.id,
           tree_id: context.tree.id,
           type: "biological_child",
@@ -318,7 +320,7 @@ export async function addSelfToFamilyTreeAction(formData: FormData): Promise<Cla
       }
 
       // 3. Recalculate lineage & generations
-      await applyTreeLineage(supabase, context);
+      await applyTreeLineage((getAdminSupabase() || supabase) as any, context);
 
       // 4. Link profile to this new person
       const nextSettings = {
@@ -329,7 +331,7 @@ export async function addSelfToFamilyTreeAction(formData: FormData): Promise<Cla
         },
       };
 
-      await supabase
+      await (getAdminSupabase() || supabase)
         .from("families")
         .update({ settings: nextSettings })
         .eq("id", context.family.id);
@@ -387,7 +389,7 @@ export async function addSelfToFamilyTreeAction(formData: FormData): Promise<Cla
       genealogy_requests: nextRequests,
     };
 
-    const { error: updateError } = await supabase
+    const { error: updateError } = await (getAdminSupabase() || supabase)
       .from("families")
       .update({ settings: nextSettings })
       .eq("id", context.family.id);
@@ -450,7 +452,7 @@ export async function cancelGenealogyRequestAction(data: {
       genealogy_requests: nextRequests,
     };
 
-    await supabase
+    await (getAdminSupabase() || supabase)
       .from("families")
       .update({ settings: nextSettings })
       .eq("id", data.familyId);
@@ -525,7 +527,8 @@ export async function reviewGenealogyRequestAction(formData: FormData): Promise<
         }
 
         // 1. Create person in tree
-        const { data: createdPerson, error: personError } = await supabase
+        const adminClient = getAdminSupabase() || supabase;
+        const { data: createdPerson, error: personError } = await adminClient
           .from("persons")
           .insert({
             family_id: context.family.id,
@@ -551,7 +554,7 @@ export async function reviewGenealogyRequestAction(formData: FormData): Promise<
 
         // 2. Add parent relationship
         if (pData.parent_id) {
-          await supabase.from("relationships").insert({
+          await (getAdminSupabase() || supabase).from("relationships").insert({
             family_id: context.family.id,
             tree_id: targetRequest.tree_id || context.tree.id,
             type: "biological_child",
@@ -561,7 +564,7 @@ export async function reviewGenealogyRequestAction(formData: FormData): Promise<
         }
 
         // 3. Recalculate lineage
-        await applyTreeLineage(supabase, context);
+        await applyTreeLineage((getAdminSupabase() || supabase) as any, context);
       }
     }
 
@@ -591,7 +594,7 @@ export async function reviewGenealogyRequestAction(formData: FormData): Promise<
       genealogy_requests: nextRequests,
     };
 
-    const { error: updateError } = await supabase
+    const { error: updateError } = await (getAdminSupabase() || supabase)
       .from("families")
       .update({ settings: nextSettings })
       .eq("id", familyId);

@@ -80,3 +80,20 @@ export const createPublicClient = () => {
     },
   });
 };
+
+
+export const createServiceRoleClient = () => {
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!supabaseUrl || !serviceKey) {
+    return null;
+  }
+
+  return createServerClient(supabaseUrl, serviceKey, {
+    cookies: {
+      getAll() {
+        return [];
+      },
+      setAll() {},
+    },
+  });
+};

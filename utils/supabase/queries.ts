@@ -6,7 +6,7 @@ import {
   FamilyTree,
   Profile,
 } from "@/types";
-import { createClient, createPublicClient } from "@/utils/supabase/server";
+import { createClient, createPublicClient, createServiceRoleClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { cache } from "react";
 
@@ -26,6 +26,10 @@ export const getSupabase = cache(async () => {
 
 export const getPublicSupabase = () => {
   return createPublicClient();
+};
+
+export const getAdminSupabase = () => {
+  return createServiceRoleClient();
 };
 
 export const getUser = cache(async () => {
