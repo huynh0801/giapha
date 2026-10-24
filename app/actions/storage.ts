@@ -1,5 +1,6 @@
 "use server";
 
+import { optimizeAvatarImage } from "@/utils/imageOptimization";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 
@@ -10,7 +11,7 @@ const ALLOWED_MIME_TYPES = new Set([
   "image/gif",
 ]);
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB input limit
 
 export interface StorageUploadResult {
   success: boolean;
@@ -33,7 +34,7 @@ export async function uploadAvatarAction(
     if (file.size > MAX_FILE_SIZE) {
       return {
         success: false,
-        error: "Dung lượng ảnh vượt quá giới hạn cho phép (tối đa 5MB).",
+        error: "Dung lượng ảnh vượt quá giới hạn cho phép (tối đa 10MB).",
       };
     }
 
@@ -44,25 +45,32 @@ export async function uploadAvatarAction(
       };
     }
 
-    const rawExt = file.name.split(".").pop()?.toLowerCase() || "jpg";
-    const extension = ["jpg", "jpeg", "png", "webp", "gif"].includes(rawExt)
-      ? rawExt
-      : "jpg";
+    let optimized: Awaited<ReturnType<typeof optimizeAvatarImage>>;
+    try {
+      optimized = await optimizeAvatarImage(file, { maxDimension: 600 });
+    } catch (optimizeError) {
+      console.error("Avatar optimize error:", optimizeError);
+      return {
+        success: false,
+        error:
+          optimizeError instanceof Error
+            ? optimizeError.message
+            : "Không thể tối ưu hóa và chuyển đổi định dạng ảnh đại diện.",
+      };
+    }
 
-    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2, 9)}.${extension}`;
+    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2, 9)}.${optimized.extension}`;
     const cleanFamilyId = familyId.replace(/[^a-zA-Z0-9_\-]/g, "");
     const filePath = `${cleanFamilyId}/${fileName}`;
 
     const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
 
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-
     const { error: uploadError } = await supabase.storage
       .from("avatars")
-      .upload(filePath, buffer, {
-        contentType: file.type,
+      .upload(filePath, optimized.buffer, {
+        contentType: optimized.contentType,
+        cacheControl: "31536000",
         upsert: false,
       });
 
