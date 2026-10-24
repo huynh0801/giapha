@@ -300,7 +300,7 @@ export default function LandingHeader({ currentUser: initialUser }: LandingHeade
                       <span>Không gian gia phả</span>
                     </Link>
 
-                    {user.role === "system_admin" ? (
+                    {user.role === "system_admin" && (
                       <Link
                         href="/admin"
                         onClick={() => setUserDropdownOpen(false)}
@@ -308,15 +308,6 @@ export default function LandingHeader({ currentUser: initialUser }: LandingHeade
                       >
                         <ShieldCheck className="size-4 text-[#800000]" />
                         <span>Trang quản trị</span>
-                      </Link>
-                    ) : (
-                      <Link
-                        href="/dashboard/about"
-                        onClick={() => setUserDropdownOpen(false)}
-                        className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[#3c2f25] hover:bg-[#f5e7c7] hover:text-[#800000] transition-colors"
-                      >
-                        <Info className="size-4 text-[#800000]" />
-                        <span>Hồ sơ dòng họ</span>
                       </Link>
                     )}
                   </div>
@@ -422,7 +413,7 @@ export default function LandingHeader({ currentUser: initialUser }: LandingHeade
                 Không gian gia phả
               </Link>
 
-              {user.role === "system_admin" ? (
+              {user.role === "system_admin" && (
                 <Link
                   href="/admin"
                   onClick={() => setMobileMenuOpen(false)}
@@ -430,15 +421,6 @@ export default function LandingHeader({ currentUser: initialUser }: LandingHeade
                 >
                   <ShieldCheck className="size-4 text-[#800000]" />
                   Trang quản trị
-                </Link>
-              ) : (
-                <Link
-                  href="/dashboard/about"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-2.5 px-3 py-2 rounded-lg font-sans text-sm font-bold text-[#3c2f25] hover:bg-[#ede5d5]"
-                >
-                  <Info className="size-4 text-[#800000]" />
-                  Hồ sơ dòng họ
                 </Link>
               )}
 

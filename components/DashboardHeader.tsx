@@ -23,7 +23,7 @@ export default function DashboardHeader() {
       <nav className="flex items-center gap-1 md:gap-8 flex-1 justify-end">
         <div className="flex items-center gap-2 md:gap-8">
           <Link href="/" className="text-[11px] md:text-sm font-bold text-gray-700 no-underline whitespace-nowrap">Trang chủ</Link>
-          <Link href="/dashboard/about?id=gioi-thieu" className="text-[11px] md:text-sm font-bold text-gray-700 whitespace-nowrap">Giới thiệu</Link>
+          <Link href="/about" className="text-[11px] md:text-sm font-bold text-gray-700 whitespace-nowrap">Giới thiệu</Link>
           <Link href="/news" className="text-[11px] md:text-sm font-bold text-gray-700 no-underline whitespace-nowrap">Tin tức</Link>
         </div>
         
