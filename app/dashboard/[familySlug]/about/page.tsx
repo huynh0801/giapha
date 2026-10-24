@@ -1,6 +1,8 @@
 import { updateFamilyAction } from "@/app/actions/family";
+import HeritagePageHeader from "@/components/dashboard/HeritagePageHeader";
+import { HeritageBadge, HeritageFrame } from "@/components/dashboard/HeritageUI";
 import { getFamilyContextBySlug } from "@/utils/supabase/queries";
-import { ArrowLeft, FileText, MapPin, ShieldCheck } from "lucide-react";
+import { FileText, MapPin, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -10,8 +12,8 @@ interface PageProps {
 
 function visibilityLabel(value: string) {
   if (value === "family_only") return "Chỉ trong dòng họ";
-  if (value === "public") return "Công khai phần giới thiệu";
-  return "Riêng tư";
+  if (value === "public") return "Công khai giới thiệu";
+  return "Nội bộ riêng tư";
 }
 
 export default async function FamilyAboutPage({ params }: PageProps) {
@@ -21,203 +23,230 @@ export default async function FamilyAboutPage({ params }: PageProps) {
 
   const family = context.family;
 
+  const inputClasses =
+    "w-full rounded-xl border-2 border-[#deb887]/80 bg-[#fffdf7] px-4 py-3 text-sm font-semibold text-[#183b28] outline-none focus:border-[#caa455] focus:ring-2 focus:ring-[#caa455]/20 transition-all";
+
   return (
-    <main className="flex w-full flex-1 flex-col bg-stone-50/50">
-      <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <Link
-              href={`/dashboard/${familySlug}`}
-              className="mb-4 inline-flex items-center gap-2 text-sm font-bold text-stone-500 transition-colors hover:text-[#800000]"
-            >
-              <ArrowLeft className="size-4" />
-              Quay về dashboard dòng họ
-            </Link>
-            <p className="text-xs font-black uppercase tracking-[0.24em] text-amber-600">
-              Hồ sơ dòng họ
-            </p>
-            <h1 className="mt-2 text-3xl font-black tracking-tight text-stone-950 sm:text-4xl">
-              {family.name}
-            </h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-stone-500">
-              Thông tin giới thiệu này thuộc không gian riêng của dòng họ. Dữ
-              liệu cây gia phả, hồ sơ tổ tiên và sự kiện vẫn chỉ mở cho thành
-              viên active trong đúng dòng họ.
-            </p>
-          </div>
-          <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-2 text-sm font-black text-emerald-700">
-            <ShieldCheck className="size-4" />
-            {visibilityLabel(family.visibility)}
-          </div>
-        </div>
+    <div className="flex w-full flex-1 flex-col pb-16">
+      <main className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
+        <HeritagePageHeader
+          familySlug={familySlug}
+          familyName={family.name}
+          title="Hồ Sơ & Chứng Thư Dòng Họ"
+          description="Lưu trữ nguồn gốc xuất xứ, nhà thờ tổ, câu đối gia huấn và các thông tin căn bản giới thiệu dòng họ."
+          badge={
+            <HeritageBadge variant="jade" className="inline-flex items-center gap-1.5">
+              <ShieldCheck className="size-3.5" />
+              <span>{visibilityLabel(family.visibility)}</span>
+            </HeritageBadge>
+          }
+        />
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
           {context.canManage ? (
-            <form
-              action={updateFamilyAction}
-              className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm sm:p-7"
-            >
-              <input type="hidden" name="family_id" value={family.id} />
-              <div className="mb-6">
-                <h2 className="text-xl font-black text-stone-900">
-                  Cập nhật thông tin dòng họ
-                </h2>
-                <p className="mt-2 text-sm leading-6 text-stone-500">
-                  Admin dòng họ có thể cập nhật phần giới thiệu, nơi khởi
-                  nguyên và hình ảnh nhận diện. Thao tác này không công khai dữ
-                  liệu gia phả.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <label className="block md:col-span-1">
-                  <span className="mb-1.5 block text-sm font-bold text-stone-700">
-                    Tên dòng họ
-                  </span>
-                  <input
-                    name="name"
-                    required
-                    defaultValue={family.name}
-                    className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm font-semibold text-stone-900 outline-none focus:border-amber-500"
-                  />
-                </label>
-
-                <label className="block md:col-span-1">
-                  <span className="mb-1.5 block text-sm font-bold text-stone-700">
-                    Slug
-                  </span>
-                  <input
-                    name="slug"
-                    defaultValue={family.slug}
-                    className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm font-semibold text-stone-900 outline-none focus:border-amber-500"
-                  />
-                </label>
-
-                <label className="block md:col-span-1">
-                  <span className="mb-1.5 block text-sm font-bold text-stone-700">
-                    Nơi khởi nguyên
-                  </span>
-                  <input
-                    name="origin_location"
-                    defaultValue={family.origin_location || ""}
-                    placeholder="Ví dụ: Hà Nội, Nam Định..."
-                    className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm font-semibold text-stone-900 outline-none focus:border-amber-500"
-                  />
-                </label>
-
-                <label className="block md:col-span-1">
-                  <span className="mb-1.5 block text-sm font-bold text-stone-700">
-                    Chế độ hiển thị hồ sơ
-                  </span>
-                  <select
-                    name="visibility"
-                    defaultValue={family.visibility}
-                    className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm font-semibold text-stone-900 outline-none focus:border-amber-500"
+            <HeritageFrame cornerColor="#8c1d1d">
+              <form action={updateFamilyAction} className="space-y-5">
+                <input type="hidden" name="family_id" value={family.id} />
+                <div className="border-b border-[#deb887]/50 pb-3">
+                  <h2
+                    className="text-xl sm:text-2xl font-bold text-[#183b28]"
+                    style={{
+                      fontFamily:
+                        '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
+                    }}
                   >
-                    <option value="private">Riêng tư</option>
-                    <option value="family_only">Chỉ trong dòng họ</option>
-                    <option value="public">
-                      Công khai phần giới thiệu, không công khai gia phả
-                    </option>
-                  </select>
-                </label>
+                    Cập nhật thông tin dòng họ
+                  </h2>
+                  <p className="mt-1 text-xs text-[#5c4a3e]">
+                    Quản trị viên có thể cập nhật thông tin giới thiệu, nơi phát tích và huy hiệu dòng họ.
+                  </p>
+                </div>
 
-                <label className="block md:col-span-2">
-                  <span className="mb-1.5 block text-sm font-bold text-stone-700">
-                    Logo hoặc ảnh đại diện
-                  </span>
-                  <input
-                    name="logo_url"
-                    defaultValue={family.logo_url || ""}
-                    placeholder="Dán URL ảnh nếu đã có"
-                    className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm font-semibold text-stone-900 outline-none focus:border-amber-500"
-                  />
-                </label>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <label className="block md:col-span-1">
+                    <span className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-[#7a6455]">
+                      Tên dòng họ <span className="text-[#8c1d1d]">*</span>
+                    </span>
+                    <input
+                      name="name"
+                      required
+                      defaultValue={family.name}
+                      className={inputClasses}
+                    />
+                  </label>
 
-                <label className="block md:col-span-2">
-                  <span className="mb-1.5 block text-sm font-bold text-stone-700">
-                    Mô tả
-                  </span>
-                  <textarea
-                    name="description"
-                    rows={5}
-                    defaultValue={family.description || ""}
-                    placeholder="Ghi chú về nguồn gốc, nhà thờ họ, chi phái hoặc định hướng số hóa gia phả."
-                    className="w-full resize-none rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm font-semibold text-stone-900 outline-none focus:border-amber-500"
-                  />
-                </label>
-              </div>
+                  <label className="block md:col-span-1">
+                    <span className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-[#7a6455]">
+                      Đường dẫn (Slug)
+                    </span>
+                    <input
+                      name="slug"
+                      defaultValue={family.slug}
+                      className={inputClasses}
+                    />
+                  </label>
 
-              <button type="submit" className="btn-primary mt-6">
-                Lưu thông tin dòng họ
-              </button>
-            </form>
+                  <label className="block md:col-span-1">
+                    <span className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-[#7a6455]">
+                      Nơi phát tích / Khởi nguyên
+                    </span>
+                    <input
+                      name="origin_location"
+                      defaultValue={family.origin_location || ""}
+                      placeholder="Ví dụ: Làng Cổ, Huyện..., Tỉnh..."
+                      className={inputClasses}
+                    />
+                  </label>
+
+                  <label className="block md:col-span-1">
+                    <span className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-[#7a6455]">
+                      Chế độ hiển thị hồ sơ
+                    </span>
+                    <select
+                      name="visibility"
+                      defaultValue={family.visibility}
+                      className={inputClasses}
+                    >
+                      <option value="private">Riêng tư</option>
+                      <option value="family_only">Chỉ trong dòng họ</option>
+                      <option value="public">
+                        Công khai phần giới thiệu (không công khai gia phả)
+                      </option>
+                    </select>
+                  </label>
+
+                  <label className="block md:col-span-2">
+                    <span className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-[#7a6455]">
+                      Huy hiệu / Logo URL
+                    </span>
+                    <input
+                      name="logo_url"
+                      defaultValue={family.logo_url || ""}
+                      placeholder="https://..."
+                      className={inputClasses}
+                    />
+                  </label>
+
+                  <label className="block md:col-span-2">
+                    <span className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-[#7a6455]">
+                      Gia sử, Nguồn gốc & Giới thiệu dòng tộc
+                    </span>
+                    <textarea
+                      name="description"
+                      rows={6}
+                      defaultValue={family.description || ""}
+                      placeholder="Ghi chép về thủy tổ, nguồn gốc phát tích, nhà thờ họ, chi phái hoặc tôn chỉ gia tộc..."
+                      className={`${inputClasses} resize-none leading-relaxed`}
+                    />
+                  </label>
+                </div>
+
+                <div className="pt-2">
+                  <button
+                    type="submit"
+                    className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#8c1d1d] to-[#6e1616] text-white font-bold text-sm shadow-sm hover:from-[#6e1616] hover:to-[#500e0e] active:scale-95 transition-all"
+                  >
+                    Lưu thông tin dòng họ
+                  </button>
+                </div>
+              </form>
+            </HeritageFrame>
           ) : (
-            <section className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
-              <h2 className="text-xl font-black text-stone-900">
-                Thông tin dòng họ
-              </h2>
-              <div className="mt-5 grid gap-4">
-                <div className="rounded-2xl bg-stone-50 p-4">
-                  <p className="text-xs font-black uppercase text-stone-400">
+            <HeritageFrame cornerColor="#183b28">
+              <div className="border-b border-[#deb887]/50 pb-3 mb-5">
+                <h2
+                  className="text-xl sm:text-2xl font-bold text-[#183b28]"
+                  style={{
+                    fontFamily:
+                      '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
+                  }}
+                >
+                  Chứng thư thông tin dòng tộc
+                </h2>
+              </div>
+              <div className="grid gap-4">
+                <div className="rounded-xl border border-[#deb887]/60 bg-gradient-to-br from-[#fffdf7] to-[#fbf7ed] p-4.5">
+                  <p className="text-xs font-bold uppercase tracking-wider text-[#7a6455]">
                     Tên dòng họ
                   </p>
-                  <p className="mt-1 text-lg font-black text-stone-900">
+                  <p
+                    className="mt-1 text-2xl font-bold text-[#8c1d1d]"
+                    style={{
+                      fontFamily:
+                        '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
+                    }}
+                  >
                     {family.name}
                   </p>
                 </div>
-                <div className="rounded-2xl bg-stone-50 p-4">
-                  <p className="text-xs font-black uppercase text-stone-400">
-                    Nơi khởi nguyên
+
+                <div className="rounded-xl border border-[#deb887]/60 bg-gradient-to-br from-[#fffdf7] to-[#fbf7ed] p-4.5">
+                  <p className="text-xs font-bold uppercase tracking-wider text-[#7a6455]">
+                    Nơi phát tích / Khởi nguyên
                   </p>
-                  <p className="mt-1 text-sm font-bold text-stone-700">
+                  <p className="mt-1 text-base font-bold text-[#183b28]">
                     {family.origin_location || "Chưa cập nhật"}
                   </p>
                 </div>
-                <div className="rounded-2xl bg-stone-50 p-4">
-                  <p className="text-xs font-black uppercase text-stone-400">
-                    Mô tả
+
+                <div className="rounded-xl border border-[#deb887]/60 bg-gradient-to-br from-[#fffdf7] to-[#fbf7ed] p-4.5">
+                  <p className="text-xs font-bold uppercase tracking-wider text-[#7a6455]">
+                    Gia sử & Lời tựa
                   </p>
-                  <p className="mt-1 text-sm leading-6 text-stone-600">
-                    {family.description || "Chưa có mô tả."}
+                  <p className="mt-2 text-sm leading-relaxed text-[#5c4a3e] whitespace-pre-wrap">
+                    {family.description || "Chưa có lời tựa gia sử."}
                   </p>
                 </div>
               </div>
-              <p className="mt-5 rounded-2xl bg-amber-50 p-4 text-sm font-semibold leading-6 text-amber-800">
-                Chỉ Admin dòng họ active của đúng dòng họ mới được chỉnh sửa hồ
-                sơ này.
-              </p>
-            </section>
+
+              <div className="mt-5 rounded-xl border border-[#caa455] bg-[#fef8ea] p-4 text-xs font-semibold text-[#92540b]">
+                * Quyền chỉnh sửa hồ sơ được cấp riêng cho Người phụ trách / Tộc trưởng dòng họ.
+              </div>
+            </HeritageFrame>
           )}
 
-          <aside className="space-y-4">
+          <aside className="space-y-5">
             <Link
               href={`/dashboard/${familySlug}/trees`}
-              className="block rounded-3xl border border-stone-200 bg-white p-5 shadow-sm transition-colors hover:border-amber-200 hover:bg-amber-50/40"
+              className="group block rounded-2xl border-2 border-[#deb887]/80 bg-gradient-to-br from-[#fffdf7] to-[#fbf7ed] p-5 shadow-xs transition-all hover:-translate-y-0.5 hover:border-[#caa455] hover:shadow-md"
             >
-              <FileText className="mb-4 size-7 text-amber-600" />
-              <h2 className="text-lg font-black text-stone-900">
-                Cây gia phả
-              </h2>
-              <p className="mt-2 text-sm leading-6 text-stone-500">
-                Tạo cây mới, đặt cây chính và kiểm soát không gian nhập liệu
-                gia phả.
+              <div className="size-11 rounded-xl bg-[#f5e7c7] text-[#8c1d1d] flex items-center justify-center mb-3.5 border border-[#deb887]/60">
+                <FileText className="size-5" />
+              </div>
+              <h3
+                className="text-lg font-bold text-[#183b28] group-hover:text-[#8c1d1d] transition-colors"
+                style={{
+                  fontFamily:
+                    '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
+                }}
+              >
+                Hệ Thống Cây Gia Phả
+              </h3>
+              <p className="mt-1.5 text-xs sm:text-sm leading-relaxed text-[#5c4a3e]">
+                Khởi tạo cây mới, thiết lập cây chính và tổ chức không gian các chi phái gia tộc.
               </p>
             </Link>
 
-            <div className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm">
-              <MapPin className="mb-4 size-7 text-emerald-600" />
-              <h2 className="text-lg font-black text-stone-900">
-                Phạm vi truy cập
-              </h2>
-              <p className="mt-2 text-sm leading-6 text-stone-500">
-                Thành viên ngoài dòng họ không thể xem cây, hồ sơ tổ tiên, sự
-                kiện hoặc blog nội bộ của dòng họ này.
+            <div className="rounded-2xl border-2 border-[#deb887]/80 bg-gradient-to-br from-[#fffdf7] to-[#fbf7ed] p-5 shadow-xs">
+              <div className="size-11 rounded-xl bg-[#eaf3ed] text-[#183b28] flex items-center justify-center mb-3.5 border border-[#a3c9b2]">
+                <MapPin className="size-5" />
+              </div>
+              <h3
+                className="text-lg font-bold text-[#183b28]"
+                style={{
+                  fontFamily:
+                    '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
+                }}
+              >
+                Quy Định Bảo Mật Dòng Tộc
+              </h3>
+              <p className="mt-1.5 text-xs sm:text-sm leading-relaxed text-[#5c4a3e]">
+                Người ngoài dòng họ không thể truy cập phả đồ, hồ sơ tiền nhân, tế tự và các tin tức nội bộ.
               </p>
             </div>
           </aside>
         </div>
-      </div>
-    </main>
+      </main>
+    </div>
   );
 }
