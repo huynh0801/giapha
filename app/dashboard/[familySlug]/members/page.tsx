@@ -3,6 +3,7 @@ import DashboardViews from "@/components/DashboardViews";
 import MemberDetailModal from "@/components/MemberDetailModal";
 import ViewToggle, { ViewMode } from "@/components/ViewToggle";
 import HeritagePageHeader from "@/components/dashboard/HeritagePageHeader";
+import { HeritageBadge } from "@/components/dashboard/HeritageUI";
 import { getFamilyContextBySlug, getSupabase } from "@/utils/supabase/queries";
 import { isChildRelationshipType } from "@/utils/treeHelpers";
 import { FolderTree } from "lucide-react";
@@ -78,9 +79,14 @@ export default async function FamilyMembersPage({
         <HeritagePageHeader
           familySlug={familySlug}
           familyName={context.family.name}
-          treeName={context.tree.name}
           title="Cây Phả Hệ & Sơ Đồ Gia Tộc"
           description={`Tra cứu danh sách thành viên, phả đồ cội nguồn, sơ đồ tư duy (mindmap) và biểu đồ bong bóng trong cây ${context.tree.name}.`}
+          badge={
+            <HeritageBadge variant="amber" className="inline-flex items-center gap-1">
+              <FolderTree className="size-3 shrink-0" />
+              <span>Đang mở: {context.tree.name}</span>
+            </HeritageBadge>
+          }
           actions={
             <Link
               href={`/dashboard/${familySlug}/trees`}
