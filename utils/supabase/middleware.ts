@@ -111,10 +111,21 @@ export async function updateSession(request: NextRequest) {
   // Redirect users who are already logged in away from the login page
   if (isLoginPage && user) {
     const url = request.nextUrl.clone();
+    let defaultTarget = isAdminLoginPage ? "/admin" : "/dashboard";
+    if (!isAdminLoginPage) {
+      const { data: userProfile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (userProfile?.role === "system_admin") {
+        defaultTarget = "/admin";
+      }
+    }
     applySafeRedirectTarget(
       url,
       request.nextUrl.searchParams.get("next") || "",
-      isAdminLoginPage ? "/admin" : "/dashboard",
+      defaultTarget,
     );
     return NextResponse.redirect(url);
   }

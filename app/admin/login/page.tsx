@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import config from "@/app/config";
 import { adminLoginAction } from "@/app/actions/auth";
@@ -73,8 +73,7 @@ export default function AdminLoginPage() {
         return;
       }
 
-      router.push(result.redirect || "/admin");
-      router.refresh();
+      window.location.href = result.redirect || "/admin";
     } catch (authError) {
       setError(explainAuthError(authError));
       setLoading(false);

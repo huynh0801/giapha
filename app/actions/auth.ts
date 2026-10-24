@@ -91,7 +91,9 @@ export async function loginAction(data: {
       data.nextPath &&
       !data.nextPath.startsWith("//") &&
       !data.nextPath.includes("://") &&
-      !data.nextPath.startsWith("/login")
+      !data.nextPath.startsWith("/login") &&
+      data.nextPath !== "/dashboard" &&
+      data.nextPath !== "/"
     ) {
       redirect = data.nextPath;
     } else if (profile?.role === "system_admin") {
