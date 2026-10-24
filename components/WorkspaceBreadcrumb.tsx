@@ -90,50 +90,35 @@ export default function WorkspaceBreadcrumb({
   return (
     <nav
       aria-label="Điều hướng trong không gian dòng họ"
-      className="sticky top-20 z-20 border-b border-amber-100/80 bg-[#fffdf8]/94 shadow-[0_8px_24px_rgba(58,31,19,0.05)] backdrop-blur-xl"
+      className="sticky top-20 z-20 border-b border-[#deb887]/60 bg-[#fffdf7]/95 shadow-[0_2px_12px_rgba(44,26,17,0.04)] backdrop-blur-md"
     >
-      <div className="mx-auto flex w-full max-w-7xl px-4 py-2 sm:px-6 lg:px-8">
-        <div className="flex w-full items-center justify-between gap-3">
-          <div className="flex min-w-0 items-center gap-2">
-            <Link
-              href={nav.workspaceHref}
-              className="inline-flex size-9 shrink-0 items-center justify-center rounded-full border border-amber-200 bg-white text-[#800000] shadow-sm transition hover:-translate-x-0.5 hover:border-amber-300 hover:bg-amber-50 focus:outline-none focus:ring-2 focus:ring-amber-300"
-              aria-label="Quay lại bảng chức năng dòng họ"
-              title="Quay lại bảng chức năng"
-            >
-              <ArrowLeft className="size-4" />
-            </Link>
-
-            <div className="min-w-0">
-              <div className="flex min-w-0 items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.14em] text-stone-400">
-                <Link
-                  href={nav.workspaceHref}
-                  className="truncate transition hover:text-[#800000]"
-                >
-                  Bảng chức năng
-                </Link>
-                <ChevronRight className="size-3.5 shrink-0" />
-                <span className="truncate text-[#b56a10]">{nav.currentLabel}</span>
-              </div>
-              <div className="mt-0.5 flex items-center gap-2">
-                <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-[#800000]">
-                  <nav.CurrentIcon className="size-3.5" />
-                </span>
-                <p className="truncate text-sm font-black text-stone-950 sm:text-base">
-                  {nav.currentLabel}
-                </p>
-              </div>
-            </div>
-          </div>
-
+      <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-2.5 sm:px-6 lg:px-8">
+        {/* Single-row streamlined breadcrumb: 0 duplicate text */}
+        <div className="flex min-w-0 items-center gap-2">
           <Link
             href={nav.workspaceHref}
-            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-[#800000] px-3.5 py-2 text-xs font-black text-white shadow-md shadow-red-950/10 transition hover:bg-[#650000] focus:outline-none focus:ring-2 focus:ring-amber-300 sm:text-sm"
+            className="group inline-flex items-center gap-1.5 rounded-xl border border-[#deb887]/80 bg-white px-2.5 py-1 text-xs font-bold text-[#7a6455] shadow-2xs transition-all hover:border-[#8c1d1d] hover:bg-[#fffdf7] hover:text-[#8c1d1d]"
+            aria-label="Quay lại bảng chức năng"
+            title="Quay lại bảng chức năng"
           >
-            <ArrowLeft className="size-4" />
-            <span className="hidden sm:inline">Quay lại bảng chức năng</span>
-            <span className="sm:hidden">Quay lại</span>
+            <ArrowLeft className="size-3.5 text-[#8c1d1d] transition-transform group-hover:-translate-x-0.5" />
+            <span>Bảng chức năng</span>
           </Link>
+
+          <ChevronRight className="size-3.5 shrink-0 text-[#caa455]" />
+
+          <div className="flex min-w-0 items-center gap-1.5 rounded-xl border border-[#deb887]/60 bg-[#fbf7ed] px-2.5 py-1 text-xs font-bold text-[#183b28] shadow-2xs">
+            <span className="flex size-5 shrink-0 items-center justify-center rounded-md bg-[#eaf3ed] text-[#183b28]">
+              <nav.CurrentIcon className="size-3.5" />
+            </span>
+            <span className="truncate">{nav.currentLabel}</span>
+          </div>
+        </div>
+
+        {/* Subtle right indicator */}
+        <div className="hidden items-center gap-1.5 text-xs font-bold text-[#7a6455] sm:inline-flex">
+          <span className="size-1.5 rounded-full bg-[#183b28]" />
+          <span>Không gian dòng họ</span>
         </div>
       </div>
     </nav>
