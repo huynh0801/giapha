@@ -70,7 +70,16 @@ export default function LoginPage() {
 
     try {
       if (isLogin) {
-        const result = await loginAction({ email, password });
+        const nextParam =
+          typeof window !== "undefined"
+            ? new URLSearchParams(window.location.search).get("next")
+            : null;
+
+        const result = await loginAction({
+          email,
+          password,
+          nextPath: nextParam || undefined,
+        });
         if (!result.success) {
           if (
             process.env.NODE_ENV !== "production" &&
@@ -334,12 +343,9 @@ export default function LoginPage() {
                   : "Đã có tài khoản? Đăng nhập"}
               </button>
 
-              <Link
-                href="/admin/login"
-                className="text-center text-sm font-bold text-[#800000] hover:text-amber-700 transition-colors"
-              >
-                Đăng nhập khu quản trị
-              </Link>
+              <p className="text-center text-xs text-[#7a6455] font-medium">
+                Cổng đăng nhập chung cho Thành viên, Người phụ trách dòng họ và Quản trị viên hệ thống.
+              </p>
             </div>
           </form>
         </motion.div>

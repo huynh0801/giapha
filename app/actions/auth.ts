@@ -49,6 +49,7 @@ export interface AuthActionResult {
 export async function loginAction(data: {
   email: string;
   password: string;
+  nextPath?: string;
 }): Promise<AuthActionResult> {
   try {
     const email = data.email?.trim().toLowerCase();
@@ -61,16 +62,43 @@ export async function loginAction(data: {
     const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data: authData, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
-    if (error) {
-      return { success: false, error: explainAuthError(error) };
+    if (error || !authData.user) {
+      return { success: false, error: explainAuthError(error || "Không thể đăng nhập.") };
     }
 
-    return { success: true, redirect: "/dashboard" };
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role,is_active,must_change_password")
+      .eq("id", authData.user.id)
+      .maybeSingle();
+
+    if (profile && profile.is_active === false) {
+      await supabase.auth.signOut();
+      return { success: false, error: "Tài khoản của bạn đã bị khóa." };
+    }
+
+    if (profile?.must_change_password) {
+      return { success: true, redirect: "/admin/change-password" };
+    }
+
+    let redirect = "/dashboard";
+    if (
+      data.nextPath &&
+      !data.nextPath.startsWith("//") &&
+      !data.nextPath.includes("://") &&
+      !data.nextPath.startsWith("/login")
+    ) {
+      redirect = data.nextPath;
+    } else if (profile?.role === "system_admin") {
+      redirect = "/admin";
+    }
+
+    return { success: true, redirect };
   } catch (error) {
     return { success: false, error: explainAuthError(error) };
   }

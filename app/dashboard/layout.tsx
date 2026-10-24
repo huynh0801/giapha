@@ -11,12 +11,7 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }) {
   const user = await getUser();
-
-  if (!user) {
-    redirect("/login");
-  }
-
-  const profile = await getProfile(user.id);
+  const profile = user ? await getProfile(user.id) : null;
 
   if (
     profile?.is_active &&
@@ -26,7 +21,7 @@ export default async function DashboardLayout({
     redirect("/admin/change-password");
   }
 
-  const currentUser: HeaderAuthUser | null = profile?.is_active
+  const currentUser: HeaderAuthUser | null = user && profile?.is_active
     ? {
         id: user.id,
         email: user.email || null,
@@ -36,7 +31,7 @@ export default async function DashboardLayout({
       }
     : null;
 
-  if (!profile?.is_active) {
+  if (user && profile && !profile.is_active) {
     return (
       <div className="flex min-h-screen flex-col bg-[#f7f3ea] font-sans text-stone-900">
         <LandingHeader currentUser={currentUser} />

@@ -369,7 +369,15 @@ export default async function DashboardFamilySwitcherPage({
                     <Eye className="size-4" />
                     Xem thông tin
                   </Link>
-                  {family.has_active_membership ? (
+                  {!profile ? (
+                    <Link
+                      href={`/login?next=${encodeURIComponent(returnTo)}`}
+                      className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#8c1d1d] hover:bg-[#6e1616] px-4 py-2.5 text-sm font-black text-white shadow-xs transition-colors"
+                    >
+                      <Send className="size-4" />
+                      Đăng nhập để tham gia
+                    </Link>
+                  ) : family.has_active_membership ? (
                     <Link
                       href={`/dashboard/${family.slug}`}
                       className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#183b28] hover:bg-[#122e1f] px-4 py-2.5 text-sm font-black text-white shadow-xs transition-colors"

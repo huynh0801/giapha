@@ -4,7 +4,7 @@ import {
   HeritageBadge,
   HeritageFrame,
 } from "@/components/dashboard/HeritageUI";
-import { getSupabase } from "@/utils/supabase/queries";
+import { getSupabase, getUser } from "@/utils/supabase/queries";
 import {
   ArrowLeft,
   ArrowRight,
@@ -74,7 +74,10 @@ async function getFamilyBySlug(familySlug: string) {
 
 export default async function FamilyDirectoryDetailPage({ params }: PageProps) {
   const { familySlug } = await params;
-  const family = await getFamilyBySlug(familySlug);
+  const [family, user] = await Promise.all([
+    getFamilyBySlug(familySlug),
+    getUser(),
+  ]);
   if (!family) notFound();
 
   const returnTo = `/dashboard/families/${familySlug}`;
@@ -250,6 +253,14 @@ export default async function FamilyDirectoryDetailPage({ params }: PageProps) {
               >
                 <span>VÀO XEM GIA PHẢ</span>
                 <ArrowRight className="size-4" />
+              </Link>
+            ) : !user ? (
+              <Link
+                href={`/login?next=${encodeURIComponent(returnTo)}`}
+                className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#8c1d1d] hover:bg-[#6e1616] px-5 py-3 text-sm font-black text-white shadow-xs transition-colors"
+              >
+                <Send className="size-4" />
+                <span>Đăng nhập để xin gia nhập</span>
               </Link>
             ) : canRequest ? (
               <form action={requestJoinFamilyAction} className="flex-1">

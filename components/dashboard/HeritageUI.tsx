@@ -5,8 +5,6 @@ export interface HeritageFrameProps {
   className?: string;
   innerClassName?: string;
   cornerColor?: string;
-  outerBorderColor?: string;
-  innerBorderColor?: string;
 }
 
 export function HeritageFrame({
@@ -14,17 +12,13 @@ export function HeritageFrame({
   className = "",
   innerClassName = "",
   cornerColor = "#8c1d1d",
-  outerBorderColor = "#8c1d1d",
-  innerBorderColor = "#caa455",
 }: HeritageFrameProps) {
   return (
     <div
-      className={`relative p-1.5 border-2 rounded-2xl bg-gradient-to-br from-[#fbf7ed] via-[#f5e7c7]/50 to-[#fbf7ed] shadow-[0_4px_20px_rgba(44,26,17,0.06)] ${className}`}
-      style={{ borderColor: outerBorderColor }}
+      className={`relative p-1.5 border-2 border-[#caa455] bg-[#f5e7c7]/30 shadow-[0_4px_20px_rgba(44,26,17,0.06)] ${className}`}
     >
       <div
-        className={`relative border-2 rounded-xl bg-[#fffdf7] p-5 sm:p-6 ${innerClassName}`}
-        style={{ borderColor: innerBorderColor }}
+        className={`relative border border-[#deb887] bg-[#fffdf7] p-5 sm:p-6 ${innerClassName}`}
       >
         {/* 4 Traditional Corner Brackets */}
         <span
