@@ -1,3 +1,4 @@
+import WorkspaceBreadcrumb from "@/components/WorkspaceBreadcrumb";
 import type { ReactNode } from "react";
 
 interface FamilyWorkspaceLayoutProps {
@@ -9,7 +10,12 @@ export default async function FamilyWorkspaceLayout({
   children,
   params,
 }: FamilyWorkspaceLayoutProps) {
-  await params;
+  const { familySlug } = await params;
 
-  return <>{children}</>;
+  return (
+    <>
+      <WorkspaceBreadcrumb familySlug={familySlug} />
+      {children}
+    </>
+  );
 }
