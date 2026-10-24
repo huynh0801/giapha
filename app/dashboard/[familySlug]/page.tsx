@@ -267,13 +267,13 @@ export default async function FamilyDashboardPage({
       <main className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-8 sm:px-6 lg:px-8">
         {/* Hero Banner: Identity & Court Calendar */}
         <section className="mb-6">
-          <div className="relative p-2.5 sm:p-3 border-[3px] border-[#d4af37] bg-[#8c1d1d] shadow-[0_6px_24px_rgba(44,26,17,0.12)] rounded-none">
+          <div className="relative p-1 sm:p-1.5 border-2 border-[#d4af37] bg-[#541111] shadow-[0_4px_20px_rgba(44,26,17,0.08)] rounded-none">
             <div className="relative border-2 border-[#d4af37] bg-[#fffdf7] p-6 sm:p-8 rounded-none">
-              {/* 4 Traditional Corner Brackets */}
-              <span className="pointer-events-none absolute top-2.5 left-2.5 size-4 border-t-2 border-l-2 border-[#8c1d1d]" />
-              <span className="pointer-events-none absolute top-2.5 right-2.5 size-4 border-t-2 border-r-2 border-[#8c1d1d]" />
-              <span className="pointer-events-none absolute bottom-2.5 left-2.5 size-4 border-b-2 border-l-2 border-[#8c1d1d]" />
-              <span className="pointer-events-none absolute bottom-2.5 right-2.5 size-4 border-b-2 border-r-2 border-[#8c1d1d]" />
+              {/* 4 Traditional Corner Brackets in Gold */}
+              <span className="pointer-events-none absolute top-2 left-2 size-3.5 border-t-2 border-l-2 border-[#d4af37]" />
+              <span className="pointer-events-none absolute top-2 right-2 size-3.5 border-t-2 border-r-2 border-[#d4af37]" />
+              <span className="pointer-events-none absolute bottom-2 left-2 size-3.5 border-b-2 border-l-2 border-[#d4af37]" />
+              <span className="pointer-events-none absolute bottom-2 right-2 size-3.5 border-b-2 border-r-2 border-[#d4af37]" />
 
               <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between relative z-10">
                 <div className="flex-1 min-w-0">
