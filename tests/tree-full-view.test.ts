@@ -169,28 +169,18 @@ test("RootSelector allows viewing all branches (Toàn bộ cành nhánh)", () =>
   );
 });
 
-test("FamilyTree leverages the connect mode canvas for viewing with fullscreen toggle", () => {
+test("FamilyTree supports free canvas zoom and clean unobstructed view", () => {
   const familyTree = read("components/FamilyTree.tsx");
 
   assert.match(
     familyTree,
-    /isFullscreen/,
-    "FamilyTree must maintain isFullscreen state",
+    /const handleWheel = \(event: WheelEvent\) =>/,
+    "FamilyTree must implement handleWheel for canvas zoom",
   );
   assert.match(
     familyTree,
-    /isExpandedWorkspace/,
-    "FamilyTree must support isExpandedWorkspace",
-  );
-  assert.match(
-    familyTree,
-    /Toàn màn hình/,
-    "FamilyTree must offer Toàn màn hình button for viewing",
-  );
-  assert.match(
-    familyTree,
-    /Thu nhỏ/,
-    "FamilyTree must offer Thu nhỏ button to exit fullscreen",
+    /TreeToolbar/,
+    "FamilyTree must render TreeToolbar for controls",
   );
   assert.match(
     familyTree,

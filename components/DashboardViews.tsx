@@ -98,12 +98,18 @@ export default function DashboardViews({
           currentView === "list" ? "overflow-auto" : "overflow-hidden"
         }`}
       >
-        {currentView !== "list" &&
-          !isTreeWorkspace &&
-          persons.length > 0 && (
+        {currentView !== "list" && persons.length > 0 && (
           <div className="relative z-20 flex w-full flex-col gap-3 border-b border-amber-100 bg-[#fbfaf7]/95 px-4 py-3 shadow-sm backdrop-blur sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
             <div className="flex min-w-0 flex-1 items-center gap-3">
               <RootSelector persons={persons} currentRootId={rootId} />
+              <div className="hidden min-w-0 items-center gap-2 lg:flex">
+                <span className="rounded-full border border-emerald-100 bg-white px-3 py-1.5 text-xs font-black text-emerald-700 shadow-sm">
+                  {relationships.length.toLocaleString("vi-VN")} quan hệ
+                </span>
+                <span className="rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs font-black text-stone-600 shadow-sm">
+                  {persons.length.toLocaleString("vi-VN")} thành viên
+                </span>
+              </div>
             </div>
             <div
               id="tree-toolbar-portal"

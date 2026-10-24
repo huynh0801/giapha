@@ -923,14 +923,6 @@ export default function FamilyTree({
     if (!el) return;
 
     const handleWheel = (event: WheelEvent) => {
-      if (
-        !isEditWorkspace &&
-        !event.ctrlKey &&
-        !event.metaKey &&
-        !event.altKey
-      ) {
-        return;
-      }
       event.preventDefault();
       event.stopPropagation();
       if (event.deltaY > 0) handleZoomOut();
@@ -1760,6 +1752,49 @@ export default function FamilyTree({
           : "relative h-full w-full overflow-hidden bg-[#f5f6f1]"
       }
     >
+            <TreeToolbar
+        scale={scale}
+        handleZoomIn={handleZoomIn}
+        handleZoomOut={handleZoomOut}
+        handleResetZoom={handleResetZoom}
+        handleCenter={centerTree}
+        handleExpandAll={handleExpandAll}
+        handleCollapseAll={handleCollapseAll}
+        hideExpandButtons={hideExpandButtons}
+        setHideExpandButtons={setHideExpandButtons}
+        autoCollapseLevel={autoCollapseLevel}
+        setAutoCollapseLevel={setAutoCollapseLevel}
+        hideDaughtersInLaw={hideDaughtersInLaw}
+        setHideDaughtersInLaw={setHideDaughtersInLaw}
+        hideSonsInLaw={hideSonsInLaw}
+        setHideSonsInLaw={setHideSonsInLaw}
+        hideDaughters={hideDaughters}
+        setHideDaughters={setHideDaughters}
+        hideSons={hideSons}
+        setHideSons={setHideSons}
+        hideMales={hideMales}
+        setHideMales={setHideMales}
+        hideFemales={hideFemales}
+        setHideFemales={setHideFemales}
+        canEdit={canEdit}
+        extraActions={
+          canUseAdminTreeWorkspace ? (
+            <button
+              type="button"
+              onClick={isEditWorkspace ? exitEditWorkspace : enterEditWorkspace}
+              className={`inline-flex h-10 items-center gap-2 rounded-full border px-4 text-sm font-black transition ${
+                isEditWorkspace
+                  ? "border-red-200 bg-red-50 text-red-700 hover:bg-red-100"
+                  : "border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100"
+              }`}
+              title={isEditWorkspace ? "Thoát chế độ nối quan hệ" : "Mở chế độ nối quan hệ trên cây"}
+            >
+              {isEditWorkspace ? <X className="size-4" /> : <Link2 className="size-4" />}
+              <span>{isEditWorkspace ? "Thoát sửa" : "Nối quan hệ"}</span>
+            </button>
+          ) : null
+        }
+      />
       <TreeQuickAddDialog
         target={quickAddTarget}
         personsMap={personsMap}
@@ -1882,186 +1917,8 @@ export default function FamilyTree({
       )}
 
       <div className="relative h-full min-h-0 w-full overflow-hidden bg-[#f5f6f1]">
-          {/* Top Workspace Header */
-          true && (
-            <div className="pointer-events-none absolute inset-x-3 top-3 z-[120] flex justify-center sm:inset-x-5 sm:top-5">
-              <div
-                data-no-pan
-                onMouseDown={(event) => event.stopPropagation()}
-                className={`pointer-events-auto flex w-full flex-col gap-3 rounded-[22px] border border-white/80 bg-[#fffdf9]/94 p-2.5 shadow-[0_18px_56px_rgba(41,37,36,0.16)] backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between ${
-                  isEditWorkspace
-                    ? "max-w-[calc(100vw-32px)]"
-                    : "max-w-[1180px]"
-                }`}
-              >
-                <div className="flex min-w-0 items-center gap-3 px-1">
-                  <div
-                    className={`hidden size-10 shrink-0 items-center justify-center rounded-2xl border shadow-sm sm:flex ${
-                      effectiveCanEdit
-                        ? "border-amber-200 bg-amber-50 text-amber-800"
-                        : "border-stone-200 bg-stone-50 text-stone-600"
-                    }`}
-                  >
-                    {effectiveCanEdit ? (
-                      <Link2 className="size-4" />
-                    ) : (
-                      <Users className="size-4" />
-                    )}
-                  </div>
-                  <div className="min-w-0">
-                    <div className="flex min-w-0 items-center gap-2">
-                      <p className="truncate text-sm font-black text-stone-950 sm:text-base">
-                        {isEditWorkspace
-                          ? "Không gian chỉnh sửa gia phả"
-                          : "Sơ đồ cây gia phả"}
-                      </p>
-                      <span
-                        className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-black uppercase ${
-                          effectiveCanEdit
-                            ? "bg-amber-100 text-amber-800"
-                            : "bg-stone-100 text-stone-600"
-                        }`}
-                      >
-                        {isEditWorkspace ? "Chế độ nối" : "Chế độ xem"}
-                      </span>
-                      {isFullscreen && (
-                        <span className="hidden shrink-0 rounded-full bg-amber-100 px-2.5 py-1 text-[10px] font-black uppercase text-amber-900 sm:inline-block">
-                          Toàn màn hình
-                        </span>
-                      )}
-                    </div>
-                    <p className="mt-0.5 truncate text-xs font-bold text-stone-500">
-                      {isEditWorkspace
-                        ? "Lăn chuột để zoom · kéo nền để di chuyển · kéo chấm để nối quan hệ"
-                        : `${displayRoots.length.toLocaleString("vi-VN")} cành · ${persons.length.toLocaleString("vi-VN")} thành viên · kéo thả tự do để xem rõ cây`}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
-                  <div className="hidden lg:block">
-                    <RootSelector persons={persons} currentRootId={rootId} />
-                  </div>
-
-                  <button
-                    type="button"
-                    data-no-pan
-                    onClick={() => {
-                      setIsFullscreen((prev) => !prev);
-                      requestAnimationFrame(() => {
-                        fitTreeToView();
-                        requestAnimationFrame(updateMiniMap);
-                      });
-                    }}
-                    className={`inline-flex min-h-10 items-center justify-center gap-2 rounded-2xl border px-3 text-xs font-black shadow-sm transition hover:-translate-y-0.5 sm:px-4 sm:text-sm ${
-                      isFullscreen
-                        ? "border-amber-300 bg-amber-50 text-amber-900"
-                        : "border-stone-200 bg-white text-stone-800 hover:border-amber-300 hover:bg-amber-50"
-                    }`}
-                    title={
-                      isFullscreen
-                        ? "Thu nhỏ về giao diện trang (Esc)"
-                        : "Mở rộng toàn màn hình để xem cây rõ nhất"
-                    }
-                  >
-                    {isFullscreen ? (
-                      <>
-                        <Minimize2 className="size-4 text-amber-700" />
-                        <span className="hidden sm:inline">Thu nhỏ</span>
-                      </>
-                    ) : (
-                      <>
-                        <Maximize2 className="size-4 text-stone-600" />
-                        <span className="hidden sm:inline">Toàn màn hình</span>
-                      </>
-                    )}
-                  </button>
-
-                  <button
-                    type="button"
-                    data-no-pan
-                    onClick={() => setShowMemberListDialog(true)}
-                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-2xl border border-stone-200 bg-white px-3 text-xs font-black text-stone-800 shadow-sm transition hover:-translate-y-0.5 hover:border-amber-300 hover:bg-amber-50 sm:px-4 sm:text-sm"
-                    title="Tìm và xem danh sách thành viên"
-                  >
-                    <Users className="size-4 text-amber-700" />
-                    <span className="hidden sm:inline">Tìm người</span>
-                    <span className="rounded-full bg-stone-950 px-2 py-0.5 text-[11px] text-white">
-                      {persons.length.toLocaleString("vi-VN")}
-                    </span>
-                  </button>
-
-                  {canEdit && (
-                    <button
-                      type="button"
-                      data-no-pan
-                      onClick={() => setShowImportDialog(true)}
-                      className="inline-flex min-h-10 items-center justify-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 text-xs font-black text-emerald-800 shadow-sm transition hover:-translate-y-0.5 hover:bg-emerald-100 sm:px-4 sm:text-sm"
-                    >
-                      <FileSpreadsheet className="size-4" />
-                      <span className="hidden sm:inline">Nhập Excel</span>
-                      <span className="sm:hidden">Nhập</span>
-                    </button>
-                  )}
-
-                  {canUseAdminTreeWorkspace && (
-                    <button
-                      type="button"
-                      data-no-pan
-                      onClick={
-                        isEditWorkspace ? exitEditWorkspace : enterEditWorkspace
-                      }
-                      className={`inline-flex min-h-10 items-center justify-center gap-2 rounded-2xl border px-3 text-xs font-black shadow-sm transition hover:-translate-y-0.5 sm:px-4 sm:text-sm ${
-                        isEditWorkspace
-                          ? "border-red-200 bg-red-50 text-red-700 hover:bg-red-100"
-                          : "border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100"
-                      }`}
-                      aria-pressed={isEditWorkspace}
-                    >
-                      {isEditWorkspace ? (
-                        <X className="size-4" />
-                      ) : (
-                        <Link2 className="size-4" />
-                      )}
-                      <span>{isEditWorkspace ? "Thoát sửa" : "Nối"}</span>
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {!canUseAdminTreeWorkspace && (
-            <ReadOnlyTreeControls
-              scale={scale}
-              canExport
-              onZoomIn={handleZoomIn}
-              onZoomOut={handleZoomOut}
-              onResetZoom={handleResetZoom}
-              onFit={fitTreeToView}
-              showAvatar={showAvatar}
-              hideExpandButtons={hideExpandButtons}
-              autoCollapseLevel={autoCollapseLevel}
-              hideDaughtersInLaw={hideDaughtersInLaw}
-              hideSonsInLaw={hideSonsInLaw}
-              hideDaughters={hideDaughters}
-              hideSons={hideSons}
-              hideMales={hideMales}
-              hideFemales={hideFemales}
-              onShowAvatarChange={setShowAvatar}
-              onHideExpandButtonsChange={setHideExpandButtons}
-              onAutoCollapseLevelChange={setAutoCollapseLevel}
-              onHideDaughtersInLawChange={setHideDaughtersInLaw}
-              onHideSonsInLawChange={setHideSonsInLaw}
-              onHideDaughtersChange={setHideDaughters}
-              onHideSonsChange={setHideSons}
-              onHideMalesChange={setHideMales}
-              onHideFemalesChange={setHideFemales}
-            />
-          )}
-
           {isEditWorkspace && (
-            <div className="pointer-events-none absolute left-5 top-[92px] z-[110] hidden items-center gap-2 rounded-full border border-white/80 bg-white/84 px-3 py-2 text-xs font-black text-stone-600 shadow-[0_12px_34px_rgba(41,37,36,0.08)] backdrop-blur lg:flex">
+            <div className="pointer-events-none absolute left-5 top-4 z-[110] hidden items-center gap-2 rounded-full border border-white/80 bg-white/84 px-3 py-2 text-xs font-black text-stone-600 shadow-[0_12px_34px_rgba(41,37,36,0.08)] backdrop-blur lg:flex">
               <>
                 <Link2 className="size-3.5 text-amber-700" />
                 Chế độ nối quan hệ
@@ -2070,7 +1927,7 @@ export default function FamilyTree({
           )}
 
           {isEditWorkspace && (
-            <div className="absolute right-5 top-[92px] z-[150] flex items-center gap-2">
+            <div className="absolute right-5 top-4 z-[150] flex items-center gap-2">
               <button
                 type="button"
                 data-no-pan
@@ -3301,7 +3158,7 @@ function ViewTreePlane({
   renderBranch: (root: Person) => React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-[620px] w-full items-start justify-center px-10 pb-24 pt-28">
+    <div className="flex min-h-[620px] w-full items-start justify-center px-10 pb-24 pt-8">
       <div className="flex w-max min-w-[min(100%,960px)] flex-wrap items-start justify-center gap-x-16 gap-y-20">
         {branchRoots.map((root) => (
           <div key={root.id} className="min-w-max">
