@@ -265,61 +265,55 @@ export default async function FamilyDashboardPage({
     <div className="relative flex-1 w-full overflow-hidden">
       <BackgroundDecor subtle />
       <main className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-8 sm:px-6 lg:px-8">
-        {/* Hero Banner: Identity & Court Calendar (Imperial Plaque with Gold Trim and Royal Crimson) */}
+        {/* Hero Banner: Identity & Court Calendar */}
         <section className="mb-6">
-          <div className="relative p-1.5 border-2 border-[#caa455] bg-[#caa455]/20 shadow-[0_6px_24px_rgba(140,29,29,0.15)] rounded-none">
-            <div className="relative border border-[#caa455]/80 bg-gradient-to-br from-[#8c1d1d] via-[#7a1616] to-[#611010] p-6 sm:p-8 rounded-none text-white">
-              {/* 4 Traditional Corner Brackets in Gold */}
-              <span className="pointer-events-none absolute top-2 left-2 size-4 border-t-2 border-l-2 border-[#caa455]" />
-              <span className="pointer-events-none absolute top-2 right-2 size-4 border-t-2 border-r-2 border-[#caa455]" />
-              <span className="pointer-events-none absolute bottom-2 left-2 size-4 border-b-2 border-l-2 border-[#caa455]" />
-              <span className="pointer-events-none absolute bottom-2 right-2 size-4 border-b-2 border-r-2 border-[#caa455]" />
+          <div className="relative p-2 sm:p-2.5 border-2 border-[#caa455] bg-[#8c1d1d] shadow-[0_4px_20px_rgba(44,26,17,0.08)] rounded-none">
+            <div className="relative border border-[#deb887] bg-[#fffdf7] p-6 sm:p-8 rounded-none">
+              {/* 4 Traditional Corner Brackets */}
+              <span className="pointer-events-none absolute top-2 left-2 size-3.5 border-t-2 border-l-2 border-[#8c1d1d]" />
+              <span className="pointer-events-none absolute top-2 right-2 size-3.5 border-t-2 border-r-2 border-[#8c1d1d]" />
+              <span className="pointer-events-none absolute bottom-2 left-2 size-3.5 border-b-2 border-l-2 border-[#8c1d1d]" />
+              <span className="pointer-events-none absolute bottom-2 right-2 size-3.5 border-b-2 border-r-2 border-[#8c1d1d]" />
 
               <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between relative z-10">
                 <div className="flex-1 min-w-0">
-                  <div className="mb-3.5 inline-flex items-center gap-2 rounded-none border border-[#caa455] bg-[#540d0d]/90 px-3.5 py-1 text-xs font-black uppercase tracking-wider text-[#fdf3d0] shadow-xs">
-                    <ShieldCheck className="size-3.5 text-[#caa455]" />
+                  <div className="mb-3 inline-flex items-center gap-2 rounded-none border border-[#deb887] bg-[#f5e7c7]/60 px-3.5 py-1 text-xs font-black uppercase tracking-wide text-[#8c1d1d]">
+                    <ShieldCheck className="size-3.5" />
                     Không gian riêng tư dòng họ
                   </div>
-                  <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[#fffdf7] leading-tight drop-shadow-xs">
+                  <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[#183b28] leading-tight">
                     {context.family.name}
                   </h1>
                   {context.family.description && (
-                    <p className="mt-3.5 max-w-2xl text-sm sm:text-base leading-relaxed text-[#f5e7c7]/95">
+                    <p className="mt-3 max-w-2xl text-sm sm:text-base leading-relaxed text-[#5c4a3e]">
                       {context.family.description}
                     </p>
                   )}
                 </div>
 
                 {/* Imperial Court Calendar Tablet */}
-                <div className="rounded-none border-2 border-[#caa455] bg-gradient-to-br from-[#681111] to-[#4e0c0c] p-4.5 sm:p-5 shadow-sm shrink-0 lg:w-76 relative">
-                  {/* Subtle inner corner marks for calendar tablet */}
-                  <span className="pointer-events-none absolute top-1 left-1 size-2 border-t border-l border-[#caa455]/60" />
-                  <span className="pointer-events-none absolute top-1 right-1 size-2 border-t border-r border-[#caa455]/60" />
-                  <span className="pointer-events-none absolute bottom-1 left-1 size-2 border-b border-l border-[#caa455]/60" />
-                  <span className="pointer-events-none absolute bottom-1 right-1 size-2 border-b border-r border-[#caa455]/60" />
-
-                  <div className="flex items-center justify-between border-b border-[#caa455]/40 pb-2 mb-2.5">
-                    <p className="text-xs font-black uppercase tracking-wider text-[#caa455]">
+                <div className="rounded-none border-2 border-[#deb887] bg-gradient-to-br from-[#fffdf7] via-[#fbf7ed] to-[#f6eedf] p-4.5 sm:p-5 shadow-xs shrink-0 lg:w-76">
+                  <div className="flex items-center justify-between border-b border-[#deb887]/50 pb-2 mb-2.5">
+                    <p className="text-xs font-black uppercase tracking-wider text-[#8c1d1d]">
                       Thời khắc gia tộc
                     </p>
-                    <span className="rounded-none bg-[#caa455] text-[#4e0c0c] text-[10px] font-extrabold px-2 py-0.5 uppercase tracking-wider">
+                    <HeritageBadge variant="amber" className="text-[10px] px-2 py-0.5 rounded-none">
                       Hôm nay
-                    </span>
+                    </HeritageBadge>
                   </div>
-                  <p className="text-base sm:text-lg font-bold text-[#fffdf7] capitalize">
+                  <p className="text-base sm:text-lg font-bold text-[#183b28] capitalize">
                     {formatDate(today)}
                   </p>
-                  <div className="mt-2.5 pt-2.5 border-t border-[#caa455]/30 space-y-1.5">
-                    <p className="text-xs font-semibold text-[#f5e7c7] flex items-center justify-between">
+                  <div className="mt-2.5 pt-2.5 border-t border-[#deb887]/40 space-y-1">
+                    <p className="text-xs font-semibold text-[#7a6455] flex items-center justify-between">
                       <span>Âm lịch:</span>
-                      <span className="font-bold text-[#fdf3d0]">
+                      <span className="font-bold text-[#8c1d1d]">
                         {lunar.lunarDayStr}
                       </span>
                     </p>
-                    <p className="text-xs font-semibold text-[#f5e7c7] flex items-center justify-between">
+                    <p className="text-xs font-semibold text-[#7a6455] flex items-center justify-between">
                       <span>Năm:</span>
-                      <span className="font-bold text-[#caa455]">
+                      <span className="font-bold text-[#183b28]">
                         {lunar.lunarYear}
                       </span>
                     </p>
