@@ -68,7 +68,7 @@ test("LandingAbout and LandingLatestNews contain expected copy and fallback supp
   const aboutPath = path.join(process.cwd(), "components", "landing", "LandingAbout.tsx");
   assert.ok(fs.existsSync(aboutPath), "LandingAbout.tsx should exist");
   const aboutContent = fs.readFileSync(aboutPath, "utf8");
-  assert.match(aboutContent, /Về dòng họ chúng tôi/);
+  assert.match(aboutContent, /Dự án số hóa gia phả vì cộng đồng/i);
   assert.match(aboutContent, /Xem chi tiết/);
 
   const newsPath = path.join(process.cwd(), "components", "landing", "LandingLatestNews.tsx");

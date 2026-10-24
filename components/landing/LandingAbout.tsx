@@ -47,18 +47,22 @@ export default function LandingAbout() {
         </div>
 
         <div>
+          <span className="inline-block text-[10px] sm:text-[11px] font-extrabold uppercase tracking-widest text-[#8c1d1d] font-sans mb-1">
+            Sáng kiến số hóa di sản
+          </span>
           <h2
             className="text-lg sm:text-xl lg:text-[1.45rem] font-bold text-[#183b28] tracking-tight leading-tight"
             style={{ fontFamily: '"SVN-Studio Brush", Georgia, serif' }}
           >
-            Về dòng họ chúng tôi
+            Dự án số hóa gia phả vì cộng đồng
           </h2>
 
           <p className="mt-2 sm:mt-2.5 text-xs sm:text-[13px] text-[#3c3026] leading-relaxed font-sans font-normal">
-            Dòng họ chúng tôi có lịch sử lâu đời, khởi nguồn từ những bậc tiền nhân
-            giàu lòng nhân nghĩa, cần cù và hiếu học. Qua nhiều thế hệ, con cháu
-            trong dòng họ luôn giữ gìn truyền thống, đoàn kết, cùng nhau xây dựng
-            cuộc sống tốt đẹp hơn.
+            Gia Phả Dòng Họ là dự án số hóa phả hệ phi lợi nhuận vì cộng đồng,
+            ra đời với sứ mệnh gìn giữ, tôn vinh và kết nối cội nguồn các gia
+            tộc Việt Nam. Nền tảng hỗ trợ các dòng họ lưu truyền cây gia phả đa
+            đời, số hóa tư liệu cổ và nhắc nhớ ngày giỗ tổ tiên trường tồn cùng
+            thời gian.
           </p>
         </div>
 

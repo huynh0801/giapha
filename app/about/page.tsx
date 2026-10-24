@@ -89,7 +89,7 @@ export default function AboutPage() {
                       '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
                   }}
                 >
-                  Nguồn Cội &amp; Truyền Thống Dòng Họ
+                  Dự Án Số Hóa Gia Phả Vì Cộng Đồng
                 </h1>
 
                 <p className="mt-3 max-w-2xl mx-auto text-xs sm:text-sm md:text-base text-[#5c4a3e] font-sans font-medium italic">
@@ -104,7 +104,7 @@ export default function AboutPage() {
                 </div>
               </div>
 
-              {/* 2. Khởi Nguồn Tiền Nhân Khai Sáng */}
+              {/* 2. Sứ Mệnh Số Hóa & Lưu Truyền Cội Nguồn */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center">
                 {/* Artwork */}
                 <div className="lg:col-span-5 flex flex-col items-center">
@@ -121,7 +121,7 @@ export default function AboutPage() {
                     </div>
                   </div>
                   <p className="mt-2 text-center text-[11px] sm:text-xs text-[#6e5849] font-sans italic">
-                    Từ đường dòng họ – Chốn hội tụ hồn thiêng và phúc đức ngàn đời
+                    Gìn giữ di sản gia phả – Kết nối hồn thiêng và phúc đức ngàn đời
                   </p>
                 </div>
 
@@ -135,32 +135,31 @@ export default function AboutPage() {
                           '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
                       }}
                     >
-                      Khởi Nguồn Tiền Nhân Khai Sáng
+                      Sứ Mệnh Số Hóa &amp; Lưu Truyền Cội Nguồn
                     </span>
                   </div>
 
                   <p className="text-xs sm:text-sm text-[#3c3026] leading-relaxed font-sans text-justify">
-                    Dòng họ chúng tôi trải qua nhiều thế hệ đồng hành cùng những
-                    bước thăng trầm của lịch sử dân tộc. Bắt đầu từ những bậc tiền
-                    nhân giàu lòng nhân nghĩa, khai hoang mở đất, lập làng dựng ấp,
-                    các thế hệ con cháu luôn kế thừa trọn vẹn đức tính cần cù, hiếu
-                    học, cương trực và hết lòng phụng sự quê hương.
+                    Dự án Gia Phả Dòng Họ ra đời từ tâm nguyện phụng sự cộng đồng,
+                    nhằm gìn giữ những giá trị thiêng liêng của văn hóa cội nguồn
+                    dân tộc. Trải qua thời gian, những trang gia phả chép tay, sắc phong
+                    hay thần tích dễ bị hư hao bởi thời gian và chiến tranh. Chúng tôi
+                    ứng dụng công nghệ hiện đại để số hóa, bảo tồn và kết nối các thế
+                    hệ con cháu một cách trang trọng và bền vững.
                   </p>
 
                   <div className="p-3.5 border-l-4 border-[#8c1d1d] bg-[#fcf6e8] border-t border-r border-b border-[#deb887]/60">
                     <p className="text-xs sm:text-[13px] text-[#2c1a11] leading-relaxed font-sans font-semibold">
-                      &ldquo;Dù đi bốn phương trời, hướng về trăm ngả gió, mỗi
+                      &ldquo;Dù đi bốn phương trời, hướng về muôn ngả gió, mỗi
                       người con dòng tộc luôn khắc cốt ghi tâm nguồn cội, cùng nhau
-                      gìn giữ gia phong, đùm bọc chi họ và làm rạng danh tiên
-                      tổ.&rdquo;
+                      gìn giữ gia phong và làm rạng danh tiên tổ.&rdquo;
                     </p>
                   </div>
 
                   <p className="text-xs sm:text-sm text-[#3c3026] leading-relaxed font-sans text-justify">
-                    Nhằm bảo tồn gia phả và kết nối muôn phương, Hội đồng Dòng họ
-                    đã cùng các chi cành chung tay số hóa tư liệu gia phả, tạo nên
-                    không gian kết nối vững chắc giữa quá khứ, hiện tại và tương
-                    lai.
+                    Nền tảng hoàn toàn miễn phí vì cộng đồng, cho phép mọi dòng họ
+                    tự lập không gian riêng, tạo lập cây phả hệ đa thế hệ, tra cứu quan hệ
+                    thân tộc, lưu trữ tư liệu cổ và quản lý lịch giỗ chạp tổ tiên thuận tiện.
                   </p>
                 </div>
               </div>
