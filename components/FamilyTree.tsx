@@ -297,8 +297,10 @@ export default function FamilyTree({
     isPressed,
     isDragging,
     zoomAt,
+    zoomByFactor,
     handlers: {
       handleMouseDown,
+      handlePointerDown,
       handleMouseMove,
       handleMouseUpOrLeave,
       handleClickCapture,
@@ -757,6 +759,7 @@ export default function FamilyTree({
   }, [isEditWorkspace, setPan]);
 
   const updateMiniMap = useCallback(() => {
+    if (!isEditWorkspace) return;
     const el = containerRef.current;
     if (!el) return;
 
@@ -1027,22 +1030,28 @@ export default function FamilyTree({
     };
   }, [isEditWorkspace]);
 
+  const wheelZoomHandlerRef = useRef<(event: WheelEvent) => void>(() => {});
+  useEffect(() => {
+    wheelZoomHandlerRef.current = (event: WheelEvent) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const zoomFactor = event.deltaY < 0 ? 1.12 : 0.88;
+      zoomByFactor(zoomFactor, event.clientX, event.clientY);
+      requestAnimationFrame(updateMiniMap);
+    };
+  }, [updateMiniMap, zoomByFactor]);
+
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
 
     const handleWheel = (event: WheelEvent) => {
-      event.preventDefault();
-      event.stopPropagation();
-      const zoomFactor = event.deltaY < 0 ? 1.12 : 0.88;
-      const nextScale = scale * zoomFactor;
-      zoomAt(nextScale, event.clientX, event.clientY);
-      requestAnimationFrame(updateMiniMap);
+      wheelZoomHandlerRef.current(event);
     };
 
     el.addEventListener("wheel", handleWheel, { passive: false });
     return () => el.removeEventListener("wheel", handleWheel);
-  }, [scale, updateMiniMap, zoomAt]);
+  }, []);
 
   const openExistingRelationshipDraft = useCallback(
     (relationship: Relationship) => {
@@ -1416,23 +1425,20 @@ export default function FamilyTree({
     return () => cancelAnimationFrame(raf);
   }, [autoCollapseLevel, centerTree, forestRootIds, getTreeData]);
 
+  const initialFitDoneKeyRef = useRef<string | null>(null);
+
   useEffect(() => {
     if (isEditWorkspace || persons.length === 0) return;
-    const raf = requestAnimationFrame(() => {
+    const currentKey = `${familyId || ""}:${rootId || "all"}:${displayRoots.length}`;
+    if (initialFitDoneKeyRef.current === currentKey) return;
+
+    initialFitDoneKeyRef.current = currentKey;
+    const timer = window.setTimeout(() => {
       fitTreeToView();
-      requestAnimationFrame(updateMiniMap);
-    });
-    return () => cancelAnimationFrame(raf);
-  }, [
-    collapsedNodes,
-    fitTreeToView,
-    forestRootIds,
-    isEditWorkspace,
-    persons.length,
-    relationships.length,
-    showAvatar,
-    updateMiniMap,
-  ]);
+    }, 150);
+
+    return () => window.clearTimeout(timer);
+  }, [displayRoots.length, familyId, fitTreeToView, isEditWorkspace, persons.length, rootId]);
 
   const toggleCollapse = useCallback((personId: string) => {
     setCollapsedNodes((prev) => {
@@ -2114,6 +2120,7 @@ export default function FamilyTree({
             style={{
               backgroundPosition: `${pan.x % 34}px ${pan.y % 34}px`,
             }}
+            onPointerDown={handlePointerDown}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUpOrLeave}
@@ -2209,10 +2216,8 @@ export default function FamilyTree({
 
             <div
               id="export-container"
-              className={`css-tree relative w-max min-w-full overflow-visible px-10 pb-10 ${
-                isDragging
-                  ? "transition-none select-none opacity-90"
-                  : "transition-transform duration-150 ease-out"
+              className={`css-tree relative w-max min-w-full overflow-visible px-10 pb-10 transition-none ${
+                isDragging ? "select-none opacity-90" : ""
               } ${
                 isEditWorkspace ? "pt-36" : "pt-10"
               }`}

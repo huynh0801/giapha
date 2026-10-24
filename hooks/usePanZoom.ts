@@ -1,4 +1,4 @@
-import { MouseEvent, useCallback, useEffect, useRef, useState } from "react";
+import { MouseEvent, PointerEvent, useCallback, useEffect, useRef, useState } from "react";
 
 export type PanCoordinates = { x: number; y: number };
 
@@ -17,23 +17,7 @@ export function usePanZoom(
     stateRef.current = { pan, scale, isPressed };
   }, [pan, scale, isPressed]);
 
-  const handleZoomIn = useCallback(() => {
-    setScale((s) => Math.min(Number((s * 1.15).toFixed(3)), 2.5));
-  }, []);
-
-  const handleZoomOut = useCallback(() => {
-    setScale((s) => Math.max(Number((s * 0.85).toFixed(3)), 0.2));
-  }, []);
-
-  const handleResetZoom = useCallback(() => {
-    setScale(1);
-  }, []);
-
-  const handleSetScale = useCallback((value: number) => {
-    setScale(Math.min(Math.max(Number(value.toFixed(3)), 0.2), 2.5));
-  }, []);
-
-  // Zoom centered around client coordinates (e.g. mouse cursor or center)
+  // Zoom centered around client coordinates (e.g. mouse cursor or viewport center)
   const zoomAt = useCallback(
     (nextScaleTarget: number, clientX: number, clientY: number) => {
       const el = containerRef.current;
@@ -71,62 +55,118 @@ export function usePanZoom(
     [containerRef],
   );
 
-  const handleMouseDown = useCallback((e: MouseEvent<HTMLElement>) => {
-    // Only drag with left click (0) or middle click (1)
-    if (e.button !== 0 && e.button !== 1) return;
+  const zoomByFactor = useCallback(
+    (factor: number, clientX: number, clientY: number) => {
+      const targetScale = stateRef.current.scale * factor;
+      zoomAt(targetScale, clientX, clientY);
+    },
+    [zoomAt],
+  );
 
-    const target = e.target as HTMLElement;
-    if (
-      target.closest(
-        "button,a,input,select,textarea,[data-no-pan],[data-no-position-drag]",
-      )
-    ) {
-      return;
+  const handleZoomIn = useCallback(() => {
+    const el = containerRef.current;
+    if (el) {
+      const rect = el.getBoundingClientRect();
+      zoomByFactor(1.15, rect.left + rect.width / 2, rect.top + rect.height / 2);
+    } else {
+      setScale((s) => Math.min(Number((s * 1.15).toFixed(3)), 2.5));
     }
+  }, [containerRef, zoomByFactor]);
 
-    setIsPressed(true);
-    hasDraggedRef.current = false;
-    const startX = e.clientX;
-    const startY = e.clientY;
-    const startPan = { ...stateRef.current.pan };
+  const handleZoomOut = useCallback(() => {
+    const el = containerRef.current;
+    if (el) {
+      const rect = el.getBoundingClientRect();
+      zoomByFactor(0.85, rect.left + rect.width / 2, rect.top + rect.height / 2);
+    } else {
+      setScale((s) => Math.max(Number((s * 0.85).toFixed(3)), 0.2));
+    }
+  }, [containerRef, zoomByFactor]);
 
-    const handlePointerMove = (moveEvent: PointerEvent | globalThis.MouseEvent) => {
-      const dx = moveEvent.clientX - startX;
-      const dy = moveEvent.clientY - startY;
+  const handleResetZoom = useCallback(() => {
+    const el = containerRef.current;
+    if (el) {
+      const rect = el.getBoundingClientRect();
+      zoomAt(1, rect.left + rect.width / 2, rect.top + rect.height / 2);
+    } else {
+      setScale(1);
+    }
+  }, [containerRef, zoomAt]);
 
-      if (!hasDraggedRef.current && (Math.abs(dx) > 3 || Math.abs(dy) > 3)) {
-        hasDraggedRef.current = true;
-        setIsDragging(true);
-      }
-
-      if (hasDraggedRef.current) {
-        moveEvent.preventDefault();
-        setPan({
-          x: Math.round(startPan.x + dx),
-          y: Math.round(startPan.y + dy),
-        });
-      }
-    };
-
-    const handlePointerUp = () => {
-      setIsPressed(false);
-      setIsDragging(false);
-      window.removeEventListener("pointermove", handlePointerMove);
-      window.removeEventListener("pointerup", handlePointerUp);
-      window.removeEventListener("mousemove", handlePointerMove);
-      window.removeEventListener("mouseup", handlePointerUp);
-
-      // Keep hasDraggedRef true briefly so handleClickCapture intercepts unwanted clicks
-      setTimeout(() => {
-        hasDraggedRef.current = false;
-      }, 60);
-    };
-
-    window.addEventListener("pointermove", handlePointerMove);
-    window.addEventListener("pointerup", handlePointerUp);
-    window.addEventListener("mousemove", handlePointerMove);
-    window.addEventListener("mouseup", handlePointerUp);
+  const handleSetScale = useCallback((value: number) => {
+    setScale(Math.min(Math.max(Number(value.toFixed(3)), 0.2), 2.5));
   }, []);
+
+  const startDrag = useCallback(
+    (clientX: number, clientY: number, target: HTMLElement) => {
+      if (
+        target.closest(
+          "button,a,input,select,textarea,[data-no-pan],[data-no-position-drag]",
+        )
+      ) {
+        return;
+      }
+
+      setIsPressed(true);
+      hasDraggedRef.current = false;
+      const startX = clientX;
+      const startY = clientY;
+      const startPan = { ...stateRef.current.pan };
+
+      const onPointerMove = (moveEvent: globalThis.PointerEvent | globalThis.MouseEvent) => {
+        const dx = moveEvent.clientX - startX;
+        const dy = moveEvent.clientY - startY;
+
+        if (!hasDraggedRef.current && (Math.abs(dx) > 3 || Math.abs(dy) > 3)) {
+          hasDraggedRef.current = true;
+          setIsDragging(true);
+        }
+
+        if (hasDraggedRef.current) {
+          moveEvent.preventDefault();
+          setPan({
+            x: Math.round(startPan.x + dx),
+            y: Math.round(startPan.y + dy),
+          });
+        }
+      };
+
+      const onPointerUp = () => {
+        setIsPressed(false);
+        setIsDragging(false);
+        window.removeEventListener("pointermove", onPointerMove);
+        window.removeEventListener("pointerup", onPointerUp);
+        window.removeEventListener("mousemove", onPointerMove);
+        window.removeEventListener("mouseup", onPointerUp);
+
+        setTimeout(() => {
+          hasDraggedRef.current = false;
+        }, 60);
+      };
+
+      window.addEventListener("pointermove", onPointerMove, { passive: false });
+      window.addEventListener("pointerup", onPointerUp);
+      window.addEventListener("mousemove", onPointerMove, { passive: false });
+      window.addEventListener("mouseup", onPointerUp);
+    },
+    [],
+  );
+
+  const handleMouseDown = useCallback(
+    (e: MouseEvent<HTMLElement>) => {
+      if (e.button !== 0 && e.button !== 1) return;
+      startDrag(e.clientX, e.clientY, e.target as HTMLElement);
+    },
+    [startDrag],
+  );
+
+  const handlePointerDown = useCallback(
+    (e: PointerEvent<HTMLElement>) => {
+      if (e.pointerType === "mouse" && e.button !== 0 && e.button !== 1) return;
+      startDrag(e.clientX, e.clientY, e.target as HTMLElement);
+    },
+    [startDrag],
+  );
 
   const handleMouseMove = useCallback(() => {}, []);
   const handleMouseUpOrLeave = useCallback(() => {}, []);
@@ -146,8 +186,10 @@ export function usePanZoom(
     isPressed,
     isDragging,
     zoomAt,
+    zoomByFactor,
     handlers: {
       handleMouseDown,
+      handlePointerDown,
       handleMouseMove,
       handleMouseUpOrLeave,
       handleClickCapture,
@@ -157,6 +199,7 @@ export function usePanZoom(
       handleSetScale,
       setPan,
       zoomAt,
+      zoomByFactor,
     },
   };
 }
