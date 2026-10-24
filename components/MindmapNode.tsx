@@ -55,7 +55,7 @@ export const MindmapNode = memo(
     const data = getTreeData(personId, ctx);
     const isHighlighted = ctx.highlightedPersonIds?.has(personId) ?? false;
     const [isExpanded, setIsExpanded] = useState(
-      ctx.autoCollapseLevel > 0 ? level < ctx.autoCollapseLevel : level < 2,
+      ctx.autoCollapseLevel > 0 ? level < ctx.autoCollapseLevel : true,
     );
     const [lastSignalTs, setLastSignalTs] = useState(0);
     const [lastCollapseLevel, setLastCollapseLevel] = useState(
@@ -73,6 +73,8 @@ export const MindmapNode = memo(
       setLastCollapseLevel(ctx.autoCollapseLevel);
       if (ctx.autoCollapseLevel > 0) {
         setIsExpanded(level < ctx.autoCollapseLevel);
+      } else {
+        setIsExpanded(true);
       }
     }
 

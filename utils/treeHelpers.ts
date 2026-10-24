@@ -307,3 +307,132 @@ export function getFilteredTreeData(
     children: childrenList,
   };
 }
+
+
+/**
+ * Tìm tất cả các cành gốc (roots của các nhánh gia phả).
+ * Phân tích các thành phần liên thông trong đồ thị gia phả để tìm ra tổ phụ / người đứng đầu của từng nhánh.
+ */
+export function findForestRoots(
+  personsMap: Map<string, Person>,
+  relationships: Relationship[],
+): Person[] {
+  const childIds = new Set(
+    relationships
+      .filter((r) => isChildRelationshipType(r.type))
+      .map((r) => r.person_b),
+  );
+
+  const parentIdsByChildId = new Map<string, string[]>();
+  const spouseIdsByPersonId = new Map<string, string[]>();
+  const graph = new Map<string, Set<string>>();
+
+  const ensureNode = (id: string) => {
+    if (!graph.has(id)) graph.set(id, new Set());
+  };
+
+  relationships.forEach((rel) => {
+    if (!personsMap.has(rel.person_a) || !personsMap.has(rel.person_b)) return;
+    ensureNode(rel.person_a);
+    ensureNode(rel.person_b);
+    graph.get(rel.person_a)!.add(rel.person_b);
+    graph.get(rel.person_b)!.add(rel.person_a);
+
+    if (isChildRelationshipType(rel.type)) {
+      if (!parentIdsByChildId.has(rel.person_b)) {
+        parentIdsByChildId.set(rel.person_b, []);
+      }
+      parentIdsByChildId.get(rel.person_b)!.push(rel.person_a);
+    } else if (rel.type === "marriage") {
+      if (!spouseIdsByPersonId.has(rel.person_a)) spouseIdsByPersonId.set(rel.person_a, []);
+      if (!spouseIdsByPersonId.has(rel.person_b)) spouseIdsByPersonId.set(rel.person_b, []);
+      spouseIdsByPersonId.get(rel.person_a)!.push(rel.person_b);
+      spouseIdsByPersonId.get(rel.person_b)!.push(rel.person_a);
+    }
+  });
+
+  const sortPeopleForTree = (a: Person, b: Person) => {
+    const genDiff = (a.generation ?? 999) - (b.generation ?? 999);
+    if (genDiff !== 0) return genDiff;
+    const yearDiff = (a.birth_year ?? 9999) - (b.birth_year ?? 9999);
+    if (yearDiff !== 0) return yearDiff;
+    return a.full_name.localeCompare(b.full_name, "vi");
+  };
+
+  const bestRoot = (ids: string[]) =>
+    [...ids].sort((a, b) => {
+      const pA = personsMap.get(a);
+      const pB = personsMap.get(b);
+      if (!pA || !pB) return a.localeCompare(b);
+      return sortPeopleForTree(pA, pB);
+    })[0];
+
+  const visited = new Set<string>();
+  const roots: Person[] = [];
+
+  for (const personId of graph.keys()) {
+    if (visited.has(personId)) continue;
+    const stack = [personId];
+    const component: string[] = [];
+    visited.add(personId);
+
+    while (stack.length > 0) {
+      const current = stack.pop()!;
+      component.push(current);
+      graph.get(current)?.forEach((next) => {
+        if (!visited.has(next)) {
+          visited.add(next);
+          stack.push(next);
+        }
+      });
+    }
+
+    const componentSet = new Set(component);
+    const topCandidates = component.filter((id) =>
+      (parentIdsByChildId.get(id) ?? []).every((pid) => !componentSet.has(pid)),
+    );
+
+    const parentsWithChildren = topCandidates.filter((id) =>
+      relationships.some(
+        (r) =>
+          isChildRelationshipType(r.type) &&
+          r.person_a === id &&
+          componentSet.has(r.person_b),
+      ),
+    );
+
+    const candidateIds =
+      parentsWithChildren.length > 0
+        ? parentsWithChildren
+        : topCandidates.length > 0
+          ? topCandidates
+          : component;
+
+    const candidateSet = new Set(candidateIds);
+    const reducedCandidates = candidateIds.filter((id) => {
+      const spouseIds = spouseIdsByPersonId.get(id) ?? [];
+      return !spouseIds.some((sId) => {
+        if (!candidateSet.has(sId)) return false;
+        return bestRoot([id, sId]) === sId;
+      });
+    });
+
+    const chosenId = bestRoot(
+      reducedCandidates.length > 0 ? reducedCandidates : candidateIds,
+    );
+    if (chosenId && personsMap.has(chosenId)) {
+      roots.push(personsMap.get(chosenId)!);
+    }
+  }
+
+  roots.sort(sortPeopleForTree);
+
+  if (roots.length === 0 && personsMap.size > 0) {
+    const fallback = [...personsMap.values()]
+      .filter((p) => !childIds.has(p.id))
+      .sort(sortPeopleForTree);
+    return fallback.length > 0 ? fallback : [...personsMap.values()].slice(0, 1);
+  }
+
+  return roots;
+}

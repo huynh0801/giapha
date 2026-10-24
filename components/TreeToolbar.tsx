@@ -1,4 +1,4 @@
-import { Crosshair, ZoomIn, ZoomOut } from "lucide-react";
+import { ChevronsDownUp, ChevronsUpDown, Crosshair, ZoomIn, ZoomOut } from "lucide-react";
 import type { ReactNode } from "react";
 import BaseToolbar, { BaseToolbarProps } from "./BaseToolbar";
 
@@ -8,6 +8,8 @@ interface TreeToolbarProps extends BaseToolbarProps {
   handleZoomOut: () => void;
   handleResetZoom: () => void;
   handleCenter: () => void;
+  handleExpandAll?: () => void;
+  handleCollapseAll?: () => void;
   extraActions?: ReactNode;
 }
 
@@ -17,6 +19,8 @@ export default function TreeToolbar({
   handleZoomOut,
   handleResetZoom,
   handleCenter,
+  handleExpandAll,
+  handleCollapseAll,
   extraActions,
   ...baseProps
 }: TreeToolbarProps) {
@@ -48,6 +52,32 @@ export default function TreeToolbar({
           <ZoomIn className="size-4" />
         </button>
       </div>
+
+      {/* Expand/Collapse Controls */}
+      {(handleExpandAll || handleCollapseAll) && (
+        <div className="flex items-center bg-white/80 backdrop-blur-md shadow-sm border border-stone-200/60 rounded-full overflow-hidden transition-opacity h-10">
+          {handleCollapseAll && (
+            <button
+              onClick={handleCollapseAll}
+              className="px-3 md:px-4 h-full flex items-center gap-1.5 hover:bg-stone-100/50 text-stone-600 transition-colors font-medium"
+              title="Thu gọn các nhánh đời sau"
+            >
+              <ChevronsDownUp className="size-4" />
+              <span className="hidden sm:inline text-xs sm:text-sm">Thu gọn</span>
+            </button>
+          )}
+          {handleExpandAll && (
+            <button
+              onClick={handleExpandAll}
+              className="px-3 md:px-4 h-full flex items-center gap-1.5 hover:bg-stone-100/50 text-stone-600 transition-colors font-medium border-l border-stone-200/50"
+              title="Mở rộng toàn bộ cây"
+            >
+              <ChevronsUpDown className="size-4" />
+              <span className="hidden sm:inline text-xs sm:text-sm">Mở rộng tất cả</span>
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Center Button */}
       <button

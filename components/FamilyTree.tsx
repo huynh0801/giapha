@@ -26,6 +26,8 @@ import {
 import {
   AlertTriangle,
   CheckCircle2,
+  ChevronsDownUp,
+  ChevronsUpDown,
   Crosshair,
   Eye,
   FileSpreadsheet,
@@ -56,7 +58,7 @@ import FamilyNodeCard from "./FamilyNodeCard";
 import TreeQuickAddDialog from "./TreeQuickAddDialog";
 import TreeToolbar from "./TreeToolbar";
 
-const DEFAULT_AUTO_COLLAPSE_LEVEL = 2;
+const DEFAULT_AUTO_COLLAPSE_LEVEL = 0;
 
 type TreeEditMode = "view" | "edit";
 
@@ -1330,6 +1332,37 @@ export default function FamilyTree({
     });
   }, []);
 
+  const handleExpandAll = useCallback(() => {
+    setAutoCollapseLevel(0);
+    setCollapsedNodes(new Set());
+  }, []);
+
+  const handleCollapseAll = useCallback(() => {
+    const autoCollapsed = new Set<string>();
+
+    const walk = (personId: string, visited: Set<string>, level: number) => {
+      if (visited.has(personId)) return;
+      visited.add(personId);
+
+      const data = getTreeData(personId);
+      if (!data.person) return;
+
+      if (level >= 2 && data.children.length > 0) {
+        autoCollapsed.add(personId);
+      }
+
+      data.children.forEach((child) =>
+        walk(child.id, new Set(visited), level + 1),
+      );
+    };
+
+    const targetRoots = roots.length > 0 ? roots.map((r) => r.id) : forestRootIds;
+    targetRoots.forEach((rootIdValue) => walk(rootIdValue, new Set(), 0));
+
+    setAutoCollapseLevel(2);
+    setCollapsedNodes(autoCollapsed);
+  }, [forestRootIds, getTreeData, roots]);
+
   const stopTreeInteraction = (event: React.MouseEvent) => {
     event.stopPropagation();
     event.preventDefault();
@@ -1741,6 +1774,8 @@ export default function FamilyTree({
           handleZoomOut={handleZoomOut}
           handleResetZoom={handleResetZoom}
           handleCenter={centerTree}
+          handleExpandAll={handleExpandAll}
+          handleCollapseAll={handleCollapseAll}
           hideExpandButtons={hideExpandButtons}
           setHideExpandButtons={setHideExpandButtons}
           autoCollapseLevel={autoCollapseLevel}
@@ -2194,6 +2229,8 @@ export default function FamilyTree({
               onFit={fitTreeToView}
               onCenter={centerTree}
               onResetLayout={resetPoolLayout}
+              onExpandAll={handleExpandAll}
+              onCollapseAll={handleCollapseAll}
               onShowAvatarChange={setShowAvatar}
               onHideExpandButtonsChange={setHideExpandButtons}
               onAutoCollapseLevelChange={setAutoCollapseLevel}
@@ -2878,6 +2915,8 @@ function TreeCanvasTools({
   onFit,
   onCenter,
   onResetLayout,
+  onExpandAll,
+  onCollapseAll,
   onShowAvatarChange,
   onHideExpandButtonsChange,
   onAutoCollapseLevelChange,
@@ -2906,6 +2945,8 @@ function TreeCanvasTools({
   onFit: () => void;
   onCenter: () => void;
   onResetLayout: () => void;
+  onExpandAll?: () => void;
+  onCollapseAll?: () => void;
   onShowAvatarChange: (value: boolean) => void;
   onHideExpandButtonsChange: (value: boolean) => void;
   onAutoCollapseLevelChange: (value: number) => void;
@@ -3075,6 +3116,33 @@ function TreeCanvasTools({
           <MousePointer2 className="size-4" />
         </button>
       </div>
+
+      {(onExpandAll || onCollapseAll) && (
+        <div className="mt-2 grid grid-cols-2 gap-2">
+          {onCollapseAll && (
+            <button
+              type="button"
+              onClick={onCollapseAll}
+              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-stone-200 bg-white px-2 text-xs font-bold text-stone-700 transition hover:bg-stone-50"
+              title="Thu gọn các nhánh đời sau"
+            >
+              <ChevronsDownUp className="size-3.5" />
+              <span>Thu gọn</span>
+            </button>
+          )}
+          {onExpandAll && (
+            <button
+              type="button"
+              onClick={onExpandAll}
+              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-stone-200 bg-white px-2 text-xs font-bold text-stone-700 transition hover:bg-stone-50"
+              title="Mở rộng toàn bộ cây"
+            >
+              <ChevronsUpDown className="size-3.5" />
+              <span>Mở rộng tất cả</span>
+            </button>
+          )}
+        </div>
+      )}
 
       <button
         type="button"

@@ -4,7 +4,7 @@ import { useDashboard } from "@/components/DashboardContext";
 import DashboardMemberList from "@/components/DashboardMemberList";
 import RootSelector from "@/components/RootSelector";
 import { Person, Relationship } from "@/types";
-import { isChildRelationshipType } from "@/utils/treeHelpers";
+import { findForestRoots, isChildRelationshipType } from "@/utils/treeHelpers";
 import { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 
@@ -52,38 +52,17 @@ export default function DashboardViews({
         .map((r) => r.person_b),
     );
 
-    let finalRootId = rootId;
-
-    // If no rootId is provided, fallback to generation 1 or earliest birth year
-    if (!finalRootId || !pMap.has(finalRootId)) {
-      const rootsFallback = persons.filter((p) => !childIds.has(p.id));
-      if (rootsFallback.length > 0) {
-        const gen1 = rootsFallback.filter((p) => p.generation === 1);
-        const sortByBirthYear = (a: Person, b: Person) => {
-          const ya = a.birth_year ?? Infinity;
-          const yb = b.birth_year ?? Infinity;
-          return ya - yb;
-        };
-
-        if (gen1.length > 0) {
-          finalRootId = gen1.sort(sortByBirthYear)[0].id;
-        } else {
-          finalRootId = rootsFallback.sort(sortByBirthYear)[0].id;
-        }
-      } else if (persons.length > 0) {
-        finalRootId = persons[0].id; // ultimate fallback
-      }
-    }
-
     let calculatedRoots: Person[] = [];
-    if (finalRootId && pMap.has(finalRootId)) {
-      calculatedRoots = [pMap.get(finalRootId)!];
+    if (rootId && pMap.has(rootId)) {
+      calculatedRoots = [pMap.get(rootId)!];
+    } else {
+      calculatedRoots = findForestRoots(pMap, relationships);
     }
 
     return {
       personsMap: pMap,
       roots: calculatedRoots,
-      defaultRootId: finalRootId,
+      defaultRootId: null,
     };
   }, [persons, relationships, rootId]);
 
@@ -122,11 +101,10 @@ export default function DashboardViews({
       >
         {currentView !== "list" &&
           !isFamilyAdminTreeWorkspace &&
-          persons.length > 0 &&
-          activeRootId && (
+          persons.length > 0 && (
           <div className="relative z-20 flex w-full flex-col gap-3 border-b border-amber-100 bg-[#fbfaf7]/95 px-4 py-3 shadow-sm backdrop-blur sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
             <div className="flex min-w-0 flex-1 items-center gap-3">
-              <RootSelector persons={persons} currentRootId={activeRootId} />
+              <RootSelector persons={persons} currentRootId={rootId} />
               {currentView === "tree" && familyAdminEditExperience && (
                 <div className="hidden min-w-0 items-center gap-2 lg:flex">
                   <span className="rounded-full border border-emerald-100 bg-white px-3 py-1.5 text-xs font-black text-emerald-700 shadow-sm">
