@@ -228,12 +228,7 @@ export default function CustomEventModal({
 
             <div className="flex-1 overflow-y-auto custom-scrollbar px-5 sm:px-8 pt-10 pb-8">
               <div className="mb-6 border-b border-[#deb887]/50 pb-3">
-                <h2
-                  className="text-2xl font-bold text-[#183b28]"
-                  style={{
-                    fontFamily: '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
-                  }}
-                >
+                <h2 className="text-2xl font-bold tracking-tight text-[#183b28]">
                   {eventToEdit ? "Chỉnh Sửa Sự Kiện Gia Tộc" : "Khởi Tạo Sự Kiện Mới"}
                 </h2>
                 <p className="mt-1 text-xs text-[#5c4a3e]">

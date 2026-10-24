@@ -19,16 +19,17 @@
   --background: #f5e7c7;
   --foreground: #171717;
   --font-system: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-be-vietnam: var(--font-be-vietnam-pro), var(--font-system);
   --font-brush: var(--font-studio-brush, 'SVN-Studio Brush'), 'SVN-Studio Brush', Georgia, serif;
-  --font-sans: var(--font-system);
-  --font-serif: var(--font-brush);
+  --font-sans: var(--font-be-vietnam);
+  --font-serif: var(--font-sans);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
-  --font-serif: var(--font-brush);
+  --font-serif: var(--font-sans);
   --font-brush: var(--font-brush);
 }
 
@@ -36,11 +37,15 @@ html,
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-brush);
+  font-family: var(--font-sans);
 }
 
 .font-sans {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+  font-family: var(--font-sans) !important;
+}
+
+.font-serif {
+  font-family: var(--font-sans) !important;
 }
 
 .font-brush {

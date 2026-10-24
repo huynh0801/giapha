@@ -401,12 +401,7 @@ export default function KinshipFinder({ persons, relationships }: Props) {
                   </p>
                   <HeritageBadge variant="jade">Xưng hô A → B</HeritageBadge>
                 </div>
-                <p
-                  className="text-3xl sm:text-4xl font-bold text-[#8c1d1d] capitalize my-2"
-                  style={{
-                    fontFamily: '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
-                  }}
-                >
+                <p className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#8c1d1d] capitalize my-2">
                   {result.aCallsB}
                 </p>
               </HeritageFrame>
@@ -418,12 +413,7 @@ export default function KinshipFinder({ persons, relationships }: Props) {
                   </p>
                   <HeritageBadge variant="crimson">Xưng hô B → A</HeritageBadge>
                 </div>
-                <p
-                  className="text-3xl sm:text-4xl font-bold text-[#183b28] capitalize my-2"
-                  style={{
-                    fontFamily: '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
-                  }}
-                >
+                <p className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#183b28] capitalize my-2">
                   {result.bCallsA}
                 </p>
               </HeritageFrame>

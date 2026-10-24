@@ -59,13 +59,7 @@ export default function FamilyQrCard({
                 Mã QR Gia Tộc
               </span>
             </div>
-            <h2
-              className="mt-1 text-2xl font-bold text-[#183b28]"
-              style={{
-                fontFamily:
-                  '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
-              }}
-            >
+            <h2 className="mt-1 text-2xl font-bold tracking-tight text-[#183b28]">
               {familyName}
             </h2>
             <p className="mt-2 max-w-2xl text-xs sm:text-sm leading-relaxed text-[#5c4a3e]">

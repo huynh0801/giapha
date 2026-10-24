@@ -61,12 +61,7 @@ function StatCard({
         </HeritageBadge>
       </div>
 
-      <p
-        className="text-3xl sm:text-4xl font-bold text-[#183b28] relative z-10"
-        style={{
-          fontFamily: '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
-        }}
-      >
+      <p className="text-3xl sm:text-4xl font-bold tracking-tight text-[#183b28] relative z-10">
         {value}
       </p>
       <p className="text-xs sm:text-sm font-bold text-[#7a6455] mt-1 relative z-10">
@@ -293,12 +288,7 @@ export default function FamilyStats({
       {stats.generationBreakdown.length > 0 && (
         <HeritageFrame cornerColor="#183b28">
           <div className="flex items-center justify-between mb-5 border-b border-[#deb887]/50 pb-3">
-            <h2
-              className="text-lg sm:text-xl font-bold text-[#183b28] flex items-center gap-2"
-              style={{
-                fontFamily: '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
-              }}
-            >
+            <h2 className="text-lg sm:text-xl font-bold tracking-tight text-[#183b28] flex items-center gap-2">
               <Crown className="size-5 text-[#caa455]" />
               Phân bố nhân khẩu theo thế hệ
             </h2>
@@ -326,12 +316,7 @@ export default function FamilyStats({
       {/* Gender ratio visual */}
       <HeritageFrame cornerColor="#8c1d1d">
         <div className="flex items-center justify-between mb-5 border-b border-[#deb887]/50 pb-3">
-          <h2
-            className="text-lg sm:text-xl font-bold text-[#183b28] flex items-center gap-2"
-            style={{
-              fontFamily: '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
-            }}
-          >
+          <h2 className="text-lg sm:text-xl font-bold tracking-tight text-[#183b28] flex items-center gap-2">
             <Users className="size-5 text-[#8c1d1d]" />
             Tỷ lệ cân bằng âm dương & giới tính
           </h2>
@@ -379,12 +364,7 @@ export default function FamilyStats({
         {/* Chinese Zodiac Breakdown */}
         {stats.chineseZodiacBreakdown.length > 0 && (
           <HeritageFrame cornerColor="#caa455">
-            <h2
-              className="text-base sm:text-lg font-bold text-[#183b28] mb-4 flex items-center gap-2 border-b border-[#deb887]/40 pb-2"
-              style={{
-                fontFamily: '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
-              }}
-            >
+            <h2 className="text-base sm:text-lg font-bold tracking-tight text-[#183b28] mb-4 flex items-center gap-2 border-b border-[#deb887]/40 pb-2">
               <Moon className="size-4 text-[#92540b]" />
               Phân bố theo Thập Nhị Địa Chi (12 Con Giáp)
             </h2>
@@ -424,12 +404,7 @@ export default function FamilyStats({
         {/* Western Zodiac Breakdown */}
         {stats.zodiacBreakdown.length > 0 && (
           <HeritageFrame cornerColor="#183b28">
-            <h2
-              className="text-base sm:text-lg font-bold text-[#183b28] mb-4 flex items-center gap-2 border-b border-[#deb887]/40 pb-2"
-              style={{
-                fontFamily: '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
-              }}
-            >
+            <h2 className="text-base sm:text-lg font-bold tracking-tight text-[#183b28] mb-4 flex items-center gap-2 border-b border-[#deb887]/40 pb-2">
               <Star className="size-4 text-[#183b28]" />
               Phân bố theo Cung Hoàng Đạo
             </h2>

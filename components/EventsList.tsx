@@ -373,12 +373,7 @@ export default function EventsList({
               <CalendarDays className="size-7" />
             </div>
             <div>
-              <p
-                className="text-xl sm:text-2xl font-bold text-[#183b28]"
-                style={{
-                  fontFamily: '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
-                }}
-              >
+              <p className="text-xl sm:text-2xl font-bold tracking-tight text-[#183b28]">
                 Hôm nay: {todayDate.solar}
               </p>
               {todayDate.lunar && (

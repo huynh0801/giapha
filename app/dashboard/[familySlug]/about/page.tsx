@@ -48,13 +48,7 @@ export default async function FamilyAboutPage({ params }: PageProps) {
               <form action={updateFamilyAction} className="space-y-5">
                 <input type="hidden" name="family_id" value={family.id} />
                 <div className="border-b border-[#deb887]/50 pb-3">
-                  <h2
-                    className="text-xl sm:text-2xl font-bold text-[#183b28]"
-                    style={{
-                      fontFamily:
-                        '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
-                    }}
-                  >
+                  <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#183b28]">
                     Cập nhật thông tin dòng họ
                   </h2>
                   <p className="mt-1 text-xs text-[#5c4a3e]">
@@ -154,13 +148,7 @@ export default async function FamilyAboutPage({ params }: PageProps) {
           ) : (
             <HeritageFrame cornerColor="#183b28">
               <div className="border-b border-[#deb887]/50 pb-3 mb-5">
-                <h2
-                  className="text-xl sm:text-2xl font-bold text-[#183b28]"
-                  style={{
-                    fontFamily:
-                      '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
-                  }}
-                >
+                <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#183b28]">
                   Chứng thư thông tin dòng tộc
                 </h2>
               </div>
@@ -169,13 +157,7 @@ export default async function FamilyAboutPage({ params }: PageProps) {
                   <p className="text-xs font-bold uppercase tracking-wider text-[#7a6455]">
                     Tên dòng họ
                   </p>
-                  <p
-                    className="mt-1 text-2xl font-bold text-[#8c1d1d]"
-                    style={{
-                      fontFamily:
-                        '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
-                    }}
-                  >
+                  <p className="mt-1 text-2xl font-bold tracking-tight text-[#8c1d1d]">
                     {family.name}
                   </p>
                 </div>
@@ -213,13 +195,7 @@ export default async function FamilyAboutPage({ params }: PageProps) {
               <div className="size-11 rounded-xl bg-[#f5e7c7] text-[#8c1d1d] flex items-center justify-center mb-3.5 border border-[#deb887]/60">
                 <FileText className="size-5" />
               </div>
-              <h3
-                className="text-lg font-bold text-[#183b28] group-hover:text-[#8c1d1d] transition-colors"
-                style={{
-                  fontFamily:
-                    '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
-                }}
-              >
+              <h3 className="text-lg font-bold tracking-tight text-[#183b28] group-hover:text-[#8c1d1d] transition-colors">
                 Hệ Thống Cây Gia Phả
               </h3>
               <p className="mt-1.5 text-xs sm:text-sm leading-relaxed text-[#5c4a3e]">
@@ -231,13 +207,7 @@ export default async function FamilyAboutPage({ params }: PageProps) {
               <div className="size-11 rounded-xl bg-[#eaf3ed] text-[#183b28] flex items-center justify-center mb-3.5 border border-[#a3c9b2]">
                 <MapPin className="size-5" />
               </div>
-              <h3
-                className="text-lg font-bold text-[#183b28]"
-                style={{
-                  fontFamily:
-                    '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
-                }}
-              >
+              <h3 className="text-lg font-bold tracking-tight text-[#183b28]">
                 Quy Định Bảo Mật Dòng Tộc
               </h3>
               <p className="mt-1.5 text-xs sm:text-sm leading-relaxed text-[#5c4a3e]">

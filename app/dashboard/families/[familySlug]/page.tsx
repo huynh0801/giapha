@@ -124,13 +124,7 @@ export default async function FamilyDirectoryDetailPage({ params }: PageProps) {
                 Hồ sơ dòng họ
               </div>
 
-              <h1
-                className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[#183b28] leading-tight"
-                style={{
-                  fontFamily:
-                    '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
-                }}
-              >
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[#183b28] leading-tight">
                 {family.name}
               </h1>
 

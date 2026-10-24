@@ -61,13 +61,7 @@ export default async function FamilyBlogPage({
           <HeritageFrame cornerColor="#deb887" className="mb-6">
             <div className="py-8 text-center">
               <Newspaper className="mx-auto mb-3 size-10 text-[#deb887]" />
-              <h2
-                className="text-xl font-bold text-[#183b28]"
-                style={{
-                  fontFamily:
-                    '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
-                }}
-              >
+              <h2 className="text-xl font-bold tracking-tight text-[#183b28]">
                 Chưa có thông báo nội bộ
               </h2>
               <p className="mt-1.5 text-xs sm:text-sm text-[#5c4a3e]">

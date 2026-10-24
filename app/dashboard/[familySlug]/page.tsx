@@ -274,13 +274,7 @@ export default async function FamilyDashboardPage({
                   <ShieldCheck className="size-3.5" />
                   Không gian riêng tư dòng họ
                 </div>
-                <h1
-                  className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[#183b28] leading-tight"
-                  style={{
-                    fontFamily:
-                      '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
-                  }}
-                >
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[#183b28] leading-tight">
                   {context.family.name}
                 </h1>
                 {context.family.description && (
@@ -352,13 +346,7 @@ export default async function FamilyDashboardPage({
                 <p className="text-xs font-black uppercase tracking-[0.2em] text-[#8c1d1d]">
                   Danh bạ phụ trách
                 </p>
-                <h2
-                  className="mt-1 text-xl sm:text-2xl font-bold text-[#183b28]"
-                  style={{
-                    fontFamily:
-                      '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
-                  }}
-                >
+                <h2 className="mt-1 text-xl sm:text-2xl font-bold tracking-tight text-[#183b28]">
                   Người phụ trách dòng họ
                 </h2>
               </div>
@@ -440,13 +428,7 @@ export default async function FamilyDashboardPage({
           <div className="mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-[#deb887]/50 pb-3">
             <div className="flex items-center gap-2.5">
               <span className="size-2 rounded-full bg-[#8c1d1d]" />
-              <h2
-                className="text-2xl font-bold text-[#183b28]"
-                style={{
-                  fontFamily:
-                    '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
-                }}
-              >
+              <h2 className="text-2xl font-bold tracking-tight text-[#183b28]">
                 Chức Năng Gia Phả
               </h2>
             </div>
@@ -467,13 +449,7 @@ export default async function FamilyDashboardPage({
             <div className="mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-[#deb887]/50 pb-3">
               <div className="flex items-center gap-2.5">
                 <span className="size-2 rounded-full bg-[#183b28]" />
-                <h2
-                  className="text-2xl font-bold text-[#183b28]"
-                  style={{
-                    fontFamily:
-                      '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
-                  }}
-                >
+                <h2 className="text-2xl font-bold tracking-tight text-[#183b28]">
                   Nghiệp Vụ Quản Trị
                 </h2>
               </div>
@@ -494,13 +470,7 @@ export default async function FamilyDashboardPage({
               <div className="mb-4 flex items-center justify-between border-b border-[#deb887]/50 pb-3">
                 <div className="flex items-center gap-2.5">
                   <CalendarDays className="size-5 text-[#8c1d1d]" />
-                  <h2
-                    className="text-xl sm:text-2xl font-bold text-[#183b28]"
-                    style={{
-                      fontFamily:
-                        '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
-                    }}
-                  >
+                  <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#183b28]">
                     Sự kiện & Giỗ chạp sắp tới (30 ngày)
                   </h2>
                 </div>
@@ -571,13 +541,8 @@ function FeatureCard({ feature }: { feature: Feature }) {
           )}
         </div>
 
-        {/* Title: Using a crisp, dignified Serif typography to eliminate ligature overlap glitches */}
-        <h3
-          className="text-lg font-bold text-[#183b28] transition-colors duration-200 group-hover:text-[#8c1d1d]"
-          style={{
-            fontFamily: '"Playfair Display", Georgia, "SVN-Studio Brush", serif',
-          }}
-        >
+        {/* Title: Using a crisp, dignified, easily readable typography */}
+        <h3 className="text-lg font-bold tracking-tight text-[#183b28] transition-colors duration-200 group-hover:text-[#8c1d1d]">
           {feature.title}
         </h3>
 

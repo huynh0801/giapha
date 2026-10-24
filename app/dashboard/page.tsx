@@ -148,13 +148,7 @@ export default async function DashboardFamilySwitcherPage({
           <FolderTree className="size-3.5" />
           Không gian gia tộc
         </div>
-        <h1
-          className="mt-3 text-3xl sm:text-4xl lg:text-5xl font-black text-[#183b28] tracking-tight leading-tight"
-          style={{
-            fontFamily:
-              '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
-          }}
-        >
+        <h1 className="mt-3 text-3xl sm:text-4xl lg:text-5xl font-black text-[#183b28] tracking-tight leading-tight">
           Chọn dòng họ & Danh bạ
         </h1>
         <p className="mt-3 max-w-3xl text-sm leading-relaxed text-[#5c4a3e]">
@@ -178,13 +172,7 @@ export default async function DashboardFamilySwitcherPage({
       {families.length > 0 && (
         <section className="mb-10">
           <div className="mb-4 flex items-center justify-between gap-4">
-            <h2
-              className="text-xl sm:text-2xl font-bold text-[#183b28]"
-              style={{
-                fontFamily:
-                  '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
-              }}
-            >
+            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#183b28]">
               Dòng họ bạn đang có quyền truy cập
             </h2>
             <HeritageBadge variant="jade">
@@ -206,13 +194,7 @@ export default async function DashboardFamilySwitcherPage({
                           <FolderTree className="size-6" />
                         </div>
                         <div className="min-w-0">
-                          <h3
-                            className="truncate text-xl font-bold text-[#183b28] group-hover:text-[#8c1d1d] transition-colors"
-                            style={{
-                              fontFamily:
-                                '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
-                            }}
-                          >
+                          <h3 className="truncate text-xl font-bold tracking-tight text-[#183b28] group-hover:text-[#8c1d1d] transition-colors">
                             {family.name}
                           </h3>
                           <p className="mt-0.5 font-mono text-xs text-[#7a6455]">
@@ -270,13 +252,7 @@ export default async function DashboardFamilySwitcherPage({
               <LockKeyhole className="size-3.5" />
               Danh bạ dòng họ
             </div>
-            <h2
-              className="mt-1 text-2xl sm:text-3xl font-bold text-[#183b28]"
-              style={{
-                fontFamily:
-                  '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
-              }}
-            >
+            <h2 className="mt-1 text-2xl sm:text-3xl font-bold tracking-tight text-[#183b28]">
               Tìm dòng họ để xin tham gia
             </h2>
             <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-[#5c4a3e]">
@@ -347,13 +323,7 @@ export default async function DashboardFamilySwitcherPage({
                           </HeritageBadge>
                         )}
                       </div>
-                      <h3
-                        className="truncate text-xl font-bold text-[#183b28]"
-                        style={{
-                          fontFamily:
-                            '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
-                        }}
-                      >
+                      <h3 className="truncate text-xl font-bold tracking-tight text-[#183b28]">
                         {family.name}
                       </h3>
                       <p className="mt-0.5 font-mono text-xs text-[#7a6455]">
@@ -445,13 +415,7 @@ export default async function DashboardFamilySwitcherPage({
         {directory.length === 0 && (
           <div className="mt-6 rounded-2xl border-2 border-dashed border-[#deb887] bg-[#fdfaf3] p-10 text-center">
             <FolderTree className="mx-auto mb-3 size-10 text-[#deb887]" />
-            <h3
-              className="text-xl font-bold text-[#183b28]"
-              style={{
-                fontFamily:
-                  '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
-              }}
-            >
+            <h3 className="text-xl font-bold tracking-tight text-[#183b28]">
               Không tìm thấy dòng họ phù hợp
             </h3>
             <p className="mt-2 text-sm text-[#7a6455]">
