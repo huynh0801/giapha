@@ -129,9 +129,6 @@ export default async function ProfilePage() {
                           <h3 className="truncate font-bold text-[#2c1a11] group-hover:text-[#800000] transition-colors">
                             {family.name}
                           </h3>
-                          <p className="font-mono text-xs text-[#8a7b6f] mt-0.5">
-                            /dashboard/{family.slug}
-                          </p>
                         </div>
                         <span className="shrink-0 rounded-full bg-amber-50 border border-amber-200/80 px-2.5 py-0.5 text-[11px] font-bold text-amber-800">
                           {roleText}

@@ -197,9 +197,6 @@ export default async function DashboardFamilySwitcherPage({
                           <h3 className="truncate text-xl font-bold tracking-tight text-[#183b28] group-hover:text-[#8c1d1d] transition-colors">
                             {family.name}
                           </h3>
-                          <p className="mt-0.5 font-mono text-xs text-[#7a6455]">
-                            /dashboard/{family.slug}
-                          </p>
                         </div>
                       </div>
                       <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#f4efe6] text-[#deb887] transition-all group-hover:bg-[#8c1d1d] group-hover:text-white">
@@ -326,9 +323,6 @@ export default async function DashboardFamilySwitcherPage({
                       <h3 className="truncate text-xl font-bold tracking-tight text-[#183b28]">
                         {family.name}
                       </h3>
-                      <p className="mt-0.5 font-mono text-xs text-[#7a6455]">
-                        {family.slug}
-                      </p>
                     </div>
                     <div className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-[#deb887] bg-[#f5e7c7] text-[#8c1d1d] shadow-xs">
                       <ShieldCheck className="size-5" />

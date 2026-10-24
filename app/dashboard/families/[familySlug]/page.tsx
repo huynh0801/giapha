@@ -131,10 +131,6 @@ export default async function FamilyDirectoryDetailPage({ params }: PageProps) {
                 {family.name}
               </h1>
 
-              <p className="mt-1 font-mono text-xs text-[#7a6455]">
-                /dashboard/{family.slug}
-              </p>
-
               <div className="mt-4 flex flex-wrap items-center gap-2">
                 <HeritageBadge variant="neutral">
                   {visibilityLabel(family.visibility)}
