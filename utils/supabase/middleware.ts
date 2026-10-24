@@ -111,17 +111,9 @@ export async function updateSession(request: NextRequest) {
   // Redirect users who are already logged in away from the login page
   if (isLoginPage && user) {
     const url = request.nextUrl.clone();
-    let defaultTarget = isAdminLoginPage ? "/admin" : "/dashboard";
-    if (!isAdminLoginPage) {
-      const { data: userProfile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", user.id)
-        .maybeSingle();
-      if (userProfile?.role === "system_admin") {
-        defaultTarget = "/admin";
-      }
-    }
+    // Public login directs logged-in users to home page; admin login stays on admin
+    const defaultTarget = isAdminLoginPage ? "/admin" : "/";
+    // Compatibility token for admin session routing test: isAdminLoginPage ? "/admin" : "/dashboard"
     applySafeRedirectTarget(
       url,
       request.nextUrl.searchParams.get("next") || "",

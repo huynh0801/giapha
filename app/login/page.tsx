@@ -91,7 +91,7 @@ export default function LoginPage() {
           }
           setError(result.error || "Không thể đăng nhập.");
         } else {
-          window.location.href = result.redirect || "/dashboard";
+          window.location.href = result.redirect || "/";
         }
       } else {
         if (password !== confirmPassword) {

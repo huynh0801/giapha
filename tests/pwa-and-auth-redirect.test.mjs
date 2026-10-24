@@ -9,21 +9,19 @@ function read(relPath) {
   return fs.readFileSync(path.join(root, relPath), "utf8");
 }
 
-test("admin login automatically redirects system admin to /admin", () => {
+test("login keeps user on home page without auto-entering admin area", () => {
   const middleware = read("utils/supabase/middleware.ts");
   const authAction = read("app/actions/auth.ts");
   const loginPage = read("app/login/page.tsx");
 
-  // Middleware redirects system admin away from login to /admin
-  assert.match(middleware, /userProfile\?\.role === "system_admin"/);
-  assert.match(middleware, /defaultTarget = "\/admin"/);
+  // Middleware redirects logged-in users away from /login back to home page ("/")
+  assert.match(middleware, /defaultTarget = isAdminLoginPage \? "\/admin" : "\/"/);
 
-  // Auth server action defaults system_admin redirect to /admin
-  assert.match(authAction, /profile\?\.role === "system_admin"/);
-  assert.match(authAction, /redirect = "\/admin"/);
+  // Auth server action defaults redirect to "/"
+  assert.match(authAction, /let redirect = "\/"/);
 
-  // Client login page uses immediate top-level browser navigation
-  assert.match(loginPage, /window\.location\.href = result\.redirect/);
+  // Client login page falls back to "/"
+  assert.match(loginPage, /window\.location\.href = result\.redirect \|\| "\/"/);
 });
 
 test("metadata uses the current logo and royal theme colors", () => {

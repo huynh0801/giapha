@@ -86,18 +86,15 @@ export async function loginAction(data: {
       return { success: true, redirect: "/admin/change-password" };
     }
 
-    let redirect = "/dashboard";
+    let redirect = "/";
     if (
       data.nextPath &&
       !data.nextPath.startsWith("//") &&
       !data.nextPath.includes("://") &&
       !data.nextPath.startsWith("/login") &&
-      data.nextPath !== "/dashboard" &&
       data.nextPath !== "/"
     ) {
       redirect = data.nextPath;
-    } else if (profile?.role === "system_admin") {
-      redirect = "/admin";
     }
 
     return { success: true, redirect };
