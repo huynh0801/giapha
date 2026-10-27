@@ -54,26 +54,72 @@ export interface StorageResult {
   error?: string;
 }
 
-export function extractStoragePath(inputPath: string, bucketFallback: string = "avatars"): string {
-  if (!inputPath) return "";
-  let path = inputPath.trim();
-  const publicBaseUrl = process.env.CLOUDFLARE_R2_PUBLIC_URL?.replace(/\/+$/, "");
-  if (publicBaseUrl && path.startsWith(publicBaseUrl)) {
-    path = path.slice(publicBaseUrl.length);
-  } else if (path.startsWith("http://") || path.startsWith("https://")) {
+export interface StorageLocation {
+  isSupabase: boolean;
+  isR2: boolean;
+  bucket: string;
+  key: string;
+}
+
+export function parseStorageLocation(
+  inputPath: string,
+  defaultBucket: string = "avatars"
+): StorageLocation {
+  if (!inputPath) {
+    return { isSupabase: false, isR2: false, bucket: defaultBucket, key: "" };
+  }
+
+  const trimmed = inputPath.trim();
+  const supabaseRegex = /\/storage\/v1\/object\/public\/([^/]+)\/(.+)$/;
+  const supabaseMatch = trimmed.match(supabaseRegex);
+
+  if (supabaseMatch) {
+    return {
+      isSupabase: true,
+      isR2: false,
+      bucket: supabaseMatch[1],
+      key: supabaseMatch[2].replace(/^\/+/, ""),
+    };
+  }
+
+  if (trimmed.includes(".supabase.co")) {
     try {
-      const url = new URL(path);
-      const supabasePrefix = `/storage/v1/object/public/${bucketFallback}/`;
-      if (url.pathname.includes(supabasePrefix)) {
-        path = url.pathname.slice(url.pathname.indexOf(supabasePrefix) + supabasePrefix.length);
-      } else {
-        path = url.pathname;
+      const url = new URL(trimmed);
+      const match = url.pathname.match(supabaseRegex);
+      if (match) {
+        return {
+          isSupabase: true,
+          isR2: false,
+          bucket: match[1],
+          key: match[2].replace(/^\/+/, ""),
+        };
       }
     } catch {
-      // ignore
+      // not a full valid URL
     }
   }
-  return path.replace(/^\/+/, "");
+
+  const publicBaseUrl = process.env.CLOUDFLARE_R2_PUBLIC_URL?.replace(/\/+$/, "");
+  if (publicBaseUrl && trimmed.startsWith(publicBaseUrl)) {
+    const key = trimmed.slice(publicBaseUrl.length).replace(/^\/+/, "");
+    return {
+      isSupabase: false,
+      isR2: true,
+      bucket: defaultBucket,
+      key,
+    };
+  }
+
+  return {
+    isSupabase: false,
+    isR2: false,
+    bucket: defaultBucket,
+    key: trimmed.replace(/^\/+/, ""),
+  };
+}
+
+export function extractStoragePath(inputPath: string, bucketFallback: string = "avatars"): string {
+  return parseStorageLocation(inputPath, bucketFallback).key;
 }
 
 export async function uploadStorageImage(options: UploadStorageOptions): Promise<StorageResult> {
@@ -96,7 +142,7 @@ export async function uploadStorageImage(options: UploadStorageOptions): Promise
       buffer = file;
     } else if (file instanceof Uint8Array) {
       buffer = Buffer.from(file.buffer, file.byteOffset, file.byteLength);
-    } else if (typeof (file as { arrayBuffer?: () => Promise<ArrayBuffer> }).arrayBuffer === "function") {
+    } else if (typeof (file as { arrayBuffer?: () => Promise<ArrayBufferLike> }).arrayBuffer === "function") {
       const arrayBuffer = await file.arrayBuffer();
       buffer = Buffer.from(arrayBuffer);
     } else {
@@ -146,13 +192,18 @@ export async function uploadStorageImage(options: UploadStorageOptions): Promise
     }
 
     // Fallback: Supabase Storage
-    let cookieStore: any = null;
+    let cookieStore: Awaited<ReturnType<typeof cookies>> | null = null;
     try {
       cookieStore = await cookies();
     } catch {
       // outside request context
     }
-    const supabase = createClient(cookieStore || ({ getAll: () => [], setAll: () => {} } as any));
+    const fallbackStore = {
+      getAll: () => [],
+      setAll: () => {},
+    } as unknown as Awaited<ReturnType<typeof cookies>>;
+
+    const supabase = createClient(cookieStore || fallbackStore);
 
     const { error: uploadError } = await supabase.storage
       .from(bucketFallback)
@@ -193,28 +244,54 @@ export async function deleteStorageImage(options: {
     const { filePath, bucketFallback = "avatars" } = options;
     if (!filePath) return { success: true };
 
-    const targetKey = extractStoragePath(filePath, bucketFallback);
-    if (!targetKey) return { success: true };
+    const location = parseStorageLocation(filePath, bucketFallback);
+    if (!location.key) return { success: true };
+
+    // Legacy Supabase image: Delete from Supabase Storage even when R2 is configured
+    if (location.isSupabase) {
+      let cookieStore: Awaited<ReturnType<typeof cookies>> | null = null;
+      try {
+        cookieStore = await cookies();
+      } catch {
+        // outside request context
+      }
+      const fallbackStore = {
+        getAll: () => [],
+        setAll: () => {},
+      } as unknown as Awaited<ReturnType<typeof cookies>>;
+
+      const supabase = createClient(cookieStore || fallbackStore);
+      const { error } = await supabase.storage.from(location.bucket).remove([location.key]);
+      if (error) {
+        return { success: false, error: error.message };
+      }
+      return { success: true };
+    }
 
     if (isR2Configured()) {
       const s3 = getR2Client();
       await s3.send(
         new DeleteObjectCommand({
           Bucket: process.env.CLOUDFLARE_R2_BUCKET_NAME!,
-          Key: targetKey,
+          Key: location.key,
         })
       );
       return { success: true };
     }
 
-    let cookieStore: any = null;
+    let cookieStore: Awaited<ReturnType<typeof cookies>> | null = null;
     try {
       cookieStore = await cookies();
     } catch {
       // outside request context
     }
-    const supabase = createClient(cookieStore || ({ getAll: () => [], setAll: () => {} } as any));
-    const { error } = await supabase.storage.from(bucketFallback).remove([targetKey]);
+    const fallbackStore = {
+      getAll: () => [],
+      setAll: () => {},
+    } as unknown as Awaited<ReturnType<typeof cookies>>;
+
+    const supabase = createClient(cookieStore || fallbackStore);
+    const { error } = await supabase.storage.from(location.bucket).remove([location.key]);
     if (error) {
       return { success: false, error: error.message };
     }

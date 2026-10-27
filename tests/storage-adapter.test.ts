@@ -6,6 +6,7 @@ import {
   uploadStorageImage,
   deleteStorageImage,
   extractStoragePath,
+  parseStorageLocation,
   setR2ClientInstance,
   resetR2ClientInstance,
 } from "../utils/storage/index";
@@ -56,7 +57,7 @@ test("isR2Configured returns false when any single R2 environment variable is mi
   process.env = originalEnv;
 });
 
-test("extractStoragePath extracts key correctly from URLs and paths", () => {
+test("parseStorageLocation and extractStoragePath handle various URLs and buckets", () => {
   const originalEnv = { ...process.env };
   process.env.CLOUDFLARE_R2_PUBLIC_URL = "https://pub-test.r2.dev";
 
@@ -67,10 +68,22 @@ test("extractStoragePath extracts key correctly from URLs and paths", () => {
     extractStoragePath("https://pub-test.r2.dev/avatars/user-123.webp"),
     "avatars/user-123.webp"
   );
-  assert.equal(
-    extractStoragePath("https://test.supabase.co/storage/v1/object/public/avatars/user-123.webp", "avatars"),
-    "user-123.webp"
+
+  // Supabase URL with automatic bucket detection
+  const loc1 = parseStorageLocation(
+    "https://test.supabase.co/storage/v1/object/public/avatars/folder/user-123.webp"
   );
+  assert.equal(loc1.isSupabase, true);
+  assert.equal(loc1.bucket, "avatars");
+  assert.equal(loc1.key, "folder/user-123.webp");
+  assert.equal(extractStoragePath("https://test.supabase.co/storage/v1/object/public/avatars/folder/user-123.webp"), "folder/user-123.webp");
+
+  const loc2 = parseStorageLocation(
+    "https://test.supabase.co/storage/v1/object/public/news/2026/header.webp"
+  );
+  assert.equal(loc2.isSupabase, true);
+  assert.equal(loc2.bucket, "news");
+  assert.equal(loc2.key, "2026/header.webp");
 
   process.env = originalEnv;
 });
@@ -84,7 +97,7 @@ test("uploadStorageImage returns error on empty or invalid file", async () => {
   assert.match(result1.error || "", /rỗng/i);
 
   const result2 = await uploadStorageImage({
-    file: null as any,
+    file: null as unknown as Buffer,
     folder: "test",
   });
   assert.equal(result2.success, false);
@@ -110,15 +123,24 @@ test("uploadStorageImage uploads to R2 when configured and compresses to webp", 
     .png()
     .toBuffer();
 
-  let sentCommand: any = null;
+  interface S3Command {
+    input: {
+      Bucket: string;
+      Key: string;
+      Body: Buffer;
+      ContentType: string;
+    };
+  }
+
+  let sentCommand: S3Command | null = null;
   const mockS3Client = {
-    send: async (command: any) => {
-      sentCommand = command;
+    send: async (command: unknown) => {
+      sentCommand = command as S3Command;
       return {};
     },
   };
 
-  setR2ClientInstance(mockS3Client as any);
+  setR2ClientInstance(mockS3Client as unknown as import("@aws-sdk/client-s3").S3Client);
 
   try {
     const result = await uploadStorageImage({
@@ -136,13 +158,13 @@ test("uploadStorageImage uploads to R2 when configured and compresses to webp", 
     assert.ok(result.publicUrl?.endsWith(".webp"));
 
     assert.ok(sentCommand);
-    assert.equal(sentCommand.input.Bucket, "giaphadongho");
-    assert.equal(sentCommand.input.Key, result.filePath);
-    assert.equal(sentCommand.input.ContentType, "image/webp");
-    assert.ok(Buffer.isBuffer(sentCommand.input.Body));
+    assert.equal((sentCommand as S3Command).input.Bucket, "giaphadongho");
+    assert.equal((sentCommand as S3Command).input.Key, result.filePath);
+    assert.equal((sentCommand as S3Command).input.ContentType, "image/webp");
+    assert.ok(Buffer.isBuffer((sentCommand as S3Command).input.Body));
 
     // Verify optimized image is valid webp and resized <= 50
-    const metadata = await sharp(sentCommand.input.Body).metadata();
+    const metadata = await sharp((sentCommand as S3Command).input.Body).metadata();
     assert.equal(metadata.format, "webp");
     assert.ok((metadata.width || 0) <= 50);
   } finally {
@@ -195,39 +217,55 @@ test("uploadStorageImage falls back to Supabase storage when R2 is not configure
 test("deleteStorageImage handles empty filePath, R2 deletion, and Supabase deletion", async () => {
   const originalEnv = { ...process.env };
 
-  // Empty path
+  // 1. Empty path
   const emptyRes = await deleteStorageImage({ filePath: "" });
   assert.equal(emptyRes.success, true);
 
-  // R2 configured
+  // 2. R2 configured
   process.env.CLOUDFLARE_R2_ACCOUNT_ID = "acc-123";
   process.env.CLOUDFLARE_R2_ACCESS_KEY_ID = "key-123";
   process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY = "sec-123";
   process.env.CLOUDFLARE_R2_BUCKET_NAME = "giaphadongho";
   process.env.CLOUDFLARE_R2_PUBLIC_URL = "https://pub-test.r2.dev";
 
-  let deleteCommand: any = null;
+  interface DeleteCommand {
+    input: {
+      Bucket: string;
+      Key: string;
+    };
+  }
+
+  let deleteCommand: DeleteCommand | null = null;
   const mockS3Client = {
-    send: async (command: any) => {
-      deleteCommand = command;
+    send: async (command: unknown) => {
+      deleteCommand = command as DeleteCommand;
       return {};
     },
   };
-  setR2ClientInstance(mockS3Client as any);
+  setR2ClientInstance(mockS3Client as unknown as import("@aws-sdk/client-s3").S3Client);
 
   try {
+    // 2a. Delete R2 image when R2 is configured
     const resR2 = await deleteStorageImage({
       filePath: "https://pub-test.r2.dev/avatars/test-delete.webp",
     });
     assert.equal(resR2.success, true);
     assert.ok(deleteCommand);
-    assert.equal(deleteCommand.input.Bucket, "giaphadongho");
-    assert.equal(deleteCommand.input.Key, "avatars/test-delete.webp");
+    assert.equal((deleteCommand as DeleteCommand).input.Bucket, "giaphadongho");
+    assert.equal((deleteCommand as DeleteCommand).input.Key, "avatars/test-delete.webp");
+
+    // 2b. Legacy Supabase image: MUST route to Supabase Storage and NOT send to R2!
+    deleteCommand = null;
+    const resLegacySupabase = await deleteStorageImage({
+      filePath: "https://testproject.supabase.co/storage/v1/object/public/news/legacy-banner.webp",
+    });
+    assert.equal(resLegacySupabase.success, true);
+    assert.equal(deleteCommand, null, "Should NOT call R2 send when image is from Supabase Storage");
   } finally {
     resetR2ClientInstance();
   }
 
-  // R2 unconfigured (Supabase fallback)
+  // 3. R2 unconfigured (Supabase fallback for relative path)
   delete process.env.CLOUDFLARE_R2_ACCOUNT_ID;
   delete process.env.CLOUDFLARE_R2_ACCESS_KEY_ID;
   delete process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY;
