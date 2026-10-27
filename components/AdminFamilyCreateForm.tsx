@@ -5,6 +5,7 @@ import {
   type CreateFamilyActionState,
 } from "@/app/actions/family";
 import { AdminUserData } from "@/types";
+import { slugify } from "@/utils/slug";
 import {
   AlertCircle,
   Check,
@@ -66,9 +67,16 @@ export default function AdminFamilyCreateForm({
   const [adminQuery, setAdminQuery] = useState("");
   const [selectedAdminId, setSelectedAdminId] = useState("");
 
+  const [nameValue, setNameValue] = useState("");
+  const [slugValue, setSlugValue] = useState("");
+  const [isCustomSlug, setIsCustomSlug] = useState(false);
+
   useEffect(() => {
     if (!state.success) return;
     formRef.current?.reset();
+    setNameValue("");
+    setSlugValue("");
+    setIsCustomSlug(false);
     const timer = window.setTimeout(() => {
       setAdminQuery("");
       setSelectedAdminId("");
@@ -76,6 +84,25 @@ export default function AdminFamilyCreateForm({
     router.refresh();
     return () => window.clearTimeout(timer);
   }, [router, state.success]);
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const nextName = e.target.value;
+    setNameValue(nextName);
+    if (!isCustomSlug) {
+      setSlugValue(slugify(nextName));
+    }
+  };
+
+  const handleSlugChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const nextSlug = e.target.value;
+    setSlugValue(nextSlug);
+    if (!nextSlug.trim()) {
+      setIsCustomSlug(false);
+      setSlugValue(slugify(nameValue));
+    } else {
+      setIsCustomSlug(true);
+    }
+  };
 
   const filteredAdmins = useMemo(() => {
     const query = normalize(adminQuery.trim());
@@ -145,6 +172,8 @@ export default function AdminFamilyCreateForm({
             <input
               name="name"
               required
+              value={nameValue}
+              onChange={handleNameChange}
               placeholder="Ví dụ: Dòng họ Nguyễn Văn"
               className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm font-semibold text-stone-950 outline-none transition focus:border-amber-500 focus:bg-white focus:ring-4 focus:ring-amber-100"
             />
@@ -156,6 +185,8 @@ export default function AdminFamilyCreateForm({
             </span>
             <input
               name="slug"
+              value={slugValue}
+              onChange={handleSlugChange}
               placeholder="dong-ho-nguyen-van"
               className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm font-semibold text-stone-950 outline-none transition focus:border-amber-500 focus:bg-white focus:ring-4 focus:ring-amber-100"
             />
