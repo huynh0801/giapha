@@ -1,0 +1,228 @@
+import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { createClient } from "@/utils/supabase/server";
+import { cookies } from "next/headers";
+import sharp from "sharp";
+
+export function isR2Configured(): boolean {
+  return Boolean(
+    process.env.CLOUDFLARE_R2_ACCOUNT_ID &&
+    process.env.CLOUDFLARE_R2_ACCESS_KEY_ID &&
+    process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY &&
+    process.env.CLOUDFLARE_R2_BUCKET_NAME &&
+    process.env.CLOUDFLARE_R2_PUBLIC_URL
+  );
+}
+
+let s3ClientInstance: S3Client | null = null;
+
+export function getR2Client(): S3Client {
+  const accountId = process.env.CLOUDFLARE_R2_ACCOUNT_ID;
+  if (!s3ClientInstance) {
+    s3ClientInstance = new S3Client({
+      region: "auto",
+      endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
+      credentials: {
+        accessKeyId: process.env.CLOUDFLARE_R2_ACCESS_KEY_ID || "",
+        secretAccessKey: process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY || "",
+      },
+    });
+  }
+  return s3ClientInstance;
+}
+
+export function resetR2ClientInstance(): void {
+  s3ClientInstance = null;
+}
+
+export function setR2ClientInstance(client: S3Client | null): void {
+  s3ClientInstance = client;
+}
+
+export interface UploadStorageOptions {
+  file: File | { name: string; type: string; arrayBuffer: () => Promise<ArrayBufferLike> } | Buffer | Uint8Array;
+  folder: string;
+  fileNamePrefix?: string;
+  maxDimension?: number;
+  quality?: number;
+  bucketFallback?: string;
+}
+
+export interface StorageResult {
+  success: boolean;
+  publicUrl?: string;
+  filePath?: string;
+  error?: string;
+}
+
+export function extractStoragePath(inputPath: string, bucketFallback: string = "avatars"): string {
+  if (!inputPath) return "";
+  let path = inputPath.trim();
+  const publicBaseUrl = process.env.CLOUDFLARE_R2_PUBLIC_URL?.replace(/\/+$/, "");
+  if (publicBaseUrl && path.startsWith(publicBaseUrl)) {
+    path = path.slice(publicBaseUrl.length);
+  } else if (path.startsWith("http://") || path.startsWith("https://")) {
+    try {
+      const url = new URL(path);
+      const supabasePrefix = `/storage/v1/object/public/${bucketFallback}/`;
+      if (url.pathname.includes(supabasePrefix)) {
+        path = url.pathname.slice(url.pathname.indexOf(supabasePrefix) + supabasePrefix.length);
+      } else {
+        path = url.pathname;
+      }
+    } catch {
+      // ignore
+    }
+  }
+  return path.replace(/^\/+/, "");
+}
+
+export async function uploadStorageImage(options: UploadStorageOptions): Promise<StorageResult> {
+  try {
+    const {
+      file,
+      folder,
+      fileNamePrefix = "img",
+      maxDimension = 1200,
+      quality = 82,
+      bucketFallback = "avatars",
+    } = options;
+
+    if (!file) {
+      return { success: false, error: "Tệp tin ảnh rỗng hoặc không hợp lệ." };
+    }
+
+    let buffer: Buffer;
+    if (Buffer.isBuffer(file)) {
+      buffer = file;
+    } else if (file instanceof Uint8Array) {
+      buffer = Buffer.from(file.buffer, file.byteOffset, file.byteLength);
+    } else if (typeof (file as { arrayBuffer?: () => Promise<ArrayBuffer> }).arrayBuffer === "function") {
+      const arrayBuffer = await file.arrayBuffer();
+      buffer = Buffer.from(arrayBuffer);
+    } else {
+      return { success: false, error: "Định dạng tệp không hợp lệ." };
+    }
+
+    if (!buffer || buffer.length === 0) {
+      return { success: false, error: "Tệp tin ảnh rỗng hoặc không hợp lệ." };
+    }
+
+    // Nén và chuyển đổi sang WebP bằng sharp
+    const optimizedBuffer = await sharp(buffer, { failOn: "none" })
+      .rotate()
+      .resize({
+        width: maxDimension,
+        height: maxDimension,
+        fit: "inside",
+        withoutEnlargement: true,
+      })
+      .webp({ quality, effort: 4 })
+      .toBuffer();
+
+    const fileName = `${fileNamePrefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.webp`;
+    const cleanFolder = (folder || "").replace(/^\/+|\/+$/g, "");
+    const filePath = cleanFolder ? `${cleanFolder}/${fileName}` : fileName;
+
+    if (isR2Configured()) {
+      const s3 = getR2Client();
+      const bucketName = process.env.CLOUDFLARE_R2_BUCKET_NAME!;
+      const publicBaseUrl = process.env.CLOUDFLARE_R2_PUBLIC_URL!.replace(/\/+$/, "");
+
+      await s3.send(
+        new PutObjectCommand({
+          Bucket: bucketName,
+          Key: filePath,
+          Body: optimizedBuffer,
+          ContentType: "image/webp",
+          CacheControl: "public, max-age=31536000, immutable",
+        })
+      );
+
+      return {
+        success: true,
+        publicUrl: `${publicBaseUrl}/${filePath}`,
+        filePath,
+      };
+    }
+
+    // Fallback: Supabase Storage
+    let cookieStore: any = null;
+    try {
+      cookieStore = await cookies();
+    } catch {
+      // outside request context
+    }
+    const supabase = createClient(cookieStore || ({ getAll: () => [], setAll: () => {} } as any));
+
+    const { error: uploadError } = await supabase.storage
+      .from(bucketFallback)
+      .upload(filePath, optimizedBuffer, {
+        contentType: "image/webp",
+        cacheControl: "31536000",
+        upsert: false,
+      });
+
+    if (uploadError) {
+      console.error("Supabase Storage fallback error:", uploadError);
+      return { success: false, error: uploadError.message };
+    }
+
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from(bucketFallback).getPublicUrl(filePath);
+
+    return {
+      success: true,
+      publicUrl,
+      filePath,
+    };
+  } catch (error) {
+    console.error("Storage upload exception:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Đã xảy ra lỗi khi tải ảnh lên kho lưu trữ.",
+    };
+  }
+}
+
+export async function deleteStorageImage(options: {
+  filePath: string;
+  bucketFallback?: string;
+}): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { filePath, bucketFallback = "avatars" } = options;
+    if (!filePath) return { success: true };
+
+    const targetKey = extractStoragePath(filePath, bucketFallback);
+    if (!targetKey) return { success: true };
+
+    if (isR2Configured()) {
+      const s3 = getR2Client();
+      await s3.send(
+        new DeleteObjectCommand({
+          Bucket: process.env.CLOUDFLARE_R2_BUCKET_NAME!,
+          Key: targetKey,
+        })
+      );
+      return { success: true };
+    }
+
+    let cookieStore: any = null;
+    try {
+      cookieStore = await cookies();
+    } catch {
+      // outside request context
+    }
+    const supabase = createClient(cookieStore || ({ getAll: () => [], setAll: () => {} } as any));
+    const { error } = await supabase.storage.from(bucketFallback).remove([targetKey]);
+    if (error) {
+      return { success: false, error: error.message };
+    }
+    return { success: true };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Lỗi khi xóa ảnh.",
+    };
+  }
+}

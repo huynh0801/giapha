@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --test tests/multitenant-private.test.mjs tests/security-hardening.test.mjs tests/landing-page.test.mjs tests/user-profile.test.mjs tests/heritage-ui.test.mjs tests/pwa-and-auth-redirect.test.mjs tests/news-search.test.mjs tests/member-claim.test.mjs && node --import tsx --test tests/genealogy-engine.test.ts tests/excel-import.test.ts tests/tree-full-view.test.ts tests/slug.test.ts tests/slug-integration.test.ts",
+    "test": "node --test tests/multitenant-private.test.mjs tests/security-hardening.test.mjs tests/landing-page.test.mjs tests/user-profile.test.mjs tests/heritage-ui.test.mjs tests/pwa-and-auth-redirect.test.mjs tests/news-search.test.mjs tests/member-claim.test.mjs && node --import tsx --test tests/genealogy-engine.test.ts tests/excel-import.test.ts tests/tree-full-view.test.ts tests/slug.test.ts tests/slug-integration.test.ts tests/storage-adapter.test.ts",
     "db:link": "npx supabase link --project-ref",
     "db:pull": "npx supabase db pull",
     "db:push": "npx supabase db push",
@@ -16,6 +16,7 @@
     "db:migration:new": "npx supabase migration new"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1157.0",
     "@supabase/ssr": "^0.9.0",
     "@supabase/supabase-js": "^2.100.1",
     "@xyflow/react": "^12.11.1",
