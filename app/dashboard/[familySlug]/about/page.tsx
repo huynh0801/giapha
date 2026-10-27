@@ -1,4 +1,5 @@
 import { updateFamilyAction } from "@/app/actions/family";
+import ImageUploadField from "@/components/ImageUploadField";
 import HeritagePageHeader from "@/components/dashboard/HeritagePageHeader";
 import { HeritageBadge, HeritageFrame } from "@/components/dashboard/HeritageUI";
 import { getFamilyContextBySlug } from "@/utils/supabase/queries";
@@ -45,7 +46,7 @@ export default async function FamilyAboutPage({ params }: PageProps) {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
           {context.canManage ? (
             <HeritageFrame cornerColor="#8c1d1d">
-              <form action={updateFamilyAction} className="space-y-5">
+              <form action={updateFamilyAction} encType="multipart/form-data" className="space-y-5">
                 <input type="hidden" name="family_id" value={family.id} />
                 <div className="border-b border-[#deb887]/50 pb-3">
                   <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#183b28]">
@@ -109,17 +110,15 @@ export default async function FamilyAboutPage({ params }: PageProps) {
                     </select>
                   </label>
 
-                  <label className="block md:col-span-2">
-                    <span className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-[#7a6455]">
-                      Huy hiệu / Logo URL
-                    </span>
-                    <input
-                      name="logo_url"
-                      defaultValue={family.logo_url || ""}
-                      placeholder="https://..."
-                      className={inputClasses}
+                  <div className="md:col-span-2">
+                    <ImageUploadField
+                      name="logo_file"
+                      removeName="remove_logo"
+                      label="Huy hiệu / Logo dòng họ"
+                      currentImageUrl={family.logo_url}
+                      shape="shield"
                     />
-                  </label>
+                  </div>
 
                   <label className="block md:col-span-2">
                     <span className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-[#7a6455]">
@@ -153,6 +152,25 @@ export default async function FamilyAboutPage({ params }: PageProps) {
                 </h2>
               </div>
               <div className="grid gap-4">
+                {family.logo_url && (
+                  <div className="flex items-center gap-4 rounded-xl border border-[#deb887]/60 bg-gradient-to-br from-[#fffdf7] to-[#fbf7ed] p-4.5">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={family.logo_url}
+                      alt={`Huy hiệu ${family.name}`}
+                      className="size-16 object-contain rounded-lg border border-[#deb887]/80 bg-white"
+                    />
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-wider text-[#7a6455]">
+                        Huy hiệu / Logo dòng họ
+                      </p>
+                      <p className="text-sm font-semibold text-[#183b28]">
+                        Đã thiết lập
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 <div className="rounded-xl border border-[#deb887]/60 bg-gradient-to-br from-[#fffdf7] to-[#fbf7ed] p-4.5">
                   <p className="text-xs font-bold uppercase tracking-wider text-[#7a6455]">
                     Tên dòng họ

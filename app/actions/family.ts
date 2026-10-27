@@ -7,6 +7,7 @@ import {
 } from "@/utils/supabase/queries";
 import { parseBlogImageLimitInput } from "@/utils/blogImageRules";
 import { generateUniqueSlug, slugify } from "@/utils/slug";
+import { deleteStorageImage, uploadStorageImage } from "@/utils/storage";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -247,7 +248,6 @@ export async function updateFamilyAction(formData: FormData) {
   const requestedSlug = getText(formData, "slug");
   const description = getText(formData, "description");
   const originLocation = getText(formData, "origin_location");
-  const logoUrl = getText(formData, "logo_url");
   const visibilityInput = getText(formData, "visibility");
   const visibility =
     visibilityInput === "family_only" || visibilityInput === "public"
@@ -258,6 +258,54 @@ export async function updateFamilyAction(formData: FormData) {
 
   const slug = slugify(requestedSlug || name);
   if (!slug) throw new Error("Slug không hợp lệ.");
+
+  const logoFile = formData.get("logo_file");
+  const removeLogo = formData.get("remove_logo") === "1";
+  const oldLogoUrl = guard.context.family.logo_url || null;
+
+  let logoUrl: string | null = oldLogoUrl;
+
+  const isNewFile =
+    logoFile !== null &&
+    typeof logoFile === "object" &&
+    "size" in logoFile &&
+    Number((logoFile as { size?: unknown }).size) > 0;
+
+  if (isNewFile) {
+    const uploadResult = await uploadStorageImage({
+      file: logoFile as File,
+      folder: "families/logos",
+      fileNamePrefix: familyId,
+      maxDimension: 800,
+      bucketFallback: "avatars",
+    });
+
+    if (!uploadResult.success || !uploadResult.publicUrl) {
+      throw new Error(uploadResult.error || "Không thể tải lên logo dòng họ.");
+    }
+
+    logoUrl = uploadResult.publicUrl;
+
+    if (oldLogoUrl) {
+      await deleteStorageImage({
+        filePath: oldLogoUrl,
+        bucketFallback: "avatars",
+      });
+    }
+  } else if (removeLogo) {
+    if (oldLogoUrl) {
+      await deleteStorageImage({
+        filePath: oldLogoUrl,
+        bucketFallback: "avatars",
+      });
+    }
+    logoUrl = null;
+  } else if (formData.has("logo_url")) {
+    const rawLogoUrl = getText(formData, "logo_url");
+    if (rawLogoUrl) {
+      logoUrl = rawLogoUrl;
+    }
+  }
 
   const supabase = await getSupabase();
   const { data, error } = await supabase
