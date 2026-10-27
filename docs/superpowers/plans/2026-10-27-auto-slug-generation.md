@@ -4,9 +4,9 @@
 
 **Goal:** Triển khai cơ chế tự động sinh Slug theo thời gian thực (realtime) từ tiếng Việt có dấu cho các biểu mẫu thêm mới (Dòng họ, Cây gia phả, Bài viết), đồng thời tự động xử lý chống trùng lặp slug ở phía Server Actions.
 
-**Architecture:** Tạo tiện ích dùng chung `utils/slug.ts` (`slugify` & `generateUniqueSlug`). Đồng bộ realtime giữa ô nhập Tên/Tiêu đề và ô Slug ở Client components với cờ `isCustomSlug`. Tại Server Actions, chuẩn hóa slug và tự động tăng hậu tố `-1`, `-2`,... nếu xảy ra xung đột slug.
+**Architecture:** Tạo tiện ích dùng chung `utils/slug.ts` (`slugify` & `generateUniqueSlug`). Đồng bộ realtime giữa ô nhập Tên/Tiêu đề và ô Slug ở Client components với cờ `isCustomSlug`. Tại Server Actions, chuẩn hóa slug và tự động tăng hậu tố `-1`, `-2`,... nếu xảy ra xung đột slug trong database.
 
-**Tech Stack:** Next.js 15 (App Router, Server Actions, Client Components), React 19, TypeScript, Supabase DB.
+**Tech Stack:** Next.js 15 (App Router, Server Actions, Client Components), React 19, TypeScript, Supabase DB, Node.js Test Runner.
 
 ## Global Constraints
 
@@ -20,7 +20,7 @@
 
 **Files:**
 - Create: `utils/slug.ts`
-- Test: `tests/slug.test.ts`
+- Create: `tests/slug.test.ts`
 
 **Interfaces:**
 - Produces:
@@ -124,53 +124,62 @@ git commit -m "feat: add shared slugify and generateUniqueSlug utility with test
 **Interfaces:**
 - Consumes: `slugify` from `utils/slug`
 
-- [ ] **Step 1: Update `AdminFamilyCreateForm.tsx` with name and slug state**
+- [ ] **Step 1: Update `AdminFamilyCreateForm.tsx`**
 
-In `components/AdminFamilyCreateForm.tsx`:
 1. Import `slugify` from `@/utils/slug`.
-2. Add states:
+2. Add state for `nameValue`, `slugValue`, and `isCustomSlug`:
    ```typescript
-   const [name, setName] = useState("");
-   const [slug, setSlug] = useState("");
+   const [nameValue, setNameValue] = useState("");
+   const [slugValue, setSlugValue] = useState("");
    const [isCustomSlug, setIsCustomSlug] = useState(false);
    ```
-3. When form resets on success, reset `name`, `slug`, and `isCustomSlug`.
-4. On `name` input change:
+3. Update `useEffect` when `state.success` triggers to also reset:
    ```typescript
-   const newName = event.target.value;
-   setName(newName);
-   if (!isCustomSlug) {
-     setSlug(slugify(newName));
-   }
+   setNameValue("");
+   setSlugValue("");
+   setIsCustomSlug(false);
    ```
-5. On `slug` input change:
+4. Handle name input change:
    ```typescript
-   const newSlug = event.target.value;
-   setSlug(newSlug);
-   if (!newSlug.trim()) {
-     setIsCustomSlug(false);
-     setSlug(slugify(name));
-   } else {
-     setIsCustomSlug(true);
-   }
+   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+     const nextName = e.target.value;
+     setNameValue(nextName);
+     if (!isCustomSlug) {
+       setSlugValue(slugify(nextName));
+     }
+   };
    ```
-6. Bind `value={name}` and `value={slug}` to respective inputs.
+5. Handle slug input change:
+   ```typescript
+   const handleSlugChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+     const nextSlug = e.target.value;
+     setSlugValue(nextSlug);
+     if (!nextSlug.trim()) {
+       setIsCustomSlug(false);
+       setSlugValue(slugify(nameValue));
+     } else {
+       setIsCustomSlug(true);
+     }
+   };
+   ```
+6. Bind `value={nameValue}` and `onChange={handleNameChange}` to `name` input.
+7. Bind `value={slugValue}` and `onChange={handleSlugChange}` to `slug` input.
 
-- [ ] **Step 2: Verify `AdminFamilyCreateForm.tsx` compiles and test suite passes**
+- [ ] **Step 2: Run test suite**
 
 Run: `npm test`
-Expected: All existing tests PASS.
+Expected: PASS.
 
 - [ ] **Step 3: Commit**
 
 ```bash
 git add components/AdminFamilyCreateForm.tsx
-git commit -m "feat: add realtime slug auto-generation to AdminFamilyCreateForm"
+git commit -m "feat: enable realtime slug auto-generation in AdminFamilyCreateForm"
 ```
 
 ---
 
-### Task 3: Realtime Slug Auto-Generation in Tree Creation (`CreateFamilyTreeForm.tsx`)
+### Task 3: Extract `CreateFamilyTreeForm.tsx` with Realtime Slug Generation
 
 **Files:**
 - Create: `components/CreateFamilyTreeForm.tsx`
@@ -178,165 +187,158 @@ git commit -m "feat: add realtime slug auto-generation to AdminFamilyCreateForm"
 
 **Interfaces:**
 - Consumes: `slugify` from `utils/slug`, `createFamilyTreeAction` from `app/actions/family`
-- Produces: `CreateFamilyTreeForm` component accepting `{ familyId: string; currentSlug: string; hasTrees: boolean }`
 
 - [ ] **Step 1: Create `components/CreateFamilyTreeForm.tsx`**
 
-Create client component `components/CreateFamilyTreeForm.tsx`:
+Create `components/CreateFamilyTreeForm.tsx`:
 ```tsx
 "use client";
 
-import { useState } from "react";
-import { GitBranch, ShieldCheck } from "lucide-react";
 import { createFamilyTreeAction } from "@/app/actions/family";
 import { slugify } from "@/utils/slug";
+import { Plus } from "lucide-react";
+import { useState } from "react";
 
 interface CreateFamilyTreeFormProps {
   familyId: string;
-  hasTrees: boolean;
 }
 
-export function CreateFamilyTreeForm({
+export default function CreateFamilyTreeForm({
   familyId,
-  hasTrees,
 }: CreateFamilyTreeFormProps) {
-  const [name, setName] = useState("");
-  const [slug, setSlug] = useState("");
+  const [nameValue, setNameValue] = useState("");
+  const [slugValue, setSlugValue] = useState("");
   const [isCustomSlug, setIsCustomSlug] = useState(false);
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    setName(val);
+    const nextName = e.target.value;
+    setNameValue(nextName);
     if (!isCustomSlug) {
-      setSlug(slugify(val));
+      setSlugValue(slugify(nextName));
     }
   };
 
   const handleSlugChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    setSlug(val);
-    if (!val.trim()) {
+    const nextSlug = e.target.value;
+    setSlugValue(nextSlug);
+    if (!nextSlug.trim()) {
       setIsCustomSlug(false);
-      setSlug(slugify(name));
+      setSlugValue(slugify(nameValue));
     } else {
       setIsCustomSlug(true);
     }
   };
 
   return (
-    <div className="rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
-      <div className="mb-4 flex items-center gap-3">
-        <div className="rounded-xl bg-[#800000]/10 p-2.5 text-[#800000]">
-          <GitBranch className="size-5" />
+    <form
+      action={createFamilyTreeAction}
+      className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm sm:p-6"
+    >
+      <input type="hidden" name="family_id" value={familyId} />
+      <div className="mb-5 flex items-center gap-3">
+        <div className="flex size-11 items-center justify-center rounded-2xl bg-amber-50 text-amber-700">
+          <Plus className="size-5" />
         </div>
         <div>
-          <h2 className="text-base font-black text-stone-900">
+          <h2 className="text-xl font-black text-stone-900">
             Tạo cây gia phả mới
           </h2>
-          <p className="text-xs text-stone-500">
-            Tạo thêm nhánh hoặc cây bổ trợ cho dòng họ này.
+          <p className="text-sm text-stone-500">
+            Dành cho chi phái hoặc nhánh dữ liệu riêng.
           </p>
         </div>
       </div>
 
-      <form action={createFamilyTreeAction} className="space-y-4">
-        <input type="hidden" name="family_id" value={familyId} />
+      <div className="space-y-4">
+        <label className="block">
+          <span className="mb-1.5 block text-sm font-bold text-stone-700">
+            Tên cây
+          </span>
+          <input
+            name="name"
+            required
+            value={nameValue}
+            onChange={handleNameChange}
+            placeholder="Ví dụ: Cây gia phả chính"
+            className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm font-semibold text-stone-900 outline-none focus:border-amber-500"
+          />
+        </label>
 
-        <div className="space-y-4">
-          <label className="block">
-            <span className="mb-1.5 block text-sm font-bold text-stone-700">
-              Tên cây
-            </span>
-            <input
-              name="name"
-              required
-              value={name}
-              onChange={handleNameChange}
-              placeholder="Ví dụ: Cây gia phả chính"
-              className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm font-semibold text-stone-900 outline-none focus:border-amber-500"
-            />
-          </label>
+        <label className="block">
+          <span className="mb-1.5 block text-sm font-bold text-stone-700">
+            Slug
+          </span>
+          <input
+            name="slug"
+            value={slugValue}
+            onChange={handleSlugChange}
+            placeholder="cay-gia-pha-chinh"
+            className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm font-semibold text-stone-900 outline-none focus:border-amber-500"
+          />
+        </label>
 
-          <label className="block">
-            <span className="mb-1.5 block text-sm font-bold text-stone-700">
-              Slug
-            </span>
-            <input
-              name="slug"
-              value={slug}
-              onChange={handleSlugChange}
-              placeholder="cay-gia-pha-chinh"
-              className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm font-semibold text-stone-900 outline-none focus:border-amber-500"
-            />
-          </label>
+        <label className="block">
+          <span className="mb-1.5 block text-sm font-bold text-stone-700">
+            Mô tả
+          </span>
+          <textarea
+            name="description"
+            rows={4}
+            placeholder="Ghi chú về phạm vi cây, chi phái hoặc dữ liệu đang nhập."
+            className="w-full resize-none rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm font-semibold text-stone-900 outline-none focus:border-amber-500"
+          />
+        </label>
 
-          <label className="block">
-            <span className="mb-1.5 block text-sm font-bold text-stone-700">
-              Mô tả
-            </span>
-            <textarea
-              name="description"
-              rows={4}
-              placeholder="Ghi chú về phạm vi cây, chi phái hoặc dữ liệu đang nhập."
-              className="w-full resize-none rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm font-semibold text-stone-900 outline-none focus:border-amber-500"
-            />
-          </label>
+        <label className="block">
+          <span className="mb-1.5 block text-sm font-bold text-stone-700">
+            Chế độ hiển thị
+          </span>
+          <select
+            name="visibility"
+            defaultValue="private"
+            className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm font-semibold text-stone-900 outline-none focus:border-amber-500"
+          >
+            <option value="private">Riêng tư</option>
+            <option value="family_only">Chỉ trong dòng họ</option>
+          </select>
+        </label>
 
-          <label className="block">
-            <span className="mb-1.5 block text-sm font-bold text-stone-700">
-              Quyền xem cây
-            </span>
-            <select
-              name="visibility"
-              defaultValue="family_only"
-              className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm font-semibold text-stone-900 outline-none focus:border-amber-500"
-            >
-              <option value="private">Chỉ quản trị viên</option>
-              <option value="family_only">Thành viên dòng họ</option>
-              <option value="public">Công khai</option>
-            </select>
-          </label>
-
-          <label className="flex items-center gap-2 text-sm text-stone-700">
-            <input
-              type="checkbox"
-              name="is_primary"
-              defaultChecked={!hasTrees}
-              className="rounded border-stone-300 text-[#800000] focus:ring-[#800000]"
-            />
-            <span className="font-semibold">
-              Đặt làm cây mặc định của dòng họ
-            </span>
-          </label>
-        </div>
+        <label className="flex items-center gap-3 rounded-2xl bg-amber-50 px-4 py-3 text-sm font-bold text-amber-900">
+          <input
+            type="checkbox"
+            name="is_primary"
+            className="size-4 rounded border-amber-300"
+          />
+          Đặt làm cây chính sau khi tạo
+        </label>
 
         <button
           type="submit"
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#800000] px-4 py-3 text-sm font-black text-amber-100 transition hover:bg-[#600000]"
+          className="w-full rounded-xl bg-amber-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-amber-700"
         >
-          <ShieldCheck className="size-4" />
           Tạo cây gia phả
         </button>
-      </form>
-    </div>
+      </div>
+    </form>
   );
 }
 ```
 
-- [ ] **Step 2: Use `CreateFamilyTreeForm` in `app/dashboard/[familySlug]/trees/page.tsx`**
+- [ ] **Step 2: Update `app/dashboard/[familySlug]/trees/page.tsx`**
 
-Replace the static tree creation form in `app/dashboard/[familySlug]/trees/page.tsx` with:
+Replace inline `<form action={createFamilyTreeAction}>` with:
 ```tsx
-<CreateFamilyTreeForm
-  familyId={family.id}
-  hasTrees={trees.length > 0}
-/>
+import CreateFamilyTreeForm from "@/components/CreateFamilyTreeForm";
+...
+{context.canManage ? (
+  <CreateFamilyTreeForm familyId={context.family.id} />
+) : null}
 ```
 
-- [ ] **Step 3: Run tests to verify compatibility**
+- [ ] **Step 3: Run test suite**
 
 Run: `npm test`
-Expected: PASS. Note: Ensure `tests/multitenant-private.test.mjs` matches `createFamilyTreeAction` which will still be referenced in `CreateFamilyTreeForm`.
+Expected: PASS.
 
 - [ ] **Step 4: Commit**
 
@@ -358,34 +360,44 @@ git commit -m "feat: extract CreateFamilyTreeForm with realtime slug auto-genera
 - [ ] **Step 1: Update `BlogAdminPanel.tsx`**
 
 1. Replace internal `slugify` function with import from `@/utils/slug`.
-2. Add state for `slug` and `isCustomSlug`:
+2. Add state for `slugValue` and `isCustomSlug`:
    ```typescript
    const [slugValue, setSlugValue] = useState("");
    const [isCustomSlug, setIsCustomSlug] = useState(false);
    ```
-3. When `handleSelectPost` is called:
-   - If `post`: `setSlugValue(post.slug)`, `setIsCustomSlug(true)`.
-   - If `!post` (new post): `setSlugValue("")`, `setIsCustomSlug(false)`.
-4. In `handleTitleChange` (or when typing in Title):
-   ```typescript
-   if (!editingPost && !isCustomSlug) {
-     setSlugValue(slugify(event.currentTarget.value));
-   }
-   ```
-5. In `slug` input `onChange`:
-   ```typescript
-   const val = event.currentTarget.value;
-   setSlugValue(val);
-   if (!val.trim()) {
-     setIsCustomSlug(false);
-     if (titleInputRef.current) {
-       setSlugValue(slugify(titleInputRef.current.value));
-     }
-   } else {
-     setIsCustomSlug(true);
-   }
-   ```
-6. Bind `value={slugValue}` to the slug `<input>`.
+3. When `startEditing(post)` is called:
+   - `setSlugValue(post.slug);`
+   - `setIsCustomSlug(true);`
+4. When `resetForm()` is called:
+   - `setSlugValue("");`
+   - `setIsCustomSlug(false);`
+5. In Title `<input>`:
+   - Add `onChange`:
+     ```typescript
+     onChange={(e) => {
+       if (!editingPost && !isCustomSlug) {
+         setSlugValue(slugify(e.target.value));
+       }
+     }}
+     ```
+6. In Slug `<input>`:
+   - Replace `defaultValue` with `value={slugValue}`
+   - Add `onChange`:
+     ```typescript
+     onChange={(e) => {
+       const val = e.target.value;
+       setSlugValue(val);
+       if (!val.trim()) {
+         setIsCustomSlug(false);
+         const titleInput = e.currentTarget.form?.elements.namedItem("title") as HTMLInputElement | null;
+         if (titleInput) {
+           setSlugValue(slugify(titleInput.value));
+         }
+       } else {
+         setIsCustomSlug(true);
+       }
+     }}
+     ```
 
 - [ ] **Step 2: Run test suite**
 
@@ -413,7 +425,8 @@ git commit -m "feat: enable realtime slug auto-generation in BlogAdminPanel"
 - [ ] **Step 1: Update `createFamilyAction` in `app/actions/family.ts`**
 
 1. Import `slugify` and `generateUniqueSlug` from `@/utils/slug`.
-2. Use `generateUniqueSlug` to verify and resolve slug collisions:
+2. Replace local `slugify` function.
+3. In `createFamilyAction`:
    ```typescript
    const baseSlug = slugify(requestedSlug || name);
    if (!baseSlug) return { error: "Slug không hợp lệ." };
@@ -428,26 +441,27 @@ git commit -m "feat: enable realtime slug auto-generation in BlogAdminPanel"
      return Boolean(data);
    });
    ```
-3. Call `create_family_with_admin` with `family_slug: slug`.
+4. Pass `slug` to `create_family_with_admin`.
 
 - [ ] **Step 2: Update `createFamilyTreeAction` in `app/actions/family.ts`**
 
-1. In `createFamilyTreeAction`:
-   ```typescript
-   const baseSlug = slugify(requestedSlug || name);
-   if (!baseSlug) throw new Error("Slug cây gia phả không hợp lệ.");
+In `createFamilyTreeAction`:
+```typescript
+const baseSlug = slugify(requestedSlug || name);
+if (!baseSlug) throw new Error("Slug cây gia phả không hợp lệ.");
 
-   const slug = await generateUniqueSlug(baseSlug, async (candidate) => {
-     const { data } = await supabase
-       .from("family_trees")
-       .select("id")
-       .eq("family_id", familyId)
-       .eq("slug", candidate)
-       .maybeSingle();
-     return Boolean(data);
-   });
-   ```
-2. Insert into `family_trees` with `slug`.
+const supabase = await getSupabase();
+const slug = await generateUniqueSlug(baseSlug, async (candidate) => {
+  const { data } = await supabase
+    .from("family_trees")
+    .select("id")
+    .eq("family_id", familyId)
+    .eq("slug", candidate)
+    .maybeSingle();
+  return Boolean(data);
+});
+```
+Use `slug` in `.insert({ family_id: familyId, name, slug, ... })`.
 
 - [ ] **Step 3: Update `createOrUpdatePostAction` in `app/actions/blog.ts`**
 
@@ -478,8 +492,9 @@ git commit -m "feat: enable realtime slug auto-generation in BlogAdminPanel"
      return Boolean(data);
    });
    ```
+3. Use `slug` for saving and revalidating paths.
 
-- [ ] **Step 4: Run all test suites**
+- [ ] **Step 4: Run test suite**
 
 Run: `npm test`
 Expected: PASS.
@@ -493,24 +508,42 @@ git commit -m "feat: handle slug collision resolution in family and blog server 
 
 ---
 
-### Task 6: Toàn Bộ Verification & E2E Testing
+### Task 6: Toàn Bộ Verification & Integration Testing
 
 **Files:**
-- Test: `tests/slug-integration.test.ts`
+- Create: `tests/slug-integration.test.ts`
 
 - [ ] **Step 1: Write integration tests verifying actions and utilities**
 
 Create `tests/slug-integration.test.ts`:
-Verify that `generateUniqueSlug` works with mock db checks and edge cases (empty strings, special unicode characters, multiple collisions).
+```typescript
+import test from "node:test";
+import assert from "node:assert/strict";
+import { slugify, generateUniqueSlug } from "../utils/slug";
+
+test("slugify handles edge cases and Vietnamese accents cleanly", () => {
+  assert.equal(slugify("Họ Đỗ (Chi Phía Bắc)"), "ho-do-chi-phia-bac");
+  assert.equal(slugify("Nguyễn Đình Chiểu @ 2026!"), "nguyen-dinh-chieu-2026");
+  assert.equal(slugify("---   ---"), "");
+});
+
+test("generateUniqueSlug correctly avoids conflicts across multiple collisions", async () => {
+  const existing = new Set(["tin-tuc-dong-ho", "tin-tuc-dong-ho-1", "tin-tuc-dong-ho-2"]);
+  const isTaken = (candidate: string) => existing.has(candidate);
+
+  const res = await generateUniqueSlug("tin-tuc-dong-ho", isTaken);
+  assert.equal(res, "tin-tuc-dong-ho-3");
+});
+```
 
 - [ ] **Step 2: Run all test suites**
 
-Run: `npm test`
+Run: `npm test && node --import tsx --test tests/slug-integration.test.ts`
 Expected: All suites pass without errors.
 
 - [ ] **Step 3: Commit**
 
 ```bash
 git add tests/slug-integration.test.ts
-git commit -m "test: add slug integration tests and verify test suite"
+git commit -m "test: add slug integration tests and verify full suite"
 ```
