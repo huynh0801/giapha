@@ -9,6 +9,7 @@ import {
 import RichBlogEditor from "@/components/RichBlogEditor";
 import { BlogPost, PostScope } from "@/types";
 import { getFamilyBlogImageLimit } from "@/utils/blogImageRules";
+import { slugify } from "@/utils/slug";
 import {
   CheckCircle2,
   Edit3,
@@ -33,17 +34,7 @@ function formatDate(value: string | null) {
   }).format(new Date(value));
 }
 
-function slugify(input: string) {
-  return input
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[đĐ]/g, "d")
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .replace(/-{2,}/g, "-");
-}
+
 
 function getScopeCopy(scope: PostScope) {
   if (scope === "family") {
@@ -98,6 +89,8 @@ export default function BlogAdminPanel({
       : null;
   const router = useRouter();
   const [editingPost, setEditingPost] = useState<BlogPost | null>(initialPost);
+  const [slugValue, setSlugValue] = useState(initialPost?.slug || "");
+  const [isCustomSlug, setIsCustomSlug] = useState(Boolean(initialPost));
   const [imagePreview, setImagePreview] = useState<string>(
     initialPost?.cover_image_url || "",
   );
@@ -125,6 +118,8 @@ export default function BlogAdminPanel({
     setCoverCountsTowardLimit(Boolean(fallbackPost?.cover_image_path));
     setRemoveCoverImage(false);
     setCoverInputKey((value) => value + 1);
+    setSlugValue(fallbackPost?.slug || "");
+    setIsCustomSlug(Boolean(fallbackPost));
     setMessage("");
     setError("");
   };
@@ -135,16 +130,15 @@ export default function BlogAdminPanel({
     setCoverCountsTowardLimit(Boolean(post.cover_image_path));
     setRemoveCoverImage(false);
     setCoverInputKey((value) => value + 1);
+    setSlugValue(post.slug);
+    setIsCustomSlug(true);
     setMessage("");
     setError("");
   };
 
   const handleTitleBlur = (event: React.FocusEvent<HTMLInputElement>) => {
-    const form = event.currentTarget.form;
-    if (!form) return;
-    const slugInput = form.elements.namedItem("slug") as HTMLInputElement | null;
-    if (slugInput && !slugInput.value.trim()) {
-      slugInput.value = slugify(event.currentTarget.value);
+    if (!slugValue.trim()) {
+      setSlugValue(slugify(event.currentTarget.value));
     }
   };
 
@@ -196,6 +190,8 @@ export default function BlogAdminPanel({
         setCoverCountsTowardLimit(Boolean(result.post.cover_image_path));
         setRemoveCoverImage(false);
         setCoverInputKey((value) => value + 1);
+        setSlugValue(result.post.slug);
+        setIsCustomSlug(true);
       } else {
         form.reset();
         resetForm();
@@ -314,6 +310,11 @@ export default function BlogAdminPanel({
                 <input
                   name="title"
                   defaultValue={editingPost?.title || ""}
+                  onChange={(e) => {
+                    if (!editingPost && !isCustomSlug) {
+                      setSlugValue(slugify(e.target.value));
+                    }
+                  }}
                   onBlur={handleTitleBlur}
                   required
                   className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-4 text-xl font-black tracking-tight text-stone-900 outline-none transition-all focus:border-amber-300 focus:bg-white focus:shadow-[0_0_0_3px_rgba(217,119,6,0.16)]"
@@ -334,7 +335,20 @@ export default function BlogAdminPanel({
                   </label>
                   <input
                     name="slug"
-                    defaultValue={editingPost?.slug || ""}
+                    value={slugValue}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setSlugValue(val);
+                      if (!val.trim()) {
+                        setIsCustomSlug(false);
+                        const titleInput = e.currentTarget.form?.elements.namedItem("title") as HTMLInputElement | null;
+                        if (titleInput) {
+                          setSlugValue(slugify(titleInput.value));
+                        }
+                      } else {
+                        setIsCustomSlug(true);
+                      }
+                    }}
                     className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm font-semibold text-stone-700 outline-none transition-all focus:border-amber-300 focus:bg-white focus:shadow-[0_0_0_3px_rgba(217,119,6,0.16)]"
                     placeholder="duong-dan-bai-viet"
                   />
