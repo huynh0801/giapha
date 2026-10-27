@@ -77,11 +77,11 @@ export default function AdminFamilyCreateForm({
     if (!state.success) return;
     formRef.current?.reset();
     formRef.current?.dispatchEvent(new Event("reset"));
-    setUploadKey((k) => k + 1);
-    setNameValue("");
-    setSlugValue("");
-    setIsCustomSlug(false);
     const timer = window.setTimeout(() => {
+      setUploadKey((k) => k + 1);
+      setNameValue("");
+      setSlugValue("");
+      setIsCustomSlug(false);
       setAdminQuery("");
       setSelectedAdminId("");
     }, 0);
