@@ -6,6 +6,7 @@ import {
   getSupabase,
 } from "@/utils/supabase/queries";
 import { parseBlogImageLimitInput } from "@/utils/blogImageRules";
+import { generateUniqueSlug, slugify } from "@/utils/slug";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -16,18 +17,6 @@ export type CreateFamilyActionState = {
   familySlug?: string;
   familyName?: string;
 };
-
-function slugify(input: string) {
-  return input
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[đĐ]/g, "d")
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .replace(/-{2,}/g, "-");
-}
 
 function getText(formData: FormData, key: string) {
   return formData.get(key)?.toString().trim() || "";
@@ -90,10 +79,18 @@ export async function createFamilyAction(
     return { error: "Vui lòng chọn Admin dòng họ đầu tiên." };
   }
 
-  const slug = slugify(requestedSlug || name);
-  if (!slug) return { error: "Slug không hợp lệ." };
+  const baseSlug = slugify(requestedSlug || name);
+  if (!baseSlug) return { error: "Slug không hợp lệ." };
 
   const supabase = await getSupabase();
+  const slug = await generateUniqueSlug(baseSlug, async (candidate) => {
+    const { data } = await supabase
+      .from("families")
+      .select("id")
+      .eq("slug", candidate)
+      .maybeSingle();
+    return Boolean(data);
+  });
   const { error } = await supabase.rpc("create_family_with_admin", {
     family_name: name,
     family_slug: slug,
@@ -308,10 +305,19 @@ export async function createFamilyTreeAction(formData: FormData) {
 
   if (!name) throw new Error("Tên cây gia phả là bắt buộc.");
 
-  const slug = slugify(requestedSlug || name);
-  if (!slug) throw new Error("Slug cây gia phả không hợp lệ.");
+  const baseSlug = slugify(requestedSlug || name);
+  if (!baseSlug) throw new Error("Slug cây gia phả không hợp lệ.");
 
   const supabase = await getSupabase();
+  const slug = await generateUniqueSlug(baseSlug, async (candidate) => {
+    const { data } = await supabase
+      .from("family_trees")
+      .select("id")
+      .eq("family_id", familyId)
+      .eq("slug", candidate)
+      .maybeSingle();
+    return Boolean(data);
+  });
 
   if (isPrimary) {
     const resetResult = await supabase

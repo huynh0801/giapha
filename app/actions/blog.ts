@@ -1,4 +1,4 @@
-﻿"use server";
+"use server";
 
 import { BlogPost, PostScope } from "@/types";
 import {
@@ -12,19 +12,8 @@ import {
   getProfile,
   getSupabase,
 } from "@/utils/supabase/queries";
+import { generateUniqueSlug, slugify } from "@/utils/slug";
 import { revalidatePath } from "next/cache";
-
-function slugify(input: string) {
-  return input
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[đĐ]/g, "d")
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .replace(/-{2,}/g, "-");
-}
 
 function getText(formData: FormData, key: string) {
   return formData.get(key)?.toString().trim() || "";
@@ -160,8 +149,30 @@ async function saveScopedBlogPost(scope: PostScope, formData: FormData) {
   if (!title) return { error: "Tiêu đề là bắt buộc." };
   if (!content) return { error: "Nội dung bài viết là bắt buộc." };
 
-  const slug = slugify(requestedSlug || title);
-  if (!slug) return { error: "Slug không hợp lệ." };
+  const baseSlug = slugify(requestedSlug || title);
+  if (!baseSlug) return { error: "Slug không hợp lệ." };
+
+  const supabase = await getSupabase();
+  const slug = await generateUniqueSlug(baseSlug, async (candidate) => {
+    let query = supabase
+      .from("blog_posts")
+      .select("id")
+      .eq("scope", scope)
+      .eq("slug", candidate);
+
+    if (familyId) {
+      query = query.eq("family_id", familyId);
+    } else {
+      query = query.is("family_id", null);
+    }
+
+    if (id) {
+      query = query.neq("id", id);
+    }
+
+    const { data } = await query.maybeSingle();
+    return Boolean(data);
+  });
 
   let coverImageUrl = existingCoverUrl;
   let coverImagePath = existingCoverPath || null;
@@ -206,8 +217,6 @@ async function saveScopedBlogPost(scope: PostScope, formData: FormData) {
   if (scope === "system" && !coverImageUrl) {
     return { error: "Ảnh bìa là bắt buộc khi tạo bài viết hệ thống." };
   }
-
-  const supabase = await getSupabase();
 
   if (scope === "family" && familyId && !id) {
     const { data: existingNotice, error: existingNoticeError } = await supabase
@@ -382,6 +391,8 @@ async function deleteScopedBlogPost(scope: PostScope, formData: FormData) {
 export async function saveBlogPost(formData: FormData) {
   return saveScopedBlogPost("system", formData);
 }
+
+export const createOrUpdatePostAction = saveBlogPost;
 
 export async function saveFamilyBlogPost(formData: FormData) {
   return saveScopedBlogPost("family", formData);
