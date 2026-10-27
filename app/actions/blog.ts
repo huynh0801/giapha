@@ -6,7 +6,10 @@ import {
   getBlogImageLimitError,
   getFamilyBlogImageLimit,
 } from "@/utils/blogImageRules";
-import { optimizeBlogImage } from "@/utils/imageOptimization";
+import {
+  uploadStorageImage,
+  deleteStorageImage,
+} from "@/utils/storage/index";
 import {
   getFamilyContextById,
   getProfile,
@@ -84,46 +87,29 @@ async function uploadBlogImage(
   familyId: string | null,
   folder: "covers" | "inline",
 ) {
-  const supabase = await getSupabase();
-  let optimized: Awaited<ReturnType<typeof optimizeBlogImage>>;
-
-  try {
-    optimized = await optimizeBlogImage(file, {
-      maxDimension: folder === "covers" ? 1800 : 1600,
-    });
-  } catch (error) {
-    return {
-      error:
-        error instanceof Error
-          ? error.message
-          : "Không thể tối ưu ảnh upload.",
-    };
+  if (file.size > 15 * 1024 * 1024) {
+    return { error: "Ảnh upload không được vượt quá 15MB." };
   }
 
   const prefix = getStoragePrefix(scope, familyId || undefined);
-  const fileName =
-    folder === "covers"
-      ? `${Date.now()}-${crypto.randomUUID()}-${slug}.${optimized.extension}`
-      : `${Date.now()}-${crypto.randomUUID()}.${optimized.extension}`;
-  const filePath = `${prefix}/${folder}/${fileName}`;
+  const targetFolder = `${prefix}/${folder}`;
+  const fileNamePrefix =
+    folder === "covers" ? (slug ? `cover-${slug}` : "cover") : "inline";
 
-  const { error } = await supabase.storage
-    .from("blog-images")
-    .upload(filePath, optimized.buffer, {
-      cacheControl: "31536000",
-      upsert: false,
-      contentType: optimized.contentType,
-    });
+  const result = await uploadStorageImage({
+    file,
+    folder: targetFolder,
+    fileNamePrefix,
+    maxDimension: folder === "covers" ? 1800 : 1600,
+    quality: 78,
+    bucketFallback: "blog-images",
+  });
 
-  if (error) {
-    return { error: error.message };
+  if (!result.success || !result.publicUrl || !result.filePath) {
+    return { error: result.error || "Không thể upload ảnh." };
   }
 
-  const {
-    data: { publicUrl },
-  } = supabase.storage.from("blog-images").getPublicUrl(filePath);
-
-  return { publicUrl, filePath };
+  return { publicUrl: result.publicUrl, filePath: result.filePath };
 }
 
 async function saveScopedBlogPost(scope: PostScope, formData: FormData) {
@@ -281,7 +267,10 @@ async function saveScopedBlogPost(scope: PostScope, formData: FormData) {
     existingCoverPath &&
     existingCoverPath !== coverImagePath
   ) {
-    await supabase.storage.from("blog-images").remove([existingCoverPath]);
+    await deleteStorageImage({
+      filePath: existingCoverPath,
+      bucketFallback: "blog-images",
+    });
   }
 
   const savedPost = result.data as BlogPost;
@@ -369,7 +358,10 @@ async function deleteScopedBlogPost(scope: PostScope, formData: FormData) {
   if (error) return { error: error.message };
 
   if (coverImagePath) {
-    await supabase.storage.from("blog-images").remove([coverImagePath]);
+    await deleteStorageImage({
+      filePath: coverImagePath,
+      bucketFallback: "blog-images",
+    });
   }
 
   if (scope === "system") {

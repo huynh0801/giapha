@@ -1,8 +1,7 @@
 "use server";
 
 import { optimizeAvatarImage } from "@/utils/imageOptimization";
-import { createClient } from "@/utils/supabase/server";
-import { cookies } from "next/headers";
+import { uploadStorageImage, deleteStorageImage } from "@/utils/storage/index";
 
 const ALLOWED_MIME_TYPES = new Set([
   "image/jpeg",
@@ -59,37 +58,30 @@ export async function uploadAvatarAction(
       };
     }
 
-    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2, 9)}.${optimized.extension}`;
     const cleanFamilyId = familyId.replace(/[^a-zA-Z0-9_\-]/g, "");
-    const filePath = `${cleanFamilyId}/${fileName}`;
 
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    // Upload using unified storage adapter with fallback to Supabase avatars bucket
+    const result = await uploadStorageImage({
+      file: optimized.buffer,
+      folder: cleanFamilyId,
+      fileNamePrefix: "avatar",
+      maxDimension: 600,
+      bucketFallback: "avatars",
+    });
 
-    const { error: uploadError } = await supabase.storage
-      .from("avatars")
-      .upload(filePath, optimized.buffer, {
-        contentType: optimized.contentType,
-        cacheControl: "31536000",
-        upsert: false,
-      });
-
-    if (uploadError) {
-      console.error("Storage upload error:", uploadError);
+    // Reference optimized.contentType and optimized.extension for compatibility
+    if (!result.success) {
+      console.error("Storage upload error:", result.error);
       return {
         success: false,
-        error: "Không thể lưu trữ ảnh trên máy chủ: " + uploadError.message,
+        error: result.error || "Không thể lưu trữ ảnh trên máy chủ.",
       };
     }
 
-    const {
-      data: { publicUrl },
-    } = supabase.storage.from("avatars").getPublicUrl(filePath);
-
     return {
       success: true,
-      publicUrl,
-      filePath,
+      publicUrl: result.publicUrl,
+      filePath: result.filePath,
     };
   } catch (err) {
     console.error("Upload avatar exception:", err);
@@ -111,16 +103,14 @@ export async function deleteAvatarAction(
       return { success: true };
     }
 
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const result = await deleteStorageImage({
+      filePath,
+      bucketFallback: "avatars",
+    });
 
-    const { error } = await supabase.storage
-      .from("avatars")
-      .remove([filePath]);
-
-    if (error) {
-      console.error("Storage delete error:", error);
-      return { success: false, error: error.message };
+    if (!result.success) {
+      console.error("Storage delete error:", result.error);
+      return { success: false, error: result.error };
     }
 
     return { success: true };
