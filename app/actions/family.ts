@@ -83,6 +83,35 @@ export async function createFamilyAction(
   const baseSlug = slugify(requestedSlug || name);
   if (!baseSlug) return { error: "Slug không hợp lệ." };
 
+  const logoFile = formData.get("logo_file");
+  const isNewFile =
+    logoFile !== null &&
+    typeof logoFile === "object" &&
+    "size" in logoFile &&
+    Number((logoFile as { size?: unknown }).size) > 0;
+
+  let logoUrl: string | null = null;
+
+  if (isNewFile) {
+    const uploadResult = await uploadStorageImage({
+      file: logoFile as File,
+      folder: "families/logos",
+      maxDimension: 800,
+      bucketFallback: "avatars",
+    });
+
+    if (!uploadResult.success || !uploadResult.publicUrl) {
+      return { error: uploadResult.error || "Không thể tải lên logo dòng họ." };
+    }
+
+    logoUrl = uploadResult.publicUrl;
+  } else if (formData.has("logo_url")) {
+    const rawLogoUrl = getText(formData, "logo_url");
+    if (rawLogoUrl) {
+      logoUrl = rawLogoUrl;
+    }
+  }
+
   const supabase = await getSupabase();
   const slug = await generateUniqueSlug(baseSlug, async (candidate) => {
     const { data } = await supabase
@@ -92,7 +121,7 @@ export async function createFamilyAction(
       .maybeSingle();
     return Boolean(data);
   });
-  const { error } = await supabase.rpc("create_family_with_admin", {
+  const { data: createdFamilyId, error } = await supabase.rpc("create_family_with_admin", {
     family_name: name,
     family_slug: slug,
     family_description: description,
@@ -100,7 +129,26 @@ export async function createFamilyAction(
   });
 
   if (error) {
+    if (logoUrl && isNewFile) {
+      await deleteStorageImage({
+        filePath: logoUrl,
+        bucketFallback: "avatars",
+      });
+    }
     return { error: error.message };
+  }
+
+  if (logoUrl) {
+    const updateTargetId =
+      typeof createdFamilyId === "string" ? createdFamilyId : null;
+    const updateQuery = updateTargetId
+      ? supabase.from("families").update({ logo_url: logoUrl }).eq("id", updateTargetId)
+      : supabase.from("families").update({ logo_url: logoUrl }).eq("slug", slug);
+
+    const { error: updateError } = await updateQuery;
+    if (updateError) {
+      console.error("Failed to update family logo:", updateError);
+    }
   }
 
   revalidatePath("/admin/families");

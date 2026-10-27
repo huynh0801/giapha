@@ -4,6 +4,7 @@ import {
   createFamilyAction,
   type CreateFamilyActionState,
 } from "@/app/actions/family";
+import ImageUploadField from "@/components/ImageUploadField";
 import { AdminUserData } from "@/types";
 import { slugify } from "@/utils/slug";
 import {
@@ -70,10 +71,13 @@ export default function AdminFamilyCreateForm({
   const [nameValue, setNameValue] = useState("");
   const [slugValue, setSlugValue] = useState("");
   const [isCustomSlug, setIsCustomSlug] = useState(false);
+  const [uploadKey, setUploadKey] = useState(0);
 
   useEffect(() => {
     if (!state.success) return;
     formRef.current?.reset();
+    formRef.current?.dispatchEvent(new Event("reset"));
+    setUploadKey((k) => k + 1);
     setNameValue("");
     setSlugValue("");
     setIsCustomSlug(false);
@@ -119,6 +123,7 @@ export default function AdminFamilyCreateForm({
     <form
       ref={formRef}
       action={formAction}
+      encType="multipart/form-data"
       className="overflow-hidden rounded-[28px] border border-stone-200 bg-white shadow-[0_20px_70px_rgba(60,42,25,0.08)]"
     >
       <div className="border-b border-stone-100 bg-stone-950 px-5 py-5 text-white sm:px-6">
@@ -191,6 +196,15 @@ export default function AdminFamilyCreateForm({
               className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm font-semibold text-stone-950 outline-none transition focus:border-amber-500 focus:bg-white focus:ring-4 focus:ring-amber-100"
             />
           </label>
+
+          <div>
+            <ImageUploadField
+              key={uploadKey}
+              name="logo_file"
+              label="Huy hiệu / Logo dòng họ (tùy chọn)"
+              shape="shield"
+            />
+          </div>
 
           <label className="block">
             <span className="mb-1.5 block text-sm font-black text-stone-800">
