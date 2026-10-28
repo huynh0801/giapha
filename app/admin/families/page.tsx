@@ -19,7 +19,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export const metadata = {
-  title: "Quản lý dòng họ & Yêu cầu tạo gia tộc",
+  title: "Tạo dòng họ mới",
 };
 
 interface PageProps {
@@ -96,7 +96,7 @@ export default async function AdminFamiliesPage({ searchParams }: PageProps) {
 
   return (
     <AdminShell
-      title="Quản lý & Duyệt Dòng Họ"
+      title="Tạo dòng họ mới"
       description="Xem xét phê duyệt các yêu cầu xin tạo dòng họ từ thành viên, hoặc chủ động khởi tạo workspace dòng họ thủ công."
       action={
         <Link
