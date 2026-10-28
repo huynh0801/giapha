@@ -1,5 +1,5 @@
-import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
-import { createClient } from "@/utils/supabase/server";
+import { S3Client, PutObjectCommand, DeleteObjectCommand, ListObjectsV2Command } from "@aws-sdk/client-s3";
+import { createClient, createPublicClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import sharp from "sharp";
 
@@ -300,6 +300,140 @@ export async function deleteStorageImage(options: {
     return {
       success: false,
       error: error instanceof Error ? error.message : "Lỗi khi xóa ảnh.",
+    };
+  }
+}
+
+
+export interface StorageFileItem {
+  key: string;
+  name: string;
+  url: string;
+  size: number;
+  lastModified?: string;
+  folder: string;
+}
+
+export interface ListStorageOptions {
+  folder?: string;
+  maxKeys?: number;
+  continuationToken?: string;
+  bucketFallback?: string;
+}
+
+export interface ListStorageResult {
+  success: boolean;
+  files: StorageFileItem[];
+  nextContinuationToken?: string;
+  isTruncated: boolean;
+  error?: string;
+}
+
+export async function listStorageFiles(options: ListStorageOptions = {}): Promise<ListStorageResult> {
+  try {
+    const {
+      folder = "",
+      maxKeys = 100,
+      continuationToken,
+      bucketFallback = "avatars",
+    } = options;
+
+    const cleanFolder = (folder || "").replace(/^\/+|\/+$/g, "");
+
+    if (isR2Configured()) {
+      const s3 = getR2Client();
+      const bucketName = process.env.CLOUDFLARE_R2_BUCKET_NAME!;
+      const publicBaseUrl = process.env.CLOUDFLARE_R2_PUBLIC_URL!.replace(/\/+$/, "");
+
+      const command = new ListObjectsV2Command({
+        Bucket: bucketName,
+        Prefix: cleanFolder ? `${cleanFolder}/` : undefined,
+        MaxKeys: maxKeys,
+        ContinuationToken: continuationToken,
+      });
+
+      const response = await s3.send(command);
+      const contents = response.Contents || [];
+
+      const files: StorageFileItem[] = contents
+        .filter((item) => item.Key && !item.Key.endsWith("/"))
+        .map((item) => {
+          const key = item.Key!;
+          const parts = key.split("/");
+          const name = parts[parts.length - 1];
+          const fileFolder = parts.length > 1 ? parts.slice(0, -1).join("/") : "";
+          return {
+            key,
+            name,
+            url: `${publicBaseUrl}/${key}`,
+            size: item.Size || 0,
+            lastModified: item.LastModified ? (typeof item.LastModified.toISOString === "function" ? item.LastModified.toISOString() : String(item.LastModified)) : undefined,
+            folder: fileFolder,
+          };
+        });
+
+      return {
+        success: true,
+        files,
+        nextContinuationToken: response.NextContinuationToken,
+        isTruncated: Boolean(response.IsTruncated),
+      };
+    }
+
+    // Fallback: Supabase Storage
+    let cookieStore: Awaited<ReturnType<typeof cookies>> | null = null;
+    try {
+      cookieStore = await cookies();
+    } catch {
+      // outside request context
+    }
+
+    const supabase = cookieStore ? createClient(cookieStore) : createPublicClient();
+    if (!supabase) {
+      return { success: true, files: [], isTruncated: false };
+    }
+
+    const { data, error } = await supabase.storage
+      .from(bucketFallback)
+      .list(cleanFolder || undefined, {
+        limit: maxKeys,
+        sortBy: { column: "created_at", order: "desc" },
+      });
+
+    if (error) {
+      return { success: false, files: [], isTruncated: false, error: error.message };
+    }
+
+    const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+    const cleanSupabaseUrl = supabaseUrl.replace(/\/+$/, "");
+    const publicBase = `${cleanSupabaseUrl}/storage/v1/object/public/${bucketFallback}`;
+
+    const files: StorageFileItem[] = (data || [])
+      .filter((item) => item.name && item.id)
+      .map((item) => {
+        const key = cleanFolder ? `${cleanFolder}/${item.name}` : item.name;
+        return {
+          key,
+          name: item.name,
+          url: `${publicBase}/${key}`,
+          size: (item.metadata as any)?.size || 0,
+          lastModified: item.updated_at || item.created_at,
+          folder: cleanFolder,
+        };
+      });
+
+    return {
+      success: true,
+      files,
+      isTruncated: false,
+    };
+  } catch (err) {
+    console.error("List storage files error:", err);
+    return {
+      success: false,
+      files: [],
+      isTruncated: false,
+      error: err instanceof Error ? err.message : "Không thể lấy danh sách tệp tin.",
     };
   }
 }
