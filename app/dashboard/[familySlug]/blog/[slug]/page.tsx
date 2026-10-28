@@ -5,8 +5,6 @@ import {
   CalendarDays,
   Clock3,
   Edit,
-  Eye,
-  Lock,
   Newspaper,
   ShieldCheck,
 } from "lucide-react";
@@ -206,35 +204,15 @@ export default async function FamilyBlogDetailPage({ params }: PageProps) {
                   </span>
                 </nav>
 
-                <div className="flex items-center gap-2">
-                  {post.visibility === "public" ? (
-                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
-                      <Eye className="size-3" />
-                      Công khai
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full">
-                      <Lock className="size-3" />
-                      Nội bộ dòng họ
-                    </span>
-                  )}
-
-                  {!post.is_published && (
-                    <span className="text-[11px] font-bold text-stone-600 bg-stone-100 border border-stone-200 px-2 py-0.5 rounded-full">
-                      Bản nháp
-                    </span>
-                  )}
-                </div>
+                {!post.is_published && (
+                  <span className="text-[11px] font-bold text-stone-600 bg-stone-100 border border-stone-200 px-2.5 py-0.5 rounded-full">
+                    Bản nháp
+                  </span>
+                )}
               </div>
 
               {/* Article Header & Title */}
               <div className="text-center space-y-4">
-                <div>
-                  <span className="inline-block text-[11px] font-bold uppercase tracking-widest text-[#8c1d1d] border border-[#deb887] bg-[#fcf5e5] px-3.5 py-1 font-sans shadow-2xs">
-                    🏛️ Chiếu Thư & Bản Tin Dòng Họ
-                  </span>
-                </div>
-
                 <h1
                   className="text-2xl sm:text-3xl md:text-4xl lg:text-[2.6rem] font-bold text-[#183b28] tracking-normal uppercase leading-tight sm:leading-snug max-w-4xl mx-auto"
                   style={{
