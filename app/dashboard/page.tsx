@@ -191,7 +191,7 @@ export default async function DashboardFamilySwitcherPage({
               </HeritageBadge>
             )}
           </div>
-          <CreateFamilyRequestModal />
+          <CreateFamilyRequestModal isLoggedIn={Boolean(profile?.is_active)} />
         </div>
           {families.length === 0 ? (
             <div className="rounded-2xl border-2 border-dashed border-[#deb887]/80 bg-[#fffdf7] p-8 text-center">

@@ -14,10 +14,14 @@ test("dashboard integrates create family request modal, status card, and button"
 
   // Dashboard page integration
   assert.match(dashboard, /CreateFamilyRequestModal/);
+  assert.match(dashboard, /isLoggedIn=\{Boolean\(profile\?\.is_active\)\}/);
   assert.match(dashboard, /FamilyRequestStatusCard/);
   assert.match(dashboard, /getUserActiveFamilyCreationRequest/);
 
-  // Modal component
+  // Modal component: requires login and compact 2-column no-scroll layout
+  assert.match(modal, /isLoggedIn/);
+  assert.match(modal, /Yêu Cầu Đăng Nhập/);
+  assert.match(modal, /grid-cols-1\s+sm:grid-cols-2/);
   assert.match(modal, /Tên Dòng Họ|Tên dòng họ/);
   assert.match(modal, /Số Điện Thoại|Số điện thoại/);
   assert.match(modal, /Quê Quán|Quê quán/);
