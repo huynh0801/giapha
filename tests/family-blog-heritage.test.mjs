@@ -45,3 +45,13 @@ test("Task 3: Family blog detail and news page integrate Heritage design and pub
   // Allows public access to family blog detail
   assert.match(middleware, /blog/);
 });
+
+test("Task 4: Publish status parsing supports 'on', 'true', 'published', and BlogAdminPanel has explicit toggle", () => {
+  const actions = read("app/actions/blog.ts");
+  assert.match(actions, /rawPublished === "published"/);
+
+  const panel = read("components/BlogAdminPanel.tsx");
+  assert.match(panel, /Xuất bản ngay/);
+  assert.match(panel, /Lưu bản nháp/);
+  assert.doesNotMatch(panel, /formData\.set\("remove_cover_image", "1"\)/);
+});

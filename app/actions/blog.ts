@@ -128,7 +128,12 @@ async function saveScopedBlogPost(scope: PostScope, formData: FormData) {
   const existingCoverUrl = getText(formData, "existing_cover_image_url");
   const existingCoverPath = getText(formData, "existing_cover_image_path");
   const existingPublishedAt = getText(formData, "existing_published_at");
-  const isPublished = formData.get("is_published") === "on";
+  const rawPublished = formData.get("is_published");
+  const isPublished =
+    rawPublished === "on" ||
+    rawPublished === "true" ||
+    rawPublished === "1" ||
+    rawPublished === "published";
   const image = formData.get("cover_image");
   const removeCoverImage = formData.get("remove_cover_image") === "1";
 

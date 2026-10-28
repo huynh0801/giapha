@@ -18,6 +18,7 @@ import {
   Loader2,
   Plus,
   Save,
+  Send,
   Trash2,
   X,
 } from "lucide-react";
@@ -96,6 +97,7 @@ export default function BlogAdminPanel({
     Boolean(initialPost?.cover_image_path),
   );
   const [removeCoverImage, setRemoveCoverImage] = useState(false);
+  const [isPublished, setIsPublished] = useState<boolean>(initialPost ? initialPost.is_published : true);
   const [coverInputKey, setCoverInputKey] = useState(0);
   const [message, setMessage] = useState<string>("");
   const [error, setError] = useState<string>("");
@@ -114,6 +116,7 @@ export default function BlogAdminPanel({
     setImagePreview("");
     setCoverCountsTowardLimit(false);
     setRemoveCoverImage(false);
+    setIsPublished(true);
     setCoverInputKey((value) => value + 1);
     setSlugValue("");
     setIsCustomSlug(false);
@@ -126,6 +129,7 @@ export default function BlogAdminPanel({
     setImagePreview(post.cover_image_url);
     setCoverCountsTowardLimit(Boolean(post.cover_image_path));
     setRemoveCoverImage(false);
+    setIsPublished(post.is_published);
     setCoverInputKey((value) => value + 1);
     setSlugValue(post.slug);
     setIsCustomSlug(true);
@@ -166,7 +170,6 @@ export default function BlogAdminPanel({
 
     if (scope === "family") {
       formData.set("family_id", familyId || "");
-      formData.set("remove_cover_image", "1");
     }
 
     setMessage("");
@@ -183,6 +186,7 @@ export default function BlogAdminPanel({
       setMessage("Đã lưu bài viết.");
       if ("post" in result && result.post) {
         setEditingPost(result.post);
+        setIsPublished(result.post.is_published);
         setImagePreview(result.post.cover_image_url);
         setCoverCountsTowardLimit(Boolean(result.post.cover_image_path));
         setRemoveCoverImage(false);
@@ -433,15 +437,48 @@ export default function BlogAdminPanel({
                 </label>
               </div>
 
-              <label className="flex items-center justify-between gap-4 rounded-2xl bg-amber-50 px-4 py-4 text-sm font-bold text-amber-900">
-                <span>{copy.publishLabel}</span>
+              <div className="rounded-2xl border border-stone-200 bg-stone-50 p-4 space-y-2.5">
+                <label className="block text-xs font-black uppercase tracking-[0.18em] text-stone-500">
+                  Trạng thái phát hành
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsPublished(true)}
+                    className={`flex items-center justify-center gap-2 rounded-xl py-2.5 px-3 text-xs font-bold transition-all ${
+                      isPublished
+                        ? "bg-emerald-600 text-white shadow-sm ring-2 ring-emerald-600/30"
+                        : "bg-white text-stone-700 hover:bg-stone-100 border border-stone-200"
+                    }`}
+                  >
+                    <span className={`size-2 rounded-full ${isPublished ? "bg-white" : "bg-emerald-500"}`} />
+                    <span>Xuất bản ngay</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setIsPublished(false)}
+                    className={`flex items-center justify-center gap-2 rounded-xl py-2.5 px-3 text-xs font-bold transition-all ${
+                      !isPublished
+                        ? "bg-amber-700 text-white shadow-sm ring-2 ring-amber-700/30"
+                        : "bg-white text-stone-700 hover:bg-stone-100 border border-stone-200"
+                    }`}
+                  >
+                    <span className={`size-2 rounded-full ${!isPublished ? "bg-white" : "bg-stone-400"}`} />
+                    <span>Lưu bản nháp</span>
+                  </button>
+                </div>
                 <input
+                  type="hidden"
                   name="is_published"
-                  type="checkbox"
-                  defaultChecked={editingPost?.is_published ?? true}
-                  className="size-5 rounded border-amber-300 text-amber-600"
+                  value={isPublished ? "on" : "off"}
                 />
-              </label>
+                <p className="text-[11px] leading-4 text-stone-400">
+                  {isPublished
+                    ? "🟢 Bài viết sẽ được xuất bản công khai ngay khi bấm Lưu."
+                    : "⚪ Bài viết được lưu ở dạng nháp, chỉ Quản trị viên mới thấy."}
+                </p>
+              </div>
 
               {scope === "family" && (
                 <div className="rounded-2xl border border-stone-200 bg-stone-50 p-4">
@@ -509,14 +546,22 @@ export default function BlogAdminPanel({
             <button
               type="submit"
               disabled={isPending}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#800000] px-8 py-4 text-sm font-black uppercase tracking-wide text-white shadow-xl shadow-red-950/10 transition-colors hover:bg-[#650000] disabled:opacity-60 lg:w-auto"
+              className={`inline-flex w-full items-center justify-center gap-2 rounded-2xl px-8 py-4 text-sm font-black uppercase tracking-wide text-white shadow-xl transition-colors disabled:opacity-60 lg:w-auto ${
+                isPublished
+                  ? "bg-[#800000] hover:bg-[#650000] shadow-red-950/10"
+                  : "bg-amber-800 hover:bg-amber-900 shadow-amber-950/10"
+              }`}
             >
               {isPending ? (
                 <Loader2 className="size-4 animate-spin" />
+              ) : isPublished ? (
+                <Send className="size-4" />
               ) : (
                 <Save className="size-4" />
               )}
-              {copy.save}
+              {isPublished
+                ? (scope === "family" ? "Đăng thông báo dòng tộc" : "Đăng bài viết")
+                : "Lưu bản nháp"}
             </button>
           </div>
         </form>
