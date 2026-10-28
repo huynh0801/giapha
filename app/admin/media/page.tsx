@@ -21,8 +21,8 @@ export default async function AdminMediaPage() {
   return (
     <AdminShell
       title="Kho Lưu Trữ Ảnh & Media (Cloudflare R2)"
-      subtitle="Quản lý toàn bộ tệp tin đa phương tiện của tất cả các dòng họ trên hệ thống."
-      currentPath="/admin/media"
+      description="Quản lý toàn bộ tệp tin đa phương tiện của tất cả các dòng họ trên hệ thống."
+
     >
       <div className="space-y-6">
         <div className="rounded-2xl border border-[#deb887]/80 bg-[#fffdf7] p-6 shadow-sm">

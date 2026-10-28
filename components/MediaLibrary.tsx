@@ -34,7 +34,7 @@ function formatBytes(bytes: number, decimals = 1) {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
 }
 
-function formatDate(isoString?: string) {
+function formatDate(isoString?: string | null) {
   if (!isoString) return "";
   try {
     const d = new Date(isoString);

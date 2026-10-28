@@ -157,8 +157,8 @@ export async function listMediaAction(
       if (match) {
         targetFolder = match.family.id;
       } else if (isSystemAdmin) {
-        const { getPublicSupabase } = await import("@/utils/supabase/queries");
-        const supabase = getPublicSupabase();
+        const { getSupabase } = await import("@/utils/supabase/queries");
+        const supabase = await getSupabase();
         const { data: family } = await supabase
           .from("families")
           .select("id")

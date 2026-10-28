@@ -310,7 +310,7 @@ export interface StorageFileItem {
   name: string;
   url: string;
   size: number;
-  lastModified?: string;
+  lastModified?: string | null;
   folder: string;
 }
 
