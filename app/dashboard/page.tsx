@@ -1,4 +1,7 @@
 import { requestJoinFamilyAction } from "@/app/actions/join-request";
+import { getUserActiveFamilyCreationRequest } from "@/app/actions/family-request";
+import CreateFamilyRequestModal from "@/components/dashboard/CreateFamilyRequestModal";
+import FamilyRequestStatusCard from "@/components/dashboard/FamilyRequestStatusCard";
 import BackgroundDecor from "@/components/landing/BackgroundDecor";
 import { HeritageBadge, HeritageFrame } from "@/components/dashboard/HeritageUI";
 import {
@@ -125,15 +128,16 @@ export default async function DashboardFamilySwitcherPage({
     Number.parseInt(resolvedSearchParams?.page || "1", 10) || 1,
   );
 
-  const [profile, families, directory] = await Promise.all([
+  const [profile, families, directory, activeRequest] = await Promise.all([
     getProfile(),
     getAccessibleFamilies(),
     getFamilyDirectory(q, visibility, currentPage),
+    getUserActiveFamilyCreationRequest(),
   ]);
 
   const isSystemAdmin = profile?.is_active && profile.role === "system_admin";
 
-  if (families.length === 1 && !resolvedSearchParams?.q) {
+  if (families.length === 1 && !resolvedSearchParams?.q && !activeRequest) {
     redirect(`/dashboard/${families[0].family.slug}`);
   }
 
@@ -171,17 +175,35 @@ export default async function DashboardFamilySwitcherPage({
         </div>
       )}
 
+      {/* Family Creation Request Status */}
+      {activeRequest && <FamilyRequestStatusCard request={activeRequest} />}
+
       {/* Accessible Families Section */}
-      {families.length > 0 && (
-        <section className="mb-10">
-          <div className="mb-4 flex items-center justify-between gap-4">
+      <section className="mb-10">
+        <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
             <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#183b28]">
-              Dòng họ bạn đang có quyền truy cập
+              {families.length > 0 ? "Dòng họ bạn đang có quyền truy cập" : "Dòng họ của bạn"}
             </h2>
-            <HeritageBadge variant="jade">
-              {families.length} dòng họ
-            </HeritageBadge>
+            {families.length > 0 && (
+              <HeritageBadge variant="jade">
+                {families.length} dòng họ
+              </HeritageBadge>
+            )}
           </div>
+          <CreateFamilyRequestModal />
+        </div>
+          {families.length === 0 ? (
+            <div className="rounded-2xl border-2 border-dashed border-[#deb887]/80 bg-[#fffdf7] p-8 text-center">
+              <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-[#deb887]/20 text-[#8c1d1d] mb-3">
+                <FolderTree className="size-6" />
+              </div>
+              <h3 className="text-base font-bold text-[#183b28]">Bạn chưa tham gia dòng họ nào</h3>
+              <p className="text-xs text-[#5c4a3e] mt-1 max-w-md mx-auto">
+                Bạn có thể bấm nút "Xin Tạo Dòng Họ Mới" ở trên để gửi hồ sơ thành lập dòng họ của mình, hoặc tìm kiếm trong Danh bạ bên dưới để xin gia nhập.
+              </p>
+            </div>
+          ) : (
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
             {families.map(({ family, membership, canManage }) => (
               <Link
@@ -241,8 +263,8 @@ export default async function DashboardFamilySwitcherPage({
               </Link>
             ))}
           </div>
+          )}
         </section>
-      )}
 
       {/* Directory Section (Framed INSIDE cards, clean container outside) */}
       <section className="mb-10">
