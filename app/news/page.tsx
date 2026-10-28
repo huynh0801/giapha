@@ -44,43 +44,34 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
     getCurrentUserAction(),
   ]);
 
-  // 1. Fetch available categories from all published system blog posts
-  const { data: categoryData } = await supabase
+  // 1. Prepare queries for parallel execution
+  const categoryQuery = supabase
     .from("blog_posts")
     .select("category")
     .eq("scope", "system")
     .eq("is_published", true);
 
-  const categories = Array.from(
-    new Set((categoryData || []).map((row) => row.category).filter(Boolean))
-  ) as string[];
-
   // 2. Count matching posts
-  let countQuery = supabase
+  let countQueryBuilder = supabase
     .from("blog_posts")
     .select("id", { count: "exact", head: true })
     .eq("scope", "system")
     .eq("is_published", true);
 
   if (query) {
-    countQuery = countQuery.or(
+    countQueryBuilder = countQueryBuilder.or(
       `title.ilike.%${query}%,excerpt.ilike.%${query}%,content.ilike.%${query}%`
     );
   }
   if (selectedCategory && selectedCategory !== "all") {
-    countQuery = countQuery.eq("category", selectedCategory);
+    countQueryBuilder = countQueryBuilder.eq("category", selectedCategory);
   }
 
-  const { count } = await countQuery;
-  const totalCount = count || 0;
-  const totalPages = Math.max(1, Math.ceil(totalCount / ITEMS_PER_PAGE));
-  const currentPage = Math.min(requestedPage, totalPages);
-
-  // 3. Fetch initial paginated range of posts for SSR
-  const from = (currentPage - 1) * ITEMS_PER_PAGE;
+  // 3. Paginated range of posts
+  const from = (requestedPage - 1) * ITEMS_PER_PAGE;
   const to = from + ITEMS_PER_PAGE - 1;
 
-  let postsQuery = supabase
+  let postsQueryBuilder = supabase
     .from("blog_posts")
     .select(
       "id,title,slug,excerpt,category,cover_image_url,published_at,created_at"
@@ -89,19 +80,33 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
     .eq("is_published", true);
 
   if (query) {
-    postsQuery = postsQuery.or(
+    postsQueryBuilder = postsQueryBuilder.or(
       `title.ilike.%${query}%,excerpt.ilike.%${query}%,content.ilike.%${query}%`
     );
   }
   if (selectedCategory && selectedCategory !== "all") {
-    postsQuery = postsQuery.eq("category", selectedCategory);
+    postsQueryBuilder = postsQueryBuilder.eq("category", selectedCategory);
   }
 
-  const { data } = await postsQuery
+  postsQueryBuilder = postsQueryBuilder
     .order("published_at", { ascending: false })
     .range(from, to);
 
-  const posts = (data || []) as NewsPost[];
+  // Execute all 3 queries concurrently
+  const [categoryRes, countRes, postsRes] = await Promise.all([
+    categoryQuery,
+    countQueryBuilder,
+    postsQueryBuilder,
+  ]);
+
+  const categories = Array.from(
+    new Set((categoryRes.data || []).map((row) => row.category).filter(Boolean))
+  ) as string[];
+
+  const totalCount = countRes.count || 0;
+  const totalPages = Math.max(1, Math.ceil(totalCount / ITEMS_PER_PAGE));
+  const currentPage = Math.min(requestedPage, totalPages);
+  const posts = (postsRes.data || []) as NewsPost[];
 
   return (
     <div className="min-h-screen flex flex-col bg-[#f5e7c7] text-[#2c1a11]">

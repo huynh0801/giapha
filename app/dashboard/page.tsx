@@ -114,15 +114,6 @@ export default async function DashboardFamilySwitcherPage({
   searchParams,
 }: PageProps) {
   const resolvedSearchParams = await searchParams;
-  const profile = await getProfile();
-  const isSystemAdmin = profile?.is_active && profile.role === "system_admin";
-
-  const families = await getAccessibleFamilies();
-
-  if (families.length === 1 && !resolvedSearchParams?.q) {
-    redirect(`/dashboard/${families[0].family.slug}`);
-  }
-
   const q = resolvedSearchParams?.q?.trim() || "";
   const visibility = ["all", "private", "family_only", "public"].includes(
     resolvedSearchParams?.visibility || "",
@@ -133,7 +124,19 @@ export default async function DashboardFamilySwitcherPage({
     1,
     Number.parseInt(resolvedSearchParams?.page || "1", 10) || 1,
   );
-  const directory = await getFamilyDirectory(q, visibility, currentPage);
+
+  const [profile, families, directory] = await Promise.all([
+    getProfile(),
+    getAccessibleFamilies(),
+    getFamilyDirectory(q, visibility, currentPage),
+  ]);
+
+  const isSystemAdmin = profile?.is_active && profile.role === "system_admin";
+
+  if (families.length === 1 && !resolvedSearchParams?.q) {
+    redirect(`/dashboard/${families[0].family.slug}`);
+  }
+
   const totalCount = directory[0]?.total_count || 0;
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
   const returnTo = buildDashboardHref({ q, visibility, page: currentPage });

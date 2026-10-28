@@ -28,3 +28,21 @@ test("middleware only runs schema check outside of production", () => {
     "Schema check in middleware must only run when NODE_ENV !== production"
   );
 });
+
+test("dashboard page executes profile, accessible families and directory in parallel", () => {
+  const dashboardCode = read("app/dashboard/page.tsx");
+  assert.match(
+    dashboardCode,
+    /Promise\.all\(\[\s*getProfile\(\),\s*getAccessibleFamilies\(\),\s*getFamilyDirectory\(/,
+    "Dashboard page must fetch profile, families, and directory concurrently"
+  );
+});
+
+test("news page executes categories, count and posts queries in parallel", () => {
+  const newsCode = read("app/news/page.tsx");
+  assert.match(
+    newsCode,
+    /Promise\.all\(\[\s*categoryQuery,\s*countQueryBuilder,\s*postsQueryBuilder,?\s*\]\)/,
+    "News page must run category, count and post list queries concurrently"
+  );
+});
