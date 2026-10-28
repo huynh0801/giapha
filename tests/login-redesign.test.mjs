@@ -10,10 +10,15 @@ function read(relPath) {
 test("public login page contains heritage elements and password visibility toggle", () => {
   const loginPage = read("app/login/page.tsx");
 
-  // Heritage brand assets
+  // Heritage brand assets and decorative background patterns
   assert.match(loginPage, /\/images\/landing\/logo\.png/);
   assert.match(loginPage, /Cây có cội mới trổ cành xanh ngọn/);
   assert.match(loginPage, /Nước có nguồn mới tỏa nhánh muôn phương/);
+  assert.match(loginPage, /\/images\/landing\/decorate1\.png/);
+  assert.match(loginPage, /\/images\/landing\/decorate2\.png/);
+
+  // No heavy split-screen left showcase banner
+  assert.doesNotMatch(loginPage, /Bảo Mật Tôn Nghiêm/);
 
   // Password toggle
   assert.match(loginPage, /showPassword/);
