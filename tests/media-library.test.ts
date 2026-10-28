@@ -64,3 +64,12 @@ test("app/actions/storage exports listMediaAction and deleteMediaAction with aut
   assert.match(content, /getAccessibleFamilies/);
   assert.match(content, /getIsSystemAdmin/);
 });
+
+test("MediaLibrary component is exported and contains core UI elements", async () => {
+  const fs = await import("node:fs");
+  const content = fs.readFileSync("components/MediaLibrary.tsx", "utf-8");
+  assert.match(content, /export default function MediaLibrary/);
+  assert.match(content, /Sao chép liên kết/);
+  assert.match(content, /Xóa ảnh/);
+  assert.match(content, /Tải ảnh mới/);
+});
