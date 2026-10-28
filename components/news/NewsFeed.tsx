@@ -219,7 +219,7 @@ export default function NewsFeed({
                       setShowDropdown(true);
                     }
                   }}
-                  placeholder="Gõ để tìm kiếm thông minh (AJAX live search)..."
+                  placeholder="Tìm kiếm..."
                   className="w-full pl-10 pr-10 py-2.5 text-xs sm:text-sm bg-white border border-[#deb887] text-[#2c1a11] placeholder:text-[#8a7667] focus:outline-hidden focus:border-[#8c1d1d] focus:ring-1 focus:ring-[#8c1d1d] rounded-none shadow-inner"
                 />
                 {searchTerm && (
