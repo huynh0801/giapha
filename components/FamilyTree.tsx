@@ -32,6 +32,7 @@ import {
   Eye,
   FileSpreadsheet,
   ArrowLeftRight,
+  GripVertical,
   Link2,
   Loader2,
   Lock,
@@ -1084,6 +1085,7 @@ export default function FamilyTree({
     person: Person,
   ) => {
     if (!effectiveCanEdit) return;
+    if (!event.isPrimary) return;
     event.preventDefault();
     event.stopPropagation();
     const rect = event.currentTarget.getBoundingClientRect();
@@ -3517,11 +3519,12 @@ function IntegratedTreePlane({
   }
 
   const startPositionDrag = (
-    event: React.PointerEvent<HTMLDivElement>,
+    event: React.PointerEvent<HTMLElement>,
     personId: string,
     position: PoolPosition,
   ) => {
     if (!canEdit) return;
+    if (!event.isPrimary) return;
     const target = event.target as HTMLElement;
     if (
       target.closest(
@@ -3557,12 +3560,9 @@ function IntegratedTreePlane({
           <div
             key={`branch-${root.id}`}
             className={`pointer-events-auto absolute select-none ${
-              canEdit ? "cursor-move" : "cursor-default"
-            } ${dragging?.personId === root.id ? "z-50" : "z-20"}`}
+              dragging?.personId === root.id ? "z-50" : "z-20"
+            }`}
             style={{ left: position.x, top: position.y }}
-            onMouseDown={(event) => {
-              if (canEdit) event.stopPropagation();
-            }}
             onClickCapture={(event) => {
               if (suppressClickPersonIdRef.current === root.id) {
                 event.preventDefault();
@@ -3570,10 +3570,25 @@ function IntegratedTreePlane({
                 suppressClickPersonIdRef.current = null;
               }
             }}
-            onPointerDown={(event) =>
-              startPositionDrag(event, root.id, position)
-            }
           >
+            {canEdit && (
+              <div className="mb-2 flex items-center justify-center">
+                <button
+                  type="button"
+                  data-branch-drag-handle
+                  data-no-pan
+                  onPointerDown={(event) => {
+                    if (!event.isPrimary) return;
+                    startPositionDrag(event, root.id, position);
+                  }}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-amber-300/80 bg-white/95 px-3 py-1 text-xs font-black text-amber-900 shadow-sm backdrop-blur transition hover:bg-amber-50 active:cursor-grabbing cursor-grab"
+                  title="Nhấn giữ và kéo để di dời cành cây này"
+                >
+                  <GripVertical className="size-3.5 text-amber-600" />
+                  <span>Di chuyển cành: {root.full_name}</span>
+                </button>
+              </div>
+            )}
             {renderBranch(root)}
           </div>
         );
@@ -3593,7 +3608,7 @@ function IntegratedTreePlane({
             } ${dragging?.personId === person.id ? "z-50" : "z-30"}`}
             style={{ left: position.x, top: position.y }}
             onMouseDown={(event) => {
-              if (canEdit) event.stopPropagation();
+              if (canEdit && event.button === 0) event.stopPropagation();
             }}
             onClickCapture={(event) => {
               if (suppressClickPersonIdRef.current === person.id) {
@@ -3602,9 +3617,10 @@ function IntegratedTreePlane({
                 suppressClickPersonIdRef.current = null;
               }
             }}
-            onPointerDown={(event) =>
-              startPositionDrag(event, person.id, position)
-            }
+            onPointerDown={(event) => {
+              if (!event.isPrimary) return;
+              startPositionDrag(event, person.id, position);
+            }}
           >
             {renderStandalonePersonCard(person)}
           </div>

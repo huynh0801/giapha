@@ -272,5 +272,24 @@ test("FamilyTree and usePanZoom support touch gestures, pinch-to-zoom, and mobil
   );
 });
 
+test("FamilyTree connect mode allows smooth canvas pan/zoom without branch-level pointer hijacking", () => {
+  const familyTree = read("components/FamilyTree.tsx");
+
+  // In IntegratedTreePlane, branch repositioning should use a specific handle or not stop propagation on the whole branch
+  assert.match(
+    familyTree,
+    /data-branch-drag-handle/,
+    "IntegratedTreePlane must provide a dedicated drag handle for repositioning branches so normal clicks/touches pan canvas",
+  );
+
+  // Relationship drag and position drag should guard against secondary pointers (pinch-zoom)
+  assert.match(
+    familyTree,
+    /if \(!event\.isPrimary\) return;/,
+    "startRelationshipDrag must ignore non-primary pointers to protect multi-touch pinch zoom",
+  );
+});
+
+
 
 
