@@ -55,3 +55,12 @@ test("listStorageFiles uses R2 ListObjectsV2Command when R2 is configured", asyn
   resetR2ClientInstance();
   process.env = originalEnv;
 });
+
+test("app/actions/storage exports listMediaAction and deleteMediaAction with auth guards", async () => {
+  const fs = await import("node:fs");
+  const content = fs.readFileSync("app/actions/storage.ts", "utf-8");
+  assert.match(content, /export async function listMediaAction/);
+  assert.match(content, /export async function deleteMediaAction/);
+  assert.match(content, /getAccessibleFamilies/);
+  assert.match(content, /getIsSystemAdmin/);
+});

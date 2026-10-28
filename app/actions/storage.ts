@@ -1,7 +1,8 @@
 "use server";
 
 import { optimizeAvatarImage } from "@/utils/imageOptimization";
-import { uploadStorageImage, deleteStorageImage } from "@/utils/storage/index";
+import { uploadStorageImage, deleteStorageImage, listStorageFiles, type ListStorageResult } from "@/utils/storage/index";
+import { getAccessibleFamilies, getIsSystemAdmin, getUser } from "@/utils/supabase/queries";
 
 const ALLOWED_MIME_TYPES = new Set([
   "image/jpeg",
@@ -118,6 +119,119 @@ export async function deleteAvatarAction(
     return {
       success: false,
       error: err instanceof Error ? err.message : "Lỗi khi xóa ảnh.",
+    };
+  }
+}
+
+
+export async function listMediaAction(
+  familySlug?: string,
+  continuationToken?: string
+): Promise<ListStorageResult> {
+  try {
+    const user = await getUser();
+    if (!user) {
+      return {
+        success: false,
+        files: [],
+        isTruncated: false,
+        error: "Vui lòng đăng nhập để xem thư viện ảnh.",
+      };
+    }
+
+    const isSystemAdmin = await getIsSystemAdmin();
+
+    let targetFolder = "";
+
+    if (familySlug) {
+      const accessibleFamilies = await getAccessibleFamilies();
+      const match = accessibleFamilies.find((f) => f.family.slug === familySlug);
+      if (!match && !isSystemAdmin) {
+        return {
+          success: false,
+          files: [],
+          isTruncated: false,
+          error: "Bạn không có quyền truy cập kho ảnh của dòng họ này.",
+        };
+      }
+      if (match) {
+        targetFolder = match.family.id;
+      } else if (isSystemAdmin) {
+        const { getPublicSupabase } = await import("@/utils/supabase/queries");
+        const supabase = getPublicSupabase();
+        const { data: family } = await supabase
+          .from("families")
+          .select("id")
+          .eq("slug", familySlug)
+          .maybeSingle();
+        if (family) {
+          targetFolder = family.id;
+        }
+      }
+    } else {
+      if (!isSystemAdmin) {
+        return {
+          success: false,
+          files: [],
+          isTruncated: false,
+          error: "Yêu cầu quyền Quản trị viên hệ thống.",
+        };
+      }
+      targetFolder = "";
+    }
+
+    return await listStorageFiles({
+      folder: targetFolder,
+      maxKeys: 100,
+      continuationToken,
+    });
+  } catch (err) {
+    console.error("listMediaAction error:", err);
+    return {
+      success: false,
+      files: [],
+      isTruncated: false,
+      error: err instanceof Error ? err.message : "Đã xảy ra lỗi khi tải danh sách ảnh.",
+    };
+  }
+}
+
+export async function deleteMediaAction(
+  filePath: string,
+  familySlug?: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const user = await getUser();
+    if (!user) {
+      return { success: false, error: "Vui lòng đăng nhập." };
+    }
+
+    const isSystemAdmin = await getIsSystemAdmin();
+
+    if (familySlug) {
+      const accessibleFamilies = await getAccessibleFamilies();
+      const match = accessibleFamilies.find((f) => f.family.slug === familySlug);
+      if (!match && !isSystemAdmin) {
+        return { success: false, error: "Bạn không có quyền quản lý ảnh của dòng họ này." };
+      }
+      if (match && !match.canEdit && !isSystemAdmin) {
+        return { success: false, error: "Bạn không có quyền xóa ảnh trong dòng họ này." };
+      }
+      if (match && !filePath.startsWith(match.family.id) && !isSystemAdmin) {
+        return { success: false, error: "Tệp tin không thuộc quyền quản lý của dòng họ này." };
+      }
+    } else {
+      if (!isSystemAdmin) {
+        return { success: false, error: "Yêu cầu quyền Quản trị viên hệ thống để xóa ảnh." };
+      }
+    }
+
+    return await deleteStorageImage({ filePath });
+  } catch (err) {
+    console.error("deleteMediaAction error:", err);
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "Không thể xóa ảnh.",
     };
   }
 }
