@@ -19,3 +19,12 @@ test("next.config.ts specifies optimizePackageImports for heavy libraries", () =
   assert.match(nextConfig, /lucide-react/, "optimizePackageImports must include lucide-react");
   assert.match(nextConfig, /@xyflow\/react/, "optimizePackageImports must include @xyflow/react");
 });
+
+test("middleware only runs schema check outside of production", () => {
+  const middleware = read("utils/supabase/middleware.ts");
+  assert.match(
+    middleware,
+    /if\s*\(\s*process\.env\.NODE_ENV\s*!==\s*["']production["']\s*&&\s*\(isProtectedPath\s*\|\|\s*isLoginPage\)\s*\)/,
+    "Schema check in middleware must only run when NODE_ENV !== production"
+  );
+});

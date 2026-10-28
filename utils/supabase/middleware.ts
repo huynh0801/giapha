@@ -80,8 +80,8 @@ export async function updateSession(request: NextRequest) {
   const isProfilePath = request.nextUrl.pathname.startsWith("/profile");
   const isProtectedPath = isAdminPath || isDashboardPath || isProfilePath;
 
-  // Check if DB schema is initialized by checking if profiles table exists
-  if (isProtectedPath || isLoginPage) {
+  // Check if DB schema is initialized by checking if profiles table exists (only in non-production environments)
+  if (process.env.NODE_ENV !== "production" && (isProtectedPath || isLoginPage)) {
     const { error: profileError } = await supabase
       .from("profiles")
       .select("id")
@@ -91,11 +91,9 @@ export async function updateSession(request: NextRequest) {
       profileError &&
       (profileError.code === "PGRST205" || profileError.code === "42P01")
     ) {
-      if (process.env.NODE_ENV !== "production") {
-        const url = request.nextUrl.clone();
-        url.pathname = "/setup";
-        return NextResponse.redirect(url);
-      }
+      const url = request.nextUrl.clone();
+      url.pathname = "/setup";
+      return NextResponse.redirect(url);
     }
   }
 
