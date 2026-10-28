@@ -2,15 +2,23 @@
 
 import { revalidatePath } from "next/cache";
 import { getCurrentUserAction } from "@/app/actions/auth";
-import { crawlHoatrachLatestNews } from "@/lib/crawler/hoatrach";
+import { crawlBaomoiQuangBinhNews } from "@/lib/crawler/baomoi";
 
-export async function triggerHoatrachCrawlAction(options?: { limit?: number }): Promise<{
+export interface CrawlActionResponse {
   success: boolean;
   message: string;
   count?: number;
   skipped?: number;
   errors?: string[];
-}> {
+}
+
+/**
+ * Triggers crawling of latest news from Báo Mới (Quảng Bình tag).
+ * Only accessible to active Super Admins.
+ */
+export async function triggerBaomoiCrawlAction(options?: {
+  limit?: number;
+}): Promise<CrawlActionResponse> {
   try {
     const user = await getCurrentUserAction();
     if (!user || user.role !== "system_admin") {
@@ -21,7 +29,7 @@ export async function triggerHoatrachCrawlAction(options?: { limit?: number }): 
     }
 
     const limit = options?.limit ?? 20;
-    const crawlResult = await crawlHoatrachLatestNews({ limit });
+    const crawlResult = await crawlBaomoiQuangBinhNews({ limit });
 
     revalidatePath("/news");
     revalidatePath("/");
@@ -30,7 +38,7 @@ export async function triggerHoatrachCrawlAction(options?: { limit?: number }): 
     if (crawlResult.totalCrawled > 0) {
       return {
         success: true,
-        message: `Đã cào và đăng thành công ${crawlResult.totalCrawled} bài viết mới từ Cổng thông tin UBND Xã Hòa Trạch. (Bỏ qua ${crawlResult.totalSkipped} bài đã có).`,
+        message: `Đã cào và đăng thành công ${crawlResult.totalCrawled} bài viết mới từ Báo Mới (Quảng Bình). (Bỏ qua ${crawlResult.totalSkipped} bài đã có).`,
         count: crawlResult.totalCrawled,
         skipped: crawlResult.totalSkipped,
         errors: crawlResult.errors,
@@ -38,7 +46,7 @@ export async function triggerHoatrachCrawlAction(options?: { limit?: number }): 
     } else if (crawlResult.totalSkipped > 0) {
       return {
         success: true,
-        message: `Hệ thống đã kiểm tra: Toàn bộ ${crawlResult.totalSkipped} bài viết mới nhất trên cổng Hòa Trạch đều đã tồn tại trong cơ sở dữ liệu. Không có bài trùng lặp nào được thêm.`,
+        message: `Hệ thống đã kiểm tra: Toàn bộ ${crawlResult.totalSkipped} bài viết mới nhất trên Báo Mới (Quảng Bình) đều đã tồn tại trong cơ sở dữ liệu. Không có bài trùng lặp nào được thêm.`,
         count: 0,
         skipped: crawlResult.totalSkipped,
         errors: crawlResult.errors,
@@ -46,15 +54,24 @@ export async function triggerHoatrachCrawlAction(options?: { limit?: number }): 
     } else {
       return {
         success: false,
-        message: `Không thể lấy được bài viết mới từ cổng Hòa Trạch. Vui lòng kiểm tra lại kết nối mạng hoặc server nguồn.`,
+        message: `Không thể lấy được bài viết mới từ Báo Mới (Quảng Bình). Vui lòng kiểm tra lại kết nối mạng hoặc nguồn Báo Mới.`,
         errors: crawlResult.errors,
       };
     }
   } catch (err: any) {
-    console.error("triggerHoatrachCrawlAction error:", err);
+    console.error("triggerBaomoiCrawlAction error:", err);
     return {
       success: false,
       message: `Lỗi máy chủ khi cào tin tức: ${err.message}`,
     };
   }
+}
+
+/**
+ * Alias maintaining backwards compatibility with existing hoatrach references.
+ */
+export async function triggerHoatrachCrawlAction(options?: {
+  limit?: number;
+}): Promise<CrawlActionResponse> {
+  return triggerBaomoiCrawlAction(options);
 }

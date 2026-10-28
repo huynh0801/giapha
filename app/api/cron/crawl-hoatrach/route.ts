@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { crawlHoatrachLatestNews } from "@/lib/crawler/hoatrach";
+import { crawlBaomoiQuangBinhNews } from "@/lib/crawler/baomoi";
 import { getCurrentUserAction } from "@/app/actions/auth";
 
 export const dynamic = "force-dynamic";
@@ -49,7 +49,7 @@ async function handleCrawl(request: NextRequest) {
     const limitParam = searchParams.get("limit");
     const limit = limitParam ? Math.min(Math.max(parseInt(limitParam, 10) || 20, 1), 50) : 20;
 
-    const crawlResult = await crawlHoatrachLatestNews({ limit });
+    const crawlResult = await crawlBaomoiQuangBinhNews({ limit });
 
     return NextResponse.json({
       success: crawlResult.success,

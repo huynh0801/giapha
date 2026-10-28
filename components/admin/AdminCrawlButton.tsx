@@ -14,7 +14,7 @@ export default function AdminCrawlButton() {
     if (isLoading) return;
 
     const confirmed = window.confirm(
-      "Bạn có muốn cào 20 bài viết mới nhất từ Cổng thông tin điện tử UBND Xã Hòa Trạch (hoatrach.quangtri.gov.vn) vào hệ thống ngay bây giờ?"
+      "Bạn có muốn cào 20 bài viết mới nhất từ Báo Mới (Chuyên mục Quảng Bình: baomoi.com/quang-binh-tag67.epi) vào hệ thống ngay bây giờ?"
     );
     if (!confirmed) return;
 
@@ -67,17 +67,17 @@ export default function AdminCrawlButton() {
         onClick={handleCrawl}
         disabled={isLoading}
         className="inline-flex items-center justify-center gap-2 rounded-full border border-[#caa455] bg-[#8c1d1d] hover:bg-[#a62424] px-5 py-3 text-sm font-black text-[#fffdf7] shadow-sm transition-all active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
-        title="Quét và tải 20 bài viết mới nhất từ cổng thông tin xã Hòa Trạch"
+        title="Quét và tải 20 bài viết mới nhất từ Báo Mới (Quảng Bình)"
       >
         {isLoading ? (
           <>
             <Loader2 className="size-4 animate-spin text-amber-300" />
-            <span>Đang cào tin từ Hòa Trạch...</span>
+            <span>Đang cào tin từ Báo Mới...</span>
           </>
         ) : (
           <>
             <DownloadCloud className="size-4 text-amber-300" />
-            <span>Cập nhật tin từ Hòa Trạch</span>
+            <span>Cập nhật tin từ Báo Mới</span>
           </>
         )}
       </button>
