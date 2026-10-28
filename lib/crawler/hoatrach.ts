@@ -395,8 +395,18 @@ export async function crawlHoatrachLatestNews(options?: {
     hasSourceUrlCol = false;
   }
 
-  // Fallback cover image
-  const DEFAULT_COVER = "/mo gio co va bao thap.jpg.jpg";
+  // Fallback diverse heritage cover images
+  const FALLBACK_COVERS = [
+    "/mo gio co va bao thap.jpg.jpg",
+    "/cong tam quan phuc lam tu.jpg.jpg",
+    "/Bao-thap.jpg.jpg",
+    "/images/landing/about-temple.png",
+    "/images/landing/about-painting.png",
+    "/Thap chua phuc lam tu dau the ky 20.jpg.jpg",
+    "/tuong phat chua phuc lam.jpg.jpg",
+    "/images/landing/img-detail2.png",
+    "/images/landing/img-detail.png",
+  ];
 
   // 3. Process each article
   for (const item of sortedItems) {
@@ -454,18 +464,19 @@ export async function crawlHoatrachLatestNews(options?: {
         return Boolean(data);
       });
 
-      // Mirror cover image to R2 / Storage
-      let coverImageUrl = DEFAULT_COVER;
+      // Mirror cover image to R2 / Storage or assign diverse heritage cover
+      let coverImageUrl = article.coverImageUrl;
       let coverImagePath: string | null = null;
 
-      if (article.coverImageUrl) {
-        const mirrored = await mirrorCoverImage(article.coverImageUrl, uniqueSlug);
+      if (coverImageUrl) {
+        const mirrored = await mirrorCoverImage(coverImageUrl, uniqueSlug);
         if (mirrored?.url) {
           coverImageUrl = mirrored.url;
           coverImagePath = mirrored.path || null;
-        } else {
-          coverImageUrl = article.coverImageUrl;
         }
+      } else {
+        const hash = article.title.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
+        coverImageUrl = FALLBACK_COVERS[hash % FALLBACK_COVERS.length];
       }
 
       if (dryRun) {
