@@ -74,7 +74,10 @@ export async function updateSession(request: NextRequest) {
   const isPublicFamilyIntro =
     request.nextUrl.pathname.startsWith("/dashboard/families/");
   const isPublicDirectory = request.nextUrl.pathname === "/dashboard";
-  const isPublicFamilyPath = isPublicFamilyIntro || isPublicDirectory;
+  const isPublicFamilyBlog =
+    /^\/dashboard\/[^/]+\/blog\/[^/]+$/.test(request.nextUrl.pathname);
+  const isPublicFamilyPath =
+    isPublicFamilyIntro || isPublicDirectory || isPublicFamilyBlog;
   const isDashboardPath =
     request.nextUrl.pathname.startsWith("/dashboard") && !isPublicFamilyPath;
   const isProfilePath = request.nextUrl.pathname.startsWith("/profile");

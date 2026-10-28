@@ -84,9 +84,7 @@ export default function BlogAdminPanel({
   const isFamilyNotice = scope === "family";
   const initialPost = initialEditId
     ? posts.find((item) => item.id === initialEditId) || null
-    : isFamilyNotice
-      ? posts[0] || null
-      : null;
+    : null;
   const router = useRouter();
   const [editingPost, setEditingPost] = useState<BlogPost | null>(initialPost);
   const [slugValue, setSlugValue] = useState(initialPost?.slug || "");
@@ -112,14 +110,13 @@ export default function BlogAdminPanel({
       : `/blog/${post.slug}`;
 
   const resetForm = () => {
-    const fallbackPost = isFamilyNotice ? posts[0] || null : null;
-    setEditingPost(fallbackPost);
-    setImagePreview(fallbackPost?.cover_image_url || "");
-    setCoverCountsTowardLimit(Boolean(fallbackPost?.cover_image_path));
+    setEditingPost(null);
+    setImagePreview("");
+    setCoverCountsTowardLimit(false);
     setRemoveCoverImage(false);
     setCoverInputKey((value) => value + 1);
-    setSlugValue(fallbackPost?.slug || "");
-    setIsCustomSlug(Boolean(fallbackPost));
+    setSlugValue("");
+    setIsCustomSlug(false);
     setMessage("");
     setError("");
   };
@@ -291,17 +288,11 @@ export default function BlogAdminPanel({
               className="inline-flex items-center justify-center gap-2 rounded-full bg-stone-100 px-4 py-2.5 text-sm font-bold text-stone-700 transition-colors hover:bg-stone-200"
             >
               <Plus className="size-4" />
-              {isFamilyNotice && posts.length > 0 ? "Sửa thông báo hiện có" : "Bài mới"}
+              {editingPost ? "Hủy sửa / Viết bài mới" : "Viết bài mới"}
             </button>
           </div>
 
-          <div
-            className={
-              isFamilyNotice
-                ? "grid grid-cols-1 gap-6"
-                : "grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_340px]"
-            }
-          >
+          <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
             <div className="space-y-5">
               <div>
                 <label className="mb-2 block text-xs font-black uppercase tracking-[0.18em] text-stone-400">
@@ -392,7 +383,6 @@ export default function BlogAdminPanel({
 
             </div>
 
-            {!isFamilyNotice && (
             <aside className="space-y-5">
               <div>
                 <label className="mb-2 block text-xs font-black uppercase tracking-[0.18em] text-stone-400">
@@ -453,8 +443,25 @@ export default function BlogAdminPanel({
                 />
               </label>
 
+              {scope === "family" && (
+                <div className="rounded-2xl border border-stone-200 bg-stone-50 p-4">
+                  <label className="mb-2 block text-xs font-black uppercase tracking-[0.18em] text-stone-500">
+                    Chế độ hiển thị
+                  </label>
+                  <select
+                    name="visibility"
+                    defaultValue={editingPost?.visibility === "family_only" ? "family_only" : "public"}
+                    className="w-full rounded-xl border border-stone-200 bg-white px-3 py-2 text-xs font-bold text-stone-800 outline-none focus:border-amber-500"
+                  >
+                    <option value="public">Công khai (Ai có link đều đọc được)</option>
+                    <option value="family_only">Nội bộ (Chỉ thành viên trong họ)</option>
+                  </select>
+                  <p className="mt-1.5 text-[11px] leading-4 text-stone-400">
+                    Chọn &quot;Công khai&quot; để con cháu hoặc người ngoài có link xem bài viết như đọc tin tức mà không bị yêu cầu đăng nhập.
+                  </p>
+                </div>
+              )}
             </aside>
-            )}
           </div>
 
           <div className="mt-7">

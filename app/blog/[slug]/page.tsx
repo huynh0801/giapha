@@ -13,6 +13,7 @@ import LandingHeader from "@/components/landing/LandingHeader";
 import LandingFooter from "@/components/landing/LandingFooter";
 import BackgroundDecor from "@/components/landing/BackgroundDecor";
 import { getCurrentUserAction } from "@/app/actions/auth";
+import ShareArticleButton from "@/components/ShareArticleButton";
 
 // Prevent Next.js from caching this page — always fetch fresh data.
 export const dynamic = "force-dynamic";
@@ -91,7 +92,6 @@ export async function generateMetadata({ params }: PageProps) {
     .from("blog_posts")
     .select("title,excerpt,cover_image_url")
     .eq("slug", slug)
-    .eq("scope", "system")
     .eq("is_published", true)
     .maybeSingle();
 
@@ -121,9 +121,8 @@ export default async function BlogDetailPage({ params }: PageProps) {
 
   const { data, error } = await supabase
     .from("blog_posts")
-    .select("*")
+    .select("*, families(name, slug, logo_url)")
     .eq("slug", slug)
-    .eq("scope", "system")
     .eq("is_published", true)
     .maybeSingle();
 
@@ -138,12 +137,17 @@ export default async function BlogDetailPage({ params }: PageProps) {
   const publishedDate = post.published_at || post.created_at;
   const readingMinutes = getReadingMinutes(post.content);
 
-  const { data: related } = await supabase
+  let relatedQuery = supabase
     .from("blog_posts")
     .select("id,title,slug,cover_image_url,category,published_at,created_at")
-    .eq("scope", "system")
     .eq("is_published", true)
-    .neq("id", post.id)
+    .neq("id", post.id);
+  if (post.scope === "family" && post.family_id) {
+    relatedQuery = relatedQuery.eq("family_id", post.family_id);
+  } else {
+    relatedQuery = relatedQuery.is("family_id", null);
+  }
+  const { data: related } = await relatedQuery
     .order("published_at", { ascending: false })
     .limit(3);
 
@@ -156,15 +160,16 @@ export default async function BlogDetailPage({ params }: PageProps) {
         <BackgroundDecor withMid />
 
         <div className="relative z-10 mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-8">
-          {/* Top Return Button: Nằm ngoài khung bên trên */}
-          <div className="flex items-center justify-start">
+          {/* Top Return & Share Buttons */}
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <Link
-              href="/news"
+              href={(post as unknown as { families?: { slug?: string } }).families?.slug ? `/dashboard/${(post as unknown as { families: { slug: string } }).families.slug}/blog` : "/news"}
               className="inline-flex items-center gap-2 px-5 py-2.5 border-2 border-[#caa455] bg-[#8c1d1d] text-white text-xs sm:text-sm font-bold shadow-xs hover:bg-[#6e1616] transition-colors"
             >
               <ArrowLeft className="size-4" />
-              <span>Quay lại danh sách bản tin</span>
+              <span>{(post as unknown as { families?: { name?: string } }).families?.name ? `Bảng tin dòng họ ${(post as unknown as { families: { name: string } }).families.name}` : "Quay lại danh sách bản tin"}</span>
             </Link>
+            <ShareArticleButton title={post.title} />
           </div>
 
           {/* MASTER SCROLL FRAME: Đóng toàn bộ nội dung bài viết vào 1 khung chỉ kép lớn */}

@@ -118,7 +118,7 @@ BEGIN
         name,
         slug,
         description,
-        public_origin_location,
+        origin_location,
         logo_url,
         visibility,
         status,
@@ -137,7 +137,25 @@ BEGIN
     ) RETURNING id INTO v_family_id;
 
     -- Gán người gửi làm Quản trị viên chính của dòng họ
-    INSERT INTO public.family_members (
+    -- Tạo cây gia phả chính mặc định cho dòng họ mới
+    INSERT INTO public.family_trees (
+        family_id,
+        name,
+        slug,
+        description,
+        is_primary,
+        created_by
+    ) VALUES (
+        v_family_id,
+        'Cây gia phả chính',
+        'cay-chinh',
+        'Cây gia phả mặc định',
+        true,
+        v_req.user_id
+    );
+
+    -- Gán người gửi làm Quản trị viên chính của dòng họ
+    INSERT INTO public.family_memberships (
         family_id,
         profile_id,
         role,

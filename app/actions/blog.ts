@@ -163,10 +163,7 @@ async function saveScopedBlogPost(scope: PostScope, formData: FormData) {
   let coverImageUrl = existingCoverUrl;
   let coverImagePath = existingCoverPath || null;
 
-  if (scope === "family") {
-    coverImageUrl = "";
-    coverImagePath = null;
-  }
+  // Cover images allowed for family posts
 
   if (removeCoverImage) {
     coverImageUrl = "";
@@ -182,7 +179,7 @@ async function saveScopedBlogPost(scope: PostScope, formData: FormData) {
     }
   }
 
-  if (scope === "system" && image instanceof File && image.size > 0) {
+  if (image instanceof File && image.size > 0) {
     if (!image.type.startsWith("image/")) {
       return { error: "Ảnh bìa phải là file hình ảnh." };
     }
@@ -204,26 +201,7 @@ async function saveScopedBlogPost(scope: PostScope, formData: FormData) {
     return { error: "Ảnh bìa là bắt buộc khi tạo bài viết hệ thống." };
   }
 
-  if (scope === "family" && familyId && !id) {
-    const { data: existingNotice, error: existingNoticeError } = await supabase
-      .from("blog_posts")
-      .select("id")
-      .eq("scope", "family")
-      .eq("family_id", familyId)
-      .limit(1)
-      .maybeSingle();
-
-    if (existingNoticeError) {
-      return { error: existingNoticeError.message };
-    }
-
-    if (existingNotice) {
-      return {
-        error:
-          "Mỗi dòng họ chỉ có một bảng tin nội bộ. Hãy sửa thông báo hiện có hoặc xóa thông báo cũ trước khi tạo mới.",
-      };
-    }
-  }
+  // Multiple notices allowed for family scope
 
   const publishedAt = isPublished
     ? existingPublishedAt || new Date().toISOString()
@@ -241,7 +219,7 @@ async function saveScopedBlogPost(scope: PostScope, formData: FormData) {
     cover_image_path: coverImagePath,
     is_published: isPublished,
     status: isPublished ? "published" : "draft",
-    visibility: scope === "system" && isPublished ? "public" : "private",
+    visibility: isPublished ? (scope === "system" ? "public" : (getText(formData, "visibility") === "family_only" ? "family_only" : "public")) : "private",
     published_at: publishedAt,
   };
 
