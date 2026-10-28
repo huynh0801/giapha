@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "test": "node --test tests/multitenant-private.test.mjs tests/security-hardening.test.mjs tests/landing-page.test.mjs tests/user-profile.test.mjs tests/heritage-ui.test.mjs tests/pwa-and-auth-redirect.test.mjs tests/news-search.test.mjs tests/member-claim.test.mjs tests/performance-optimizations.test.mjs tests/login-redesign.test.mjs tests/family-creation-db-schema.test.mjs tests/family-creation-dashboard-ui.test.mjs tests/family-creation-admin-ui.test.mjs tests/hoatrach-crawler-db.test.mjs tests/hoatrach-cron-route.test.mjs tests/hoatrach-admin-crawler.test.mjs tests/family-blog-heritage.test.mjs && node --import tsx --test tests/genealogy-engine.test.ts tests/excel-import.test.ts tests/tree-full-view.test.ts tests/slug.test.ts tests/slug-integration.test.ts tests/storage-adapter.test.ts tests/media-library.test.ts tests/family-creation-actions.test.ts tests/hoatrach-crawler.test.ts tests/baomoi-crawler.test.ts",
+    "db:backup": "node scripts/backup-full-database.mjs",
     "db:link": "npx supabase link --project-ref",
     "db:pull": "npx supabase db pull",
     "db:push": "npx supabase db push",

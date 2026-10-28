@@ -236,4 +236,41 @@ test("TreeToolbar is pinned at the top during connect mode (isEditWorkspace / is
   );
 });
 
+test("FamilyTree and usePanZoom support touch gestures, pinch-to-zoom, and mobile-friendly controls", () => {
+  const usePanZoom = read("hooks/usePanZoom.ts");
+  const familyTree = read("components/FamilyTree.tsx");
+
+  // Multi-touch & Pinch to zoom
+  assert.match(
+    usePanZoom,
+    /pointercancel/,
+    "usePanZoom must handle pointercancel to prevent touch drag getting stuck on mobile",
+  );
+  assert.match(
+    usePanZoom,
+    /pointerId/,
+    "usePanZoom must track pointers by pointerId for multi-touch gestures",
+  );
+  assert.match(
+    usePanZoom,
+    /Math\.hypot/,
+    "usePanZoom must compute touch distance with Math.hypot for pinch-to-zoom",
+  );
+
+  // Fullscreen support
+  assert.match(
+    familyTree,
+    /setIsFullscreen/,
+    "FamilyTree must allow toggling isFullscreen for optimal mobile viewing",
+  );
+
+  // Mobile quick control bar / HUD
+  assert.match(
+    familyTree,
+    /isFullscreen/,
+    "FamilyTree must provide fullscreen toggle state",
+  );
+});
+
+
 

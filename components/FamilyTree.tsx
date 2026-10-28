@@ -258,7 +258,13 @@ export default function FamilyTree({
   const [treeError, setTreeError] = useState<string | null>(null);
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [showMemberListDialog, setShowMemberListDialog] = useState(false);
-  const [showCanvasTools, setShowCanvasTools] = useState(true);
+  const [showCanvasTools, setShowCanvasTools] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.innerWidth >= 768) {
+      setShowCanvasTools(true);
+    }
+  }, []);
   const [treeMode, setTreeMode] = useState<TreeEditMode>("view");
   const [memberQuery, setMemberQuery] = useState("");
   const [memberFilter, setMemberFilter] = useState<MemberFilter>("all");
@@ -1025,7 +1031,7 @@ export default function FamilyTree({
   }, [setPan, updateMiniMap]);
 
   useEffect(() => {
-    if (!isEditWorkspace || typeof document === "undefined") return;
+    if (!isExpandedWorkspace || typeof document === "undefined") return;
     const previousOverflow = document.body.style.overflow;
     const previousOverscrollBehavior = document.body.style.overscrollBehavior;
     document.body.style.overflow = "hidden";
@@ -1034,7 +1040,7 @@ export default function FamilyTree({
       document.body.style.overflow = previousOverflow;
       document.body.style.overscrollBehavior = previousOverscrollBehavior;
     };
-  }, [isEditWorkspace]);
+  }, [isExpandedWorkspace]);
 
   const wheelZoomHandlerRef = useRef<(event: WheelEvent) => void>(() => {});
   useEffect(() => {
@@ -1871,7 +1877,7 @@ export default function FamilyTree({
       className={
         isExpandedWorkspace
           ? "fixed inset-0 z-[2147483600] h-[100dvh] w-screen overflow-hidden bg-[#f5f6f1]"
-          : "relative h-full w-full overflow-hidden bg-[#f5f6f1]"
+          : "relative h-full w-full overflow-hidden bg-[#f5f6f1] min-h-[540px] sm:min-h-[640px]"
       }
     >
             <TreeToolbar
@@ -2053,6 +2059,18 @@ export default function FamilyTree({
       )}
 
       <div className="relative h-full min-h-0 w-full overflow-hidden bg-[#f5f6f1]">
+          {isFullscreen && (
+            <button
+              type="button"
+              data-no-pan
+              onClick={() => setIsFullscreen(false)}
+              className="absolute left-4 top-4 z-[2147483602] inline-flex items-center gap-2 rounded-full border border-stone-200/90 bg-white/95 px-3.5 py-2 text-xs font-black text-stone-800 shadow-md backdrop-blur transition hover:bg-stone-100"
+            >
+              <Minimize2 className="size-3.5" />
+              <span>Thoát toàn màn hình</span>
+            </button>
+          )}
+
           {showCanvasTools ? (
             <TreeCanvasTools
               scale={scale}
@@ -2066,6 +2084,8 @@ export default function FamilyTree({
               hideSons={hideSons}
               hideMales={hideMales}
               hideFemales={hideFemales}
+              isFullscreen={isFullscreen}
+              onToggleFullscreen={() => setIsFullscreen((prev) => !prev)}
               onZoomIn={handleZoomIn}
               onZoomOut={handleZoomOut}
               onResetZoom={handleResetZoom}
@@ -2086,16 +2106,94 @@ export default function FamilyTree({
               onClose={() => setShowCanvasTools(false)}
             />
           ) : (
-            <button
-              type="button"
+            <div
               data-no-pan
               onMouseDown={(event) => event.stopPropagation()}
-              onClick={() => setShowCanvasTools(true)}
-              className="absolute bottom-5 right-5 z-[130] inline-flex min-h-11 items-center gap-2 rounded-2xl border border-white/80 bg-stone-950 px-4 text-sm font-black text-white shadow-[0_18px_50px_rgba(41,37,36,0.22)] backdrop-blur transition hover:-translate-y-0.5 hover:bg-stone-800"
+              className="absolute bottom-4 right-4 z-[130] flex items-center gap-1.5 rounded-2xl border border-stone-200/80 bg-white/95 p-1.5 shadow-[0_12px_36px_rgba(41,37,36,0.18)] backdrop-blur-md"
             >
-              <SlidersHorizontal className="size-4" />
-              Công cụ
-            </button>
+              <button
+                type="button"
+                onClick={handleZoomOut}
+                disabled={scale <= 0.2}
+                className="flex size-9 items-center justify-center rounded-xl text-stone-700 transition hover:bg-stone-100 disabled:opacity-40"
+                title="Thu nhỏ (-)"
+                aria-label="Thu nhỏ"
+              >
+                <ZoomOut className="size-4" />
+              </button>
+
+              <button
+                type="button"
+                onClick={handleResetZoom}
+                className="flex h-9 min-w-[48px] items-center justify-center rounded-xl px-1 text-xs font-bold text-stone-700 transition hover:bg-stone-100"
+                title="Đặt lại zoom 100%"
+                aria-label="Đặt lại zoom"
+              >
+                {Math.round(scale * 100)}%
+              </button>
+
+              <button
+                type="button"
+                onClick={handleZoomIn}
+                disabled={scale >= 2.5}
+                className="flex size-9 items-center justify-center rounded-xl text-stone-700 transition hover:bg-stone-100 disabled:opacity-40"
+                title="Phóng to (+)"
+                aria-label="Phóng to"
+              >
+                <ZoomIn className="size-4" />
+              </button>
+
+              <div className="h-5 w-px bg-stone-200" />
+
+              <button
+                type="button"
+                onClick={fitTreeToView}
+                className="flex size-9 items-center justify-center rounded-xl text-stone-700 transition hover:bg-stone-100"
+                title="Xem vừa màn hình"
+                aria-label="Xem vừa màn hình"
+              >
+                <Maximize2 className="size-4" />
+              </button>
+
+              <button
+                type="button"
+                onClick={centerTree}
+                className="hidden sm:flex size-9 items-center justify-center rounded-xl text-stone-700 transition hover:bg-stone-100"
+                title="Căn giữa sơ đồ"
+                aria-label="Căn giữa sơ đồ"
+              >
+                <Crosshair className="size-4" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsFullscreen((prev) => !prev)}
+                className={`flex size-9 items-center justify-center rounded-xl transition ${
+                  isFullscreen
+                    ? "bg-amber-100 text-amber-900 font-bold"
+                    : "text-stone-700 hover:bg-stone-100"
+                }`}
+                title={isFullscreen ? "Thu nhỏ (Thoát toàn màn hình)" : "Toàn màn hình"}
+                aria-label="Toàn màn hình"
+              >
+                {isFullscreen ? (
+                  <Minimize2 className="size-4" />
+                ) : (
+                  <Maximize2 className="size-4 rotate-90" />
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowCanvasTools(true)}
+                className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-stone-950 px-2.5 text-xs font-black text-white shadow-sm transition hover:bg-stone-800"
+                title="Mở bảng công cụ & bộ lọc"
+                aria-label="Công cụ"
+              >
+                <SlidersHorizontal className="size-3.5" />
+                <span className="hidden sm:inline">Công cụ</span>
+              </button>
+            </div>
           )}
 
           <div
@@ -2769,6 +2867,8 @@ function TreeCanvasTools({
   onHideSonsChange,
   onHideMalesChange,
   onHideFemalesChange,
+  isFullscreen,
+  onToggleFullscreen,
   onClose,
 }: {
   scale: number;
@@ -2782,6 +2882,8 @@ function TreeCanvasTools({
   hideSons: boolean;
   hideMales: boolean;
   hideFemales: boolean;
+  isFullscreen?: boolean;
+  onToggleFullscreen?: () => void;
   onZoomIn: () => void;
   onZoomOut: () => void;
   onResetZoom: () => void;
@@ -2950,6 +3052,25 @@ function TreeCanvasTools({
         >
           <Crosshair className="size-4" />
         </button>
+        {onToggleFullscreen && (
+          <button
+            type="button"
+            onClick={onToggleFullscreen}
+            className={`${iconButtonClass} ${
+              isFullscreen
+                ? "border-amber-300 bg-amber-50 text-amber-900"
+                : ""
+            }`}
+            title={isFullscreen ? "Thu nhỏ (Thoát toàn màn hình)" : "Toàn màn hình"}
+            aria-label="Toàn màn hình"
+          >
+            {isFullscreen ? (
+              <Minimize2 className="size-4" />
+            ) : (
+              <Maximize2 className="size-4 rotate-90" />
+            )}
+          </button>
+        )}
         <button
           type="button"
           onClick={onResetLayout}
