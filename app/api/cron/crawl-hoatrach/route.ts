@@ -30,7 +30,7 @@ async function handleCrawl(request: NextRequest) {
     } else {
       // 2. Fallback: Verify if current session belongs to a Super Admin
       const user = await getCurrentUserAction();
-      if (user?.is_super_admin) {
+      if (user?.role === "system_admin") {
         isAuthorized = true;
       } else if (!cronSecret && process.env.NODE_ENV !== "production") {
         // Allow in development mode if no CRON_SECRET configured

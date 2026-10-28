@@ -5,7 +5,7 @@ import fs from 'node:fs';
 test('app/actions/crawler.ts exports triggerHoatrachCrawlAction with admin guard', () => {
   const code = fs.readFileSync('app/actions/crawler.ts', 'utf8');
   assert.match(code, /export\s+async\s+function\s+triggerHoatrachCrawlAction/);
-  assert.match(code, /is_super_admin|is_active/);
+  assert.match(code, /system_admin/);
 });
 
 test('app/admin/blog/page.tsx contains crawler button', () => {

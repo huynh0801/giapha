@@ -13,7 +13,7 @@ export async function triggerHoatrachCrawlAction(options?: { limit?: number }): 
 }> {
   try {
     const user = await getCurrentUserAction();
-    if (!user || (!user.is_super_admin && user.role !== "system_admin") || !user.is_active) {
+    if (!user || user.role !== "system_admin") {
       return {
         success: false,
         message: "Chỉ Super Admin đang hoạt động mới có quyền kích hoạt cào tin tức.",

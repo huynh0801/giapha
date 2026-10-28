@@ -33,31 +33,91 @@ const CRAWL_SOURCE_PAGES = [
 
 /**
  * Extracts and sorts article detail URLs from page HTML.
- * The URLs are sorted by the epoch timestamp suffix descending (newest first).
+ * The URLs are deduplicated by article ID and sorted by the epoch timestamp suffix descending (newest first).
  */
 export function extractArticleListUrls(html: string): string[] {
   const regex = /href=["'](https:\/\/hoatrach\.quangtri\.gov\.vn\/chi-tiet-tin\/-\/view-article\/1\/[^"']+)["']/g;
-  const urls = new Set<string>();
+  const urlsByArticleId = new Map<string, string>();
   let match: RegExpExecArray | null;
 
   while ((match = regex.exec(html)) !== null) {
     const cleanUrl = match[1].replace(/&amp;/g, "&").trim();
-    urls.add(cleanUrl);
+    const articleId = cleanUrl.split("/").pop();
+    if (articleId && !urlsByArticleId.has(articleId)) {
+      urlsByArticleId.set(articleId, cleanUrl);
+    }
   }
 
   // Also check relative links if any
   const relRegex = /href=["'](\/chi-tiet-tin\/-\/view-article\/1\/[^"']+)["']/g;
   while ((match = relRegex.exec(html)) !== null) {
     const cleanUrl = `${PORTAL_BASE_URL}${match[1].replace(/&amp;/g, "&").trim()}`;
-    urls.add(cleanUrl);
+    const articleId = cleanUrl.split("/").pop();
+    if (articleId && !urlsByArticleId.has(articleId)) {
+      urlsByArticleId.set(articleId, cleanUrl);
+    }
   }
 
   // Sort descending by epoch timestamp suffix (the last path segment)
-  return Array.from(urls).sort((a, b) => {
+  return Array.from(urlsByArticleId.values()).sort((a, b) => {
     const idA = parseInt(a.split("/").pop() || "0", 10);
     const idB = parseInt(b.split("/").pop() || "0", 10);
     return idB - idA;
   });
+}
+
+/**
+ * Extracts article items with thumbnails from page HTML, deduplicated by article ID.
+ */
+export function extractArticleItemsWithThumbnails(
+  html: string
+): Map<string, { url: string; thumbnailUrl?: string }> {
+  const result = new Map<string, { url: string; thumbnailUrl?: string }>();
+
+  // Extract from artItem containers
+  const artItemRegex = /<div[^>]*class=['"][^'"]*artItem[^'"]*['"][^>]*>([\s\S]*?)<\/div>/gi;
+  let artMatch: RegExpExecArray | null;
+
+  while ((artMatch = artItemRegex.exec(html)) !== null) {
+    const itemHtml = artMatch[1];
+    const linkMatch = itemHtml.match(/href=['"]([^'"]*chi-tiet-tin\/-\/view-article\/1\/[^'"]*)['"]/i);
+    if (!linkMatch) continue;
+
+    let url = linkMatch[1].replace(/&amp;/g, "&").trim();
+    if (!url.startsWith("http")) {
+      url = `${PORTAL_BASE_URL}${url.startsWith("/") ? "" : "/"}${url}`;
+    }
+
+    const articleId = url.split("/").pop();
+    if (!articleId) continue;
+
+    let thumbnailUrl: string | undefined;
+    const imgMatch = itemHtml.match(/<img[^>]*class=['"][^'"]*img_comment[^'"]*['"][^>]*src=['"]([^'"]+)['"]/i);
+    if (imgMatch && imgMatch[1]) {
+      let rawSrc = imgMatch[1].trim();
+      if (rawSrc.startsWith(".")) rawSrc = rawSrc.slice(1);
+      if (!rawSrc.endsWith("imagename=") && !rawSrc.endsWith("imagename=\"") && !rawSrc.endsWith("imagename='")) {
+        thumbnailUrl = rawSrc.startsWith("http")
+          ? rawSrc
+          : `${PORTAL_BASE_URL}${rawSrc.startsWith("/") ? "" : "/"}${rawSrc}`;
+      }
+    }
+
+    if (!result.has(articleId) || (!result.get(articleId)?.thumbnailUrl && thumbnailUrl)) {
+      result.set(articleId, { url, thumbnailUrl });
+    }
+  }
+
+  // Also collect any standalone article links
+  const allUrls = extractArticleListUrls(html);
+  for (const u of allUrls) {
+    const id = u.split("/").pop();
+    if (id && !result.has(id)) {
+      result.set(id, { url: u });
+    }
+  }
+
+  return result;
 }
 
 /**
@@ -234,8 +294,8 @@ async function mirrorCoverImage(
       maxDimension: 1200,
     });
 
-    if (uploadResult.url) {
-      return { url: uploadResult.url, path: uploadResult.path };
+    if (uploadResult.publicUrl) {
+      return { url: uploadResult.publicUrl, path: uploadResult.filePath };
     }
   } catch (err) {
     console.warn("Failed to mirror cover image:", imageUrl, err);
@@ -262,7 +322,7 @@ export async function crawlHoatrachLatestNews(options?: {
   };
 
   // 1. Collect all article links across source pages
-  const collectedUrls = new Set<string>();
+  const collectedItems = new Map<string, { url: string; thumbnailUrl?: string }>();
 
   for (const pageUrl of CRAWL_SOURCE_PAGES) {
     try {
@@ -273,24 +333,28 @@ export async function crawlHoatrachLatestNews(options?: {
       });
       if (res.ok) {
         const html = await res.text();
-        const urls = extractArticleListUrls(html);
-        for (const u of urls) collectedUrls.add(u);
+        const items = extractArticleItemsWithThumbnails(html);
+        for (const [id, item] of items) {
+          if (!collectedItems.has(id) || (!collectedItems.get(id)?.thumbnailUrl && item.thumbnailUrl)) {
+            collectedItems.set(id, item);
+          }
+        }
       }
     } catch (e: any) {
       result.errors.push(`Error fetching page ${pageUrl}: ${e.message}`);
     }
   }
 
-  // Sort chronologically newest first
-  const sortedUrls = Array.from(collectedUrls)
+  // Sort chronologically newest first by epoch timestamp
+  const sortedItems = Array.from(collectedItems.values())
     .sort((a, b) => {
-      const idA = parseInt(a.split("/").pop() || "0", 10);
-      const idB = parseInt(b.split("/").pop() || "0", 10);
+      const idA = parseInt(a.url.split("/").pop() || "0", 10);
+      const idB = parseInt(b.url.split("/").pop() || "0", 10);
       return idB - idA;
     })
     .slice(0, limit);
 
-  if (sortedUrls.length === 0) {
+  if (sortedItems.length === 0) {
     result.errors.push("No articles discovered on hoatrach.quangtri.gov.vn");
     return result;
   }
@@ -335,7 +399,8 @@ export async function crawlHoatrachLatestNews(options?: {
   const DEFAULT_COVER = "/mo gio co va bao thap.jpg.jpg";
 
   // 3. Process each article
-  for (const articleUrl of sortedUrls) {
+  for (const item of sortedItems) {
+    const articleUrl = item.url;
     try {
       // Check duplicate by URL in content or title
       const isAlreadyCrawled =
@@ -364,6 +429,11 @@ export async function crawlHoatrachLatestNews(options?: {
 
       const detailHtml = await detailRes.text();
       const article = parseArticleDetail(detailHtml, articleUrl);
+
+      // Use thumbnail from listing if detail page has no cover
+      if (!article.coverImageUrl && item.thumbnailUrl) {
+        article.coverImageUrl = item.thumbnailUrl;
+      }
 
       // Check title duplicate
       if (existingTitles.has(article.title.trim().toLowerCase())) {
