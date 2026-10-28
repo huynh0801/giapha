@@ -73,3 +73,15 @@ test("MediaLibrary component is exported and contains core UI elements", async (
   assert.match(content, /Xóa ảnh/);
   assert.match(content, /Tải ảnh mới/);
 });
+
+test("pages and navigation links integrate media library", async () => {
+  const fs = await import("node:fs");
+  assert.ok(fs.existsSync("app/dashboard/[familySlug]/media/page.tsx"));
+  assert.ok(fs.existsSync("app/admin/media/page.tsx"));
+
+  const breadcrumb = fs.readFileSync("components/WorkspaceBreadcrumb.tsx", "utf-8");
+  assert.match(breadcrumb, /media:\s*\{\s*label:\s*["']Thư viện ảnh["']/);
+
+  const familyDash = fs.readFileSync("app/dashboard/[familySlug]/page.tsx", "utf-8");
+  assert.match(familyDash, /Thư [Vv]iện [Ảả]nh/);
+});

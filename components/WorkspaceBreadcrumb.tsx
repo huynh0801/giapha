@@ -13,6 +13,7 @@ import {
   Home,
   Network,
   UserCog,
+  Image as ImageIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
@@ -41,6 +42,7 @@ const sectionMeta: Record<
   requests: { label: "Yêu cầu tham gia", icon: Home },
   lineage: { label: "Thứ tự gia phả", icon: Home },
   data: { label: "Dữ liệu & Import", icon: Database },
+  media: { label: "Thư viện ảnh", icon: ImageIcon },
 };
 
 function getCurrentLabel(section: string | undefined, pathParts: string[]) {

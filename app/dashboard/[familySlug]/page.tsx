@@ -25,6 +25,7 @@ import {
   UserCog,
   UserPlus,
   Users,
+  Image as ImageIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { headers } from "next/headers";
@@ -228,6 +229,16 @@ export default async function FamilyDashboardPage({
       icon: <UserCog className="size-6" />,
       iconBg: "bg-[#f5e7c7]",
       iconColor: "text-[#8c1d1d]",
+    },
+    {
+      title: "Thư Viện Ảnh",
+      tag: "Kho ảnh & Tư liệu",
+      description:
+        "Xem và quản lý ảnh đại diện, ảnh bài viết và hình ảnh tư liệu trên Cloudflare R2.",
+      href: `${base}/media`,
+      icon: <ImageIcon className="size-6" />,
+      iconBg: "bg-[#eaf3ed]",
+      iconColor: "text-[#183b28]",
     },
   ];
 

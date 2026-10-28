@@ -11,6 +11,7 @@ import {
   KeyRound,
   LayoutDashboard,
   Users,
+  ImageIcon,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -47,6 +48,12 @@ const navItems = [
     label: "Người dùng",
     description: "Tài khoản",
     icon: Users,
+  },
+  {
+    href: "/admin/media",
+    label: "Kho ảnh R2",
+    description: "Thư viện ảnh",
+    icon: ImageIcon,
   },
   {
     href: "/news",
