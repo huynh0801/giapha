@@ -222,6 +222,7 @@ interface FamilyTreeProps {
   highlightedPersonIds?: Set<string>;
   onHoverPerson?: (id: string | null) => void;
   relationSourcePersonId?: string | null;
+  onEditModeChange?: (isEdit: boolean) => void;
 }
 
 export default function FamilyTree({
@@ -233,6 +234,7 @@ export default function FamilyTree({
   highlightedPersonIds,
   onHoverPerson,
   relationSourcePersonId,
+  onEditModeChange,
 }: FamilyTreeProps) {
   const workspaceRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -315,6 +317,10 @@ export default function FamilyTree({
   const effectiveCanEdit = canUseAdminTreeWorkspace && treeMode === "edit";
   const isEditWorkspace = effectiveCanEdit;
   const isExpandedWorkspace = isEditWorkspace || isFullscreen;
+
+  useEffect(() => {
+    onEditModeChange?.(isExpandedWorkspace);
+  }, [isExpandedWorkspace, onEditModeChange]);
 
   const adj = useMemo(
     () => buildAdjacencyLists(relationships, personsMap),
@@ -732,7 +738,7 @@ export default function FamilyTree({
         const viewportCenterX = containerRect.left + containerRect.width / 2;
         const deltaX = viewportCenterX - treeCenterX;
 
-        const targetTop = containerRect.top + (isEditWorkspace ? 48 : 36);
+        const targetTop = containerRect.top + (isEditWorkspace ? 96 : 36);
         const deltaY = targetTop - minTop;
 
         setPan((currentPan) => ({
@@ -748,7 +754,7 @@ export default function FamilyTree({
       const innerCenterX = innerRect.left + innerRect.width / 2;
       const viewportCenterX = containerRect.left + containerRect.width / 2;
       const deltaX = viewportCenterX - innerCenterX;
-      const targetTop = containerRect.top + (isEditWorkspace ? 48 : 36);
+      const targetTop = containerRect.top + (isEditWorkspace ? 96 : 36);
       const deltaY = targetTop - innerRect.top;
 
       setPan((currentPan) => ({
@@ -1895,19 +1901,33 @@ export default function FamilyTree({
         canEdit={canEdit}
         extraActions={
           canUseAdminTreeWorkspace ? (
-            <button
-              type="button"
-              onClick={isEditWorkspace ? exitEditWorkspace : enterEditWorkspace}
-              className={`inline-flex h-10 items-center gap-2 rounded-full border px-4 text-sm font-black transition ${
-                isEditWorkspace
-                  ? "border-red-200 bg-red-50 text-red-700 hover:bg-red-100"
-                  : "border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100"
-              }`}
-              title={isEditWorkspace ? "Thoát chế độ nối quan hệ" : "Mở chế độ nối quan hệ trên cây"}
-            >
-              {isEditWorkspace ? <X className="size-4" /> : <Link2 className="size-4" />}
-              <span>{isEditWorkspace ? "Thoát sửa" : "Nối quan hệ"}</span>
-            </button>
+            <div className="flex items-center gap-2">
+              {isEditWorkspace && (
+                <button
+                  type="button"
+                  data-no-pan
+                  onClick={() => setQuickAddTarget({ mode: "standalone" })}
+                  className="inline-flex h-10 items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 md:px-4 text-sm font-black text-emerald-800 transition hover:bg-emerald-100"
+                  title="Thêm thành viên mới vào gia phả"
+                >
+                  <UserPlus className="size-4" />
+                  <span className="hidden sm:inline">Thêm thành viên</span>
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={isEditWorkspace ? exitEditWorkspace : enterEditWorkspace}
+                className={`inline-flex h-10 items-center gap-2 rounded-full border px-3 md:px-4 text-sm font-black transition ${
+                  isEditWorkspace
+                    ? "border-red-200 bg-red-50 text-red-700 hover:bg-red-100"
+                    : "border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100"
+                }`}
+                title={isEditWorkspace ? "Thoát chế độ nối quan hệ" : "Mở chế độ nối quan hệ trên cây"}
+              >
+                {isEditWorkspace ? <X className="size-4" /> : <Link2 className="size-4" />}
+                <span>{isEditWorkspace ? "Thoát sửa" : "Nối quan hệ"}</span>
+              </button>
+            </div>
           ) : null
         }
       />
@@ -2033,40 +2053,6 @@ export default function FamilyTree({
       )}
 
       <div className="relative h-full min-h-0 w-full overflow-hidden bg-[#f5f6f1]">
-          {isEditWorkspace && (
-            <div className="pointer-events-none absolute left-5 top-4 z-[110] hidden items-center gap-2 rounded-full border border-white/80 bg-white/84 px-3 py-2 text-xs font-black text-stone-600 shadow-[0_12px_34px_rgba(41,37,36,0.08)] backdrop-blur lg:flex">
-              <>
-                <Link2 className="size-3.5 text-amber-700" />
-                Chế độ nối quan hệ
-              </>
-            </div>
-          )}
-
-          {isEditWorkspace && (
-            <div className="absolute right-5 top-4 z-[150] flex items-center gap-2">
-              <button
-                type="button"
-                data-no-pan
-                onMouseDown={(event) => event.stopPropagation()}
-                onClick={() => setQuickAddTarget({ mode: "standalone" })}
-                className="inline-flex min-h-10 items-center gap-2 rounded-full border border-emerald-200 bg-white px-4 text-sm font-black text-emerald-800 shadow-[0_14px_38px_rgba(6,95,70,0.14)] transition hover:-translate-y-0.5 hover:bg-emerald-50"
-              >
-                <UserPlus className="size-4" />
-                Thêm thành viên
-              </button>
-              <button
-                type="button"
-                data-no-pan
-                onMouseDown={(event) => event.stopPropagation()}
-                onClick={exitEditWorkspace}
-                className="inline-flex min-h-10 items-center gap-2 rounded-full border border-red-200 bg-white px-4 text-sm font-black text-red-700 shadow-[0_14px_38px_rgba(127,29,29,0.16)] transition hover:-translate-y-0.5 hover:bg-red-50"
-              >
-                <X className="size-4" />
-                Thoát chế độ nối
-              </button>
-            </div>
-          )}
-
           {showCanvasTools ? (
             <TreeCanvasTools
               scale={scale}

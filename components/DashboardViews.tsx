@@ -40,6 +40,7 @@ export default function DashboardViews({
 }: DashboardViewsProps) {
   const { view: currentView, rootId } = useDashboard();
   const [hoveredPersonId, setHoveredPersonId] = useState<string | null>(null);
+  const [isTreeEditMode, setIsTreeEditMode] = useState(false);
 
   // Prepare map and roots for tree views
   const { personsMap, roots, defaultRootId } = useMemo(() => {
@@ -90,6 +91,7 @@ export default function DashboardViews({
   }, [hoveredPersonId, relationships]);
 
   const isTreeWorkspace = currentView === "tree";
+  const isFixedTopToolbar = isTreeWorkspace && isTreeEditMode;
 
   return (
     <>
@@ -99,7 +101,13 @@ export default function DashboardViews({
         }`}
       >
         {currentView !== "list" && persons.length > 0 && (
-          <div className="relative z-20 flex w-full flex-col gap-3 border-b border-amber-100 bg-[#fbfaf7]/95 px-4 py-3 shadow-sm backdrop-blur sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
+          <div
+            className={
+              isFixedTopToolbar
+                ? "fixed top-0 inset-x-0 z-[2147483601] flex w-full flex-col gap-3 border-b border-amber-200/80 bg-[#fbfaf7]/95 px-4 py-3 shadow-md backdrop-blur sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8"
+                : "relative z-20 flex w-full flex-col gap-3 border-b border-amber-100 bg-[#fbfaf7]/95 px-4 py-3 shadow-sm backdrop-blur sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8"
+            }
+          >
             <div className="flex min-w-0 flex-1 items-center gap-3">
               <RootSelector persons={persons} currentRootId={rootId} />
               <div className="hidden min-w-0 items-center gap-2 lg:flex">
@@ -109,6 +117,12 @@ export default function DashboardViews({
                 <span className="rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs font-black text-stone-600 shadow-sm">
                   {persons.length.toLocaleString("vi-VN")} thành viên
                 </span>
+                {isFixedTopToolbar && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-100 px-3 py-1.5 text-xs font-black text-amber-900 shadow-sm">
+                    <span className="size-2 rounded-full bg-amber-600 animate-pulse" />
+                    Chế độ nối quan hệ
+                  </span>
+                )}
               </div>
             </div>
             <div
@@ -141,6 +155,7 @@ export default function DashboardViews({
               highlightedPersonIds={highlightedPersonIds}
               onHoverPerson={setHoveredPersonId}
               relationSourcePersonId={hoveredPersonId}
+              onEditModeChange={setIsTreeEditMode}
             />
           )}
           {currentView === "mindmap" && (

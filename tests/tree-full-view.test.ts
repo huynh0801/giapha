@@ -210,3 +210,30 @@ test("FamilyTree supports free canvas zoom and clean unobstructed view", () => {
   );
 });
 
+test("TreeToolbar is pinned at the top during connect mode (isEditWorkspace / isTreeEditMode)", () => {
+  const dashboardViews = read("components/DashboardViews.tsx");
+  const familyTree = read("components/FamilyTree.tsx");
+
+  assert.match(
+    dashboardViews,
+    /isFixedTopToolbar\s*\?\s*["']fixed top-0 inset-x-0 z-\[2147483601\]/,
+    "DashboardViews must pin the toolbar at top-0 when in connect mode",
+  );
+  assert.match(
+    dashboardViews,
+    /onEditModeChange=\{setIsTreeEditMode\}/,
+    "DashboardViews must receive edit mode updates from FamilyTree",
+  );
+  assert.match(
+    familyTree,
+    /onEditModeChange\?\.\(isExpandedWorkspace\)/,
+    "FamilyTree must trigger onEditModeChange when edit workspace state changes",
+  );
+  assert.match(
+    familyTree,
+    /Thêm thành viên/,
+    "FamilyTree must render quick add action inside the top toolbar in edit mode",
+  );
+});
+
+
