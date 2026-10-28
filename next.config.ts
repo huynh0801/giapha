@@ -7,6 +7,12 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: "8mb",
     },
+    optimizePackageImports: [
+      "lucide-react",
+      "d3",
+      "@xyflow/react",
+      "lunar-javascript",
+    ],
   },
   images: {
     formats: ["image/avif", "image/webp"],
