@@ -1,6 +1,7 @@
-﻿import BlogAdminPanel from "@/components/BlogAdminPanel";
+import BlogAdminPanel from "@/components/BlogAdminPanel";
 import AdminShell from "@/components/AdminShell";
 import LogoutButton from "@/components/LogoutButton";
+import AdminCrawlButton from "@/components/admin/AdminCrawlButton";
 import { BlogPost } from "@/types";
 import { getProfile, getSupabase, getUser } from "@/utils/supabase/queries";
 import { Eye, ShieldAlert } from "lucide-react";
@@ -62,13 +63,16 @@ export default async function AdminBlogPage({ searchParams }: PageProps) {
       title="Bài viết hệ thống"
       description="Chỉ Super Admin được đăng bài lên trang chủ và trang tin tức công khai. Bài viết riêng của từng dòng họ nằm trong workspace dòng họ."
       action={
-        <Link
-          href="/news"
-          className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-black text-[#800000] shadow-sm transition-colors hover:bg-amber-50"
-        >
-          <Eye className="size-4" />
-          Xem trang tin tức
-        </Link>
+        <div className="flex flex-wrap items-center gap-3">
+          <AdminCrawlButton />
+          <Link
+            href="/news"
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-black text-[#800000] shadow-sm transition-colors hover:bg-amber-50"
+          >
+            <Eye className="size-4" />
+            Xem trang tin tức
+          </Link>
+        </div>
       }
     >
       <BlogAdminPanel
