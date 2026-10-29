@@ -1,9 +1,9 @@
 "use client";
 
 import DefaultAvatar from "@/components/DefaultAvatar";
-import MemorialLetterCard from "@/components/dashboard/MemorialLetterCard";
+import PersonLifeTimeline from "@/components/dashboard/PersonLifeTimeline";
 import { useDashboard } from "@/components/DashboardContext";
-import { PersonMemorialLetter } from "@/types";
+import {  PersonMemorialLetter , PersonLifeEvent } from "@/types";
 import RelationshipManager from "@/components/RelationshipManager";
 import { Person } from "@/types";
 import {
@@ -36,6 +36,7 @@ interface MemberDetailContentProps {
   isAdmin: boolean;
   canEdit?: boolean;
   memorialLetter?: PersonMemorialLetter | null;
+  lifeEvents?: PersonLifeEvent[] | null;
   familyId?: string;
   treeId?: string;
   canWrite?: boolean;
@@ -50,6 +51,7 @@ export default function MemberDetailContent({
   isAdmin,
   canEdit = false,
   memorialLetter,
+  lifeEvents,
   familyId,
   treeId,
   canWrite,
@@ -539,15 +541,15 @@ export default function MemberDetailContent({
         <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
           {/* Main Info */}
           <div className="lg:col-span-2 space-y-8">
-                        {/* Tâm thư & Lời dặn dò */}
+                        {/* Niên biểu & Nhật ký cuộc đời */}
             {effectiveFamilyId && effectiveTreeId && (
               <motion.section layout variants={itemVariants}>
-                <MemorialLetterCard
+                <PersonLifeTimeline
                   personId={person.id}
                   personName={fullPerson.full_name}
                   familyId={effectiveFamilyId}
                   treeId={effectiveTreeId}
-                  letter={memorialLetter}
+                  initialEvents={lifeEvents}
                   canWrite={effectiveCanWrite}
                   canEdit={effectiveIsAdmin}
                   isSelfPerson={effectiveIsSelf}

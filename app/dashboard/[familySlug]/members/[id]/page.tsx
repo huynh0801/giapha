@@ -1,7 +1,7 @@
 import { DashboardProvider } from "@/components/DashboardContext";
 import DeleteMemberButton from "@/components/DeleteMemberButton";
 import MemberDetailContent from "@/components/MemberDetailContent";
-import { getMemorialLetterAction } from "@/app/actions/memorial-letter";
+import { getPersonLifeEventsAction } from "@/app/actions/life-events";
 import {
   getFamilyContextBySlug,
   getProfile,
@@ -47,7 +47,7 @@ export default async function FamilyMemberDetailPage({
   const person = personRes.data;
   if (personRes.error || !person) notFound();
 
-  const [privateRes, letterRes, profile] = await Promise.all([
+  const [privateRes, eventsRes, profile] = await Promise.all([
     context.canEdit
       ? supabase
           .from("person_details_private")
@@ -57,12 +57,12 @@ export default async function FamilyMemberDetailPage({
           .eq("person_id", id)
           .maybeSingle()
       : Promise.resolve({ data: null }),
-    getMemorialLetterAction(id, context.family.id),
+    getPersonLifeEventsAction(id, context.family.id),
     user ? getProfile(user.id) : Promise.resolve(null),
   ]);
 
   const privateData = privateRes.data;
-  const memorialLetter = letterRes.success ? letterRes.data : null;
+  const lifeEvents = eventsRes.success ? eventsRes.data : [];
 
   const settings = (context.family.settings as Record<string, unknown>) || {};
   const memberLinks = (settings.member_links as Record<string, string>) || {};
@@ -116,7 +116,7 @@ export default async function FamilyMemberDetailPage({
               privateData={privateData}
               isAdmin={context.canEdit}
               canEdit={context.canEdit}
-              memorialLetter={memorialLetter}
+              lifeEvents={lifeEvents}
               familyId={context.family.id}
               treeId={context.tree.id}
               canWrite={canWrite}

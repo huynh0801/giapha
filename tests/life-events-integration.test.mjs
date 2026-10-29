@@ -5,10 +5,10 @@ import path from "node:path";
 
 const root = process.cwd();
 
-test("MemberDetailContent and member detail page integrate MemorialLetterCard", () => {
+test("MemberDetailContent and member detail page integrate PersonLifeTimeline", () => {
   const contentCode = fs.readFileSync(path.join(root, "components/MemberDetailContent.tsx"), "utf8");
-  assert.match(contentCode, /MemorialLetterCard/);
+  assert.match(contentCode, /PersonLifeTimeline/);
 
   const pageCode = fs.readFileSync(path.join(root, "app/dashboard/[familySlug]/members/[id]/page.tsx"), "utf8");
-  assert.match(pageCode, /person_memorial_letters|memorialLetter|getMemorialLetter/);
+  assert.match(pageCode, /getPersonLifeEventsAction|lifeEvents/);
 });
