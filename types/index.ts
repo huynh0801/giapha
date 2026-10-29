@@ -165,3 +165,21 @@ export interface BlogPost {
   created_at: string;
   updated_at: string;
 }
+
+
+export type MemorialAuthorType = "self" | "descendant" | "admin";
+
+export interface PersonMemorialLetter {
+  id: string;
+  person_id: string;
+  family_id: string;
+  tree_id: string;
+  title: string;
+  content: string;
+  author_type: MemorialAuthorType;
+  author_name: string;
+  author_relationship: string | null;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
