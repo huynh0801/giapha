@@ -1,7 +1,6 @@
 // Service Worker for Gia Phả Dòng Họ PWA
-const CACHE_NAME = "giapha-pwa-v1";
+const CACHE_NAME = "giapha-pwa-v2";
 const PRECACHE_URLS = [
-  "/",
   "/site.webmanifest",
   "/images/landing/logo.png",
   "/android-chrome-192x192.png",
@@ -31,27 +30,40 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("fetch", (event) => {
-  // Only handle GET requests and exclude Supabase or API endpoints
+  // Only handle GET requests
+  if (event.request.method !== "GET") {
+    return;
+  }
+
+  const url = event.request.url;
+
+  // NEVER intercept dynamic routes, next internals, auth or API calls
   if (
-    event.request.method !== "GET" ||
-    event.request.url.includes("/api/") ||
-    event.request.url.includes("supabase.co") ||
-    event.request.url.startsWith("chrome-extension")
+    url.includes("/api/") ||
+    url.includes("/_next/") ||
+    url.includes("supabase.co") ||
+    url.startsWith("chrome-extension") ||
+    event.request.headers.get("RSC") === "1" ||
+    event.request.headers.get("Next-Router-State-Tree") ||
+    event.request.mode === "navigate"
   ) {
     return;
   }
 
-  // Network-first strategy with cache fallback
+  // Only handle static assets
+  const isStaticAsset =
+    url.match(/\.(png|jpg|jpeg|svg|css|woff2|ico|webmanifest|json)$/) ||
+    url.endsWith("/site.webmanifest");
+
+  if (!isStaticAsset) {
+    return;
+  }
+
+  // Network-first strategy with cache fallback for static assets
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        // Cache successful basic responses for static assets
-        if (
-          response &&
-          response.status === 200 &&
-          (event.request.url.match(/\.(png|jpg|jpeg|svg|css|woff2|ico|webmanifest|json)$/) ||
-           event.request.url.endsWith("/site.webmanifest"))
-        ) {
+        if (response && response.status === 200) {
           const responseToCache = response.clone();
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(event.request, responseToCache);

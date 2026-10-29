@@ -23,7 +23,6 @@ import {
   Users,
 } from "lucide-react";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
 const PAGE_SIZE = 6;
 
@@ -137,9 +136,6 @@ export default async function DashboardFamilySwitcherPage({
 
   const isSystemAdmin = profile?.is_active && profile.role === "system_admin";
 
-  if (families.length === 1 && !resolvedSearchParams?.q && !activeRequest) {
-    redirect(`/dashboard/${families[0].family.slug}`);
-  }
 
   const totalCount = directory[0]?.total_count || 0;
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));

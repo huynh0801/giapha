@@ -185,8 +185,9 @@ export default function MemberClaimBanner({
   const filteredClaimPersons = persons.filter((p) => {
     const q = claimSearch.trim().toLowerCase();
     if (!q) return true;
+    const name = p.full_name ? p.full_name.toLowerCase() : "";
     return (
-      p.full_name.toLowerCase().includes(q) ||
+      name.includes(q) ||
       (p.generation && `đời ${p.generation}`.includes(q)) ||
       (p.birth_year && p.birth_year.toString().includes(q))
     );
@@ -196,8 +197,9 @@ export default function MemberClaimBanner({
   const filteredParents = persons.filter((p) => {
     const q = parentSearch.trim().toLowerCase();
     if (!q) return true;
+    const name = p.full_name ? p.full_name.toLowerCase() : "";
     return (
-      p.full_name.toLowerCase().includes(q) ||
+      name.includes(q) ||
       (p.generation && `đời ${p.generation}`.includes(q))
     );
   });

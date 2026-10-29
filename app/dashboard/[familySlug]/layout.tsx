@@ -1,5 +1,6 @@
 import WorkspaceBreadcrumb from "@/components/WorkspaceBreadcrumb";
 import type { ReactNode } from "react";
+import { Suspense } from "react";
 
 interface FamilyWorkspaceLayoutProps {
   children: ReactNode;
@@ -14,7 +15,9 @@ export default async function FamilyWorkspaceLayout({
 
   return (
     <>
-      <WorkspaceBreadcrumb familySlug={familySlug} />
+      <Suspense fallback={null}>
+        <WorkspaceBreadcrumb familySlug={familySlug} />
+      </Suspense>
       {children}
     </>
   );
