@@ -18,14 +18,17 @@ CREATE TABLE IF NOT EXISTS public.person_life_events (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
-CREATE INDEX IF NOT EXISTS idx_person_life_events_person_year ON public.person_life_events(person_id, year ASC);
-CREATE INDEX IF NOT EXISTS idx_person_life_events_family_id ON public.person_life_events(family_id);
+CREATE INDEX IF NOT EXISTS idx_person_life_events_person_year 
+ON public.person_life_events(person_id, year ASC);
+
+CREATE INDEX IF NOT EXISTS idx_person_life_events_family_id 
+ON public.person_life_events(family_id);
 
 ALTER TABLE public.person_life_events ENABLE ROW LEVEL SECURITY;
 
 -- 1. SELECT Policy
-DROP POLICY IF EXISTS "Allow family members to read life events" ON public.person_life_events;
-CREATE POLICY "Allow family members to read life events"
+DROP POLICY IF EXISTS person_life_events_select_policy ON public.person_life_events;
+CREATE POLICY person_life_events_select_policy
 ON public.person_life_events
 FOR SELECT
 USING (
@@ -37,8 +40,8 @@ USING (
 );
 
 -- 2. INSERT Policy
-DROP POLICY IF EXISTS "Allow family members to insert life events" ON public.person_life_events;
-CREATE POLICY "Allow family members to insert life events"
+DROP POLICY IF EXISTS person_life_events_insert_policy ON public.person_life_events;
+CREATE POLICY person_life_events_insert_policy
 ON public.person_life_events
 FOR INSERT
 WITH CHECK (
@@ -47,8 +50,8 @@ WITH CHECK (
 );
 
 -- 3. UPDATE Policy
-DROP POLICY IF EXISTS "Allow author or admin to update life events" ON public.person_life_events;
-CREATE POLICY "Allow author or admin to update life events"
+DROP POLICY IF EXISTS person_life_events_update_policy ON public.person_life_events;
+CREATE POLICY person_life_events_update_policy
 ON public.person_life_events
 FOR UPDATE
 USING (
@@ -58,8 +61,8 @@ USING (
 );
 
 -- 4. DELETE Policy
-DROP POLICY IF EXISTS "Allow author or admin to delete life events" ON public.person_life_events;
-CREATE POLICY "Allow author or admin to delete life events"
+DROP POLICY IF EXISTS person_life_events_delete_policy ON public.person_life_events;
+CREATE POLICY person_life_events_delete_policy
 ON public.person_life_events
 FOR DELETE
 USING (
