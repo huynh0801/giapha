@@ -43,6 +43,7 @@ export interface CrawlResult {
   success: boolean;
   totalCrawled: number;
   totalSkipped: number;
+  totalPruned?: number;
   insertedPosts: Array<{ id?: string; title: string; slug: string }>;
   errors: string[];
 }
@@ -359,10 +360,69 @@ export async function crawlBaomoiQuangBinhNews(options?: {
       }
     }
 
+    // 4. Rolling Window: Keep at most 100 latest crawled articles (auto-purge oldest)
+    if (!dryRun) {
+      try {
+        const pruneRes = await pruneOldCrawledNews(supabase, 100);
+        result.totalPruned = pruneRes.prunedCount;
+      } catch (pruneErr: any) {
+        console.warn("Failed to prune old articles:", pruneErr.message);
+      }
+    }
+
     result.success = result.errors.length === 0 || result.totalCrawled > 0;
     return result;
   } catch (err: any) {
     result.errors.push(`Crawler fatal error: ${err.message}`);
     return result;
+  }
+}
+
+/**
+ * Automatically purges older crawled news articles if total count exceeds `maxKeep` (default: 100).
+ * Safely scopes to system crawled news (category 'TIN TỨC QUẢNG BÌNH'), preserving all family blogs and custom admin posts.
+ */
+export async function pruneOldCrawledNews(
+  supabase: any,
+  maxKeep: number = 100
+): Promise<{ prunedCount: number; error?: string }> {
+  try {
+    const { count, error: countErr } = await supabase
+      .from("blog_posts")
+      .select("id", { count: "exact", head: true })
+      .eq("scope", "system")
+      .eq("category", "TIN TỨC QUẢNG BÌNH");
+
+    if (countErr || !count || count <= maxKeep) {
+      return { prunedCount: 0, error: countErr?.message };
+    }
+
+    const excessCount = count - maxKeep;
+    // Fetch the oldest excessCount articles (ordered by published_at ascending)
+    const { data: oldPosts, error: fetchErr } = await supabase
+      .from("blog_posts")
+      .select("id")
+      .eq("scope", "system")
+      .eq("category", "TIN TỨC QUẢNG BÌNH")
+      .order("published_at", { ascending: true })
+      .limit(excessCount);
+
+    if (fetchErr || !oldPosts || oldPosts.length === 0) {
+      return { prunedCount: 0, error: fetchErr?.message };
+    }
+
+    const idsToDelete = oldPosts.map((p: any) => p.id);
+    const { error: delErr } = await supabase
+      .from("blog_posts")
+      .delete()
+      .in("id", idsToDelete);
+
+    if (delErr) {
+      return { prunedCount: 0, error: delErr.message };
+    }
+
+    return { prunedCount: idsToDelete.length };
+  } catch (err: any) {
+    return { prunedCount: 0, error: err.message };
   }
 }

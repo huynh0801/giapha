@@ -6,6 +6,7 @@ import {
   formatHighResCoverUrl,
   cleanTagLinks,
   buildArticleHtml,
+  pruneOldCrawledNews,
   type BaomoiRawItem,
 } from '../lib/crawler/baomoi';
 
@@ -104,4 +105,46 @@ test('buildArticleHtml constructs semantic HTML with lead, paragraphs, images, a
   assert.match(html, /Nguồn tin: <strong>Báo Xây Dựng<\/strong>/);
   assert.match(html, /https:\/\/baoxaydung\.vn\/article-123\.htm/);
   assert.match(html, /https:\/\/baomoi\.com\/quang-tri-can-hon-2-300-ty-dong-c56366004\.epi/);
+});
+
+test('pruneOldCrawledNews respects maxKeep and deletes only excess old posts', async () => {
+  let deletedIds: string[] = [];
+
+  const mockSupabase = {
+    from: (table: string) => ({
+      select: (fields: string, opts?: any) => {
+        if (opts?.count === 'exact') {
+          return {
+            eq: () => ({
+              eq: () => Promise.resolve({ count: 105, error: null }),
+            }),
+          };
+        }
+        return {
+          eq: () => ({
+            eq: () => ({
+              order: () => ({
+                limit: (limit: number) =>
+                  Promise.resolve({
+                    data: Array.from({ length: limit }, (_, i) => ({ id: `old-post-${i + 1}` })),
+                    error: null,
+                  }),
+              }),
+            }),
+          }),
+        };
+      },
+      delete: () => ({
+        in: (field: string, ids: string[]) => {
+          deletedIds = ids;
+          return Promise.resolve({ error: null });
+        },
+      }),
+    }),
+  };
+
+  const res = await pruneOldCrawledNews(mockSupabase, 100);
+  assert.equal(res.prunedCount, 5);
+  assert.equal(deletedIds.length, 5);
+  assert.equal(deletedIds[0], 'old-post-1');
 });

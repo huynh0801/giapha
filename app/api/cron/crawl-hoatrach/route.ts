@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { crawlBaomoiQuangBinhNews } from "@/lib/crawler/baomoi";
 import { getCurrentUserAction } from "@/app/actions/auth";
 
@@ -51,10 +52,15 @@ async function handleCrawl(request: NextRequest) {
 
     const crawlResult = await crawlBaomoiQuangBinhNews({ limit });
 
+    revalidatePath("/news");
+    revalidatePath("/");
+    revalidatePath("/admin/blog");
+
     return NextResponse.json({
       success: crawlResult.success,
       totalCrawled: crawlResult.totalCrawled,
       totalSkipped: crawlResult.totalSkipped,
+      totalPruned: crawlResult.totalPruned || 0,
       insertedCount: crawlResult.insertedPosts.length,
       errors: crawlResult.errors,
       timestamp: new Date().toISOString(),

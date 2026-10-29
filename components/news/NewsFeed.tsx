@@ -77,6 +77,14 @@ export default function NewsFeed({
   const gridTopRef = useRef<HTMLDivElement>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Synchronize state when server props update
+  useEffect(() => {
+    setPosts(initialPosts);
+    setTotalCount(initialTotalCount);
+    setTotalPages(initialTotalPages);
+    setCurrentPage(initialPage);
+  }, [initialPosts, initialTotalCount, initialTotalPages, initialPage]);
+
   // Close suggestions when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
