@@ -1,6 +1,9 @@
 "use client";
 
 import DefaultAvatar from "@/components/DefaultAvatar";
+import MemorialLetterCard from "@/components/dashboard/MemorialLetterCard";
+import { useDashboard } from "@/components/DashboardContext";
+import { PersonMemorialLetter } from "@/types";
 import RelationshipManager from "@/components/RelationshipManager";
 import { Person } from "@/types";
 import {
@@ -32,6 +35,13 @@ interface MemberDetailContentProps {
   privateData: Record<string, unknown> | null;
   isAdmin: boolean;
   canEdit?: boolean;
+  memorialLetter?: PersonMemorialLetter | null;
+  familyId?: string;
+  treeId?: string;
+  canWrite?: boolean;
+  isSelfPerson?: boolean;
+  currentUserName?: string | null;
+  currentUserId?: string | null;
 }
 
 export default function MemberDetailContent({
@@ -39,7 +49,26 @@ export default function MemberDetailContent({
   privateData,
   isAdmin,
   canEdit = false,
+  memorialLetter,
+  familyId,
+  treeId,
+  canWrite,
+  isSelfPerson,
+  currentUserName,
+  currentUserId,
 }: MemberDetailContentProps) {
+  const dashboard = useDashboard();
+  const effectiveFamilyId = familyId || dashboard?.familyId || person.family_id;
+  const effectiveTreeId = treeId || dashboard?.treeId || person.tree_id;
+  const effectiveIsAdmin =
+    isAdmin || Boolean(dashboard?.canEdit || dashboard?.canManage);
+  const effectiveIsSelf =
+    isSelfPerson ??
+    Boolean(
+      dashboard?.currentPersonId && dashboard.currentPersonId === person.id,
+    );
+  const effectiveCanWrite =
+    canWrite ?? Boolean(effectiveIsAdmin || dashboard?.familyId);
   const [isNoteExpanded, setIsNoteExpanded] = useState(false);
   const [relStats, setRelStats] = useState<{
     biologicalChildren: number;
@@ -510,7 +539,26 @@ export default function MemberDetailContent({
         <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
           {/* Main Info */}
           <div className="lg:col-span-2 space-y-8">
-            <motion.section layout variants={itemVariants}>
+                        {/* Tâm thư & Lời dặn dò */}
+            {effectiveFamilyId && effectiveTreeId && (
+              <motion.section layout variants={itemVariants}>
+                <MemorialLetterCard
+                  personId={person.id}
+                  personName={fullPerson.full_name}
+                  familyId={effectiveFamilyId}
+                  treeId={effectiveTreeId}
+                  letter={memorialLetter}
+                  canWrite={effectiveCanWrite}
+                  canEdit={effectiveIsAdmin}
+                  isSelfPerson={effectiveIsSelf}
+                  isAdmin={effectiveIsAdmin}
+                  currentUserName={currentUserName}
+                  currentUserId={currentUserId}
+                />
+              </motion.section>
+            )}
+
+<motion.section layout variants={itemVariants}>
               <h2 className="text-base sm:text-lg font-bold text-stone-800 mb-4 flex items-center gap-2">
                 <Info className="size-5 text-amber-600" />
                 Ghi chú

@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import MemorialLetterModal from "@/components/dashboard/MemorialLetterModal";
-import { deleteMemorialLetterAction } from "@/app/actions/memorial-letter";
+import {
+  deleteMemorialLetterAction,
+  getMemorialLetterAction,
+} from "@/app/actions/memorial-letter";
 import { PersonMemorialLetter } from "@/types";
 import {
   Calendar,
-  Clock,
   Edit3,
   Feather,
   HeartHandshake,
@@ -22,7 +24,7 @@ interface MemorialLetterCardProps {
   personName: string;
   familyId: string;
   treeId: string;
-  letter: PersonMemorialLetter | null;
+  letter?: PersonMemorialLetter | null;
   canWrite?: boolean;
   canEdit?: boolean;
   isSelfPerson?: boolean;
@@ -44,9 +46,29 @@ export default function MemorialLetterCard({
   currentUserName,
   currentUserId,
 }: MemorialLetterCardProps) {
-  const [letter, setLetter] = useState<PersonMemorialLetter | null>(initialLetter);
+  const [letter, setLetter] = useState<PersonMemorialLetter | null>(
+    initialLetter ?? null,
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleting, startDeleteTransition] = useTransition();
+
+  useEffect(() => {
+    if (initialLetter !== undefined) {
+      setLetter(initialLetter);
+      return;
+    }
+    let isMounted = true;
+    if (personId && familyId) {
+      void getMemorialLetterAction(personId, familyId).then((res) => {
+        if (isMounted && res.success) {
+          setLetter(res.data || null);
+        }
+      });
+    }
+    return () => {
+      isMounted = false;
+    };
+  }, [personId, familyId, initialLetter]);
 
   // Kiểm tra quyền chỉnh sửa bài viết: Admin hoặc người tạo hoặc chính chủ
   const isAuthor = Boolean(

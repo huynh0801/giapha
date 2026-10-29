@@ -1,7 +1,13 @@
 import { DashboardProvider } from "@/components/DashboardContext";
 import DeleteMemberButton from "@/components/DeleteMemberButton";
 import MemberDetailContent from "@/components/MemberDetailContent";
-import { getFamilyContextBySlug, getSupabase } from "@/utils/supabase/queries";
+import { getMemorialLetterAction } from "@/app/actions/memorial-letter";
+import {
+  getFamilyContextBySlug,
+  getProfile,
+  getSupabase,
+  getUser,
+} from "@/utils/supabase/queries";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -27,27 +33,43 @@ export default async function FamilyMemberDetailPage({
   const membersHref = `/dashboard/${familySlug}/members?treeId=${context.tree.id}`;
 
   const supabase = await getSupabase();
-  const { data: person, error } = await supabase
-    .from("persons")
-    .select("*")
-    .eq("family_id", context.family.id)
-    .eq("tree_id", context.tree.id)
-    .eq("id", id)
-    .maybeSingle();
-
-  if (error || !person) notFound();
-
-  let privateData = null;
-  if (context.canEdit) {
-    const { data } = await supabase
-      .from("person_details_private")
+  const [personRes, user] = await Promise.all([
+    supabase
+      .from("persons")
       .select("*")
       .eq("family_id", context.family.id)
       .eq("tree_id", context.tree.id)
-      .eq("person_id", id)
-      .maybeSingle();
-    privateData = data;
-  }
+      .eq("id", id)
+      .maybeSingle(),
+    getUser(),
+  ]);
+
+  const person = personRes.data;
+  if (personRes.error || !person) notFound();
+
+  const [privateRes, letterRes, profile] = await Promise.all([
+    context.canEdit
+      ? supabase
+          .from("person_details_private")
+          .select("*")
+          .eq("family_id", context.family.id)
+          .eq("tree_id", context.tree.id)
+          .eq("person_id", id)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
+    getMemorialLetterAction(id, context.family.id),
+    user ? getProfile(user.id) : Promise.resolve(null),
+  ]);
+
+  const privateData = privateRes.data;
+  const memorialLetter = letterRes.success ? letterRes.data : null;
+
+  const settings = (context.family.settings as Record<string, unknown>) || {};
+  const memberLinks = (settings.member_links as Record<string, string>) || {};
+  const isSelfPerson = Boolean(user && memberLinks[user.id] === id);
+  const canWrite = Boolean(
+    context.canEdit || context.membership?.status === "active" || isSelfPerson,
+  );
 
   return (
     <DashboardProvider
@@ -94,6 +116,13 @@ export default async function FamilyMemberDetailPage({
               privateData={privateData}
               isAdmin={context.canEdit}
               canEdit={context.canEdit}
+              memorialLetter={memorialLetter}
+              familyId={context.family.id}
+              treeId={context.tree.id}
+              canWrite={canWrite}
+              isSelfPerson={isSelfPerson}
+              currentUserName={profile?.full_name}
+              currentUserId={user?.id}
             />
           </div>
         </main>
