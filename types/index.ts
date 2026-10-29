@@ -183,3 +183,23 @@ export interface PersonMemorialLetter {
   created_at: string;
   updated_at: string;
 }
+
+
+export interface PersonLifeEvent {
+  id: string;
+  person_id: string;
+  family_id: string;
+  tree_id: string;
+  year: number;
+  month: number | null;
+  day: number | null;
+  title: string;
+  content: string;
+  image_url: string | null;
+  author_type: "self" | "descendant" | "admin";
+  author_name: string;
+  author_relationship: string | null;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
