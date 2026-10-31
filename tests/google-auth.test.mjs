@@ -36,3 +36,12 @@ test("auth callback route validates redirect target safely", () => {
   assert.match(callbackCode, /includes\(":\/\/"\)/);
   assert.match(callbackCode, /startsWith\("\/login"\)/);
 });
+
+test("public login page contains Google OAuth button, icon, and safe error handling", () => {
+  const loginPage = read("app/login/page.tsx");
+  assert.match(loginPage, /Tiếp tục với Google/);
+  assert.match(loginPage, /signInWithOAuth/);
+  assert.match(loginPage, /oauth_error/);
+  assert.match(loginPage, /account_locked/);
+  assert.doesNotMatch(loginPage, /@supabase\/supabase-js/);
+});
