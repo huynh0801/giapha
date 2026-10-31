@@ -235,6 +235,33 @@ export async function signOutAction(): Promise<{ success: boolean; error?: strin
   }
 }
 
+export async function signInWithGoogleAction(data?: {
+  nextPath?: string;
+  origin?: string;
+}): Promise<{ url?: string; error?: string }> {
+  try {
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
+    const origin = data?.origin || "";
+    const nextParam = data?.nextPath ? `?next=${encodeURIComponent(data.nextPath)}` : "";
+    const redirectTo = `${origin}/auth/callback${nextParam}`;
+
+    const { data: oauthData, error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo,
+      },
+    });
+
+    if (error || !oauthData?.url) {
+      return { error: explainAuthError(error || "Không thể khởi tạo đăng nhập Google.") };
+    }
+
+    return { url: oauthData.url };
+  } catch (error) {
+    return { error: explainAuthError(error) };
+  }
+}
 
 export interface HeaderAuthUser {
   id: string;

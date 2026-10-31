@@ -1,7 +1,11 @@
 "use client";
 
 import config from "@/app/config";
-import { loginAction, signUpAction } from "@/app/actions/auth";
+import {
+  loginAction,
+  signUpAction,
+  signInWithGoogleAction,
+} from "@/app/actions/auth";
 import {
   ArrowLeft,
   CheckCircle2,
@@ -109,7 +113,28 @@ export default function LoginPage() {
           ? new URLSearchParams(window.location.search).get("next")
           : null;
 
-      const redirectTo = `${window.location.origin}/auth/callback${
+      const origin =
+        typeof window !== "undefined" ? window.location.origin : "";
+
+      // 1. Try server action first (has direct access to server SUPABASE_URL & SUPABASE_ANON_KEY on Vercel)
+      const serverResult = await signInWithGoogleAction({
+        nextPath: nextParam || undefined,
+        origin,
+      });
+
+      if (serverResult.url) {
+        window.location.href = serverResult.url;
+        return;
+      }
+
+      if (serverResult.error && !serverResult.error.includes("Missing Supabase configuration")) {
+        setError(serverResult.error);
+        setOauthLoading(false);
+        return;
+      }
+
+      // 2. Fallback to client browser client
+      const redirectTo = `${origin}/auth/callback${
         nextParam ? `?next=${encodeURIComponent(nextParam)}` : ""
       }`;
 
