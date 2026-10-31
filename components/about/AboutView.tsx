@@ -2,19 +2,18 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
 import {
   ArrowRight,
   BookOpen,
   Calendar,
-  CheckCircle2,
   Clock,
   Compass,
+  Globe,
   Landmark,
   Mail,
   MapPin,
+  MessageCircle,
   Phone,
-  Send,
   ShieldCheck,
   Sparkles,
   Users,
@@ -24,19 +23,6 @@ import LandingFooter from "@/components/landing/LandingFooter";
 import BackgroundDecor from "@/components/landing/BackgroundDecor";
 
 export default function AboutView() {
-  const [formData, setFormData] = useState({
-    fullName: "",
-    phone: "",
-    email: "",
-    branch: "",
-    content: "",
-  });
-  const [submitted, setSubmitted] = useState(false);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitted(true);
-  };
 
   return (
     <div className="min-h-screen flex flex-col bg-[#f5e7c7] text-[#2c1a11]">
@@ -111,8 +97,8 @@ export default function AboutView() {
                   <div className="relative p-1.5 border-2 border-[#caa455] bg-[#f5e7c7] w-full shadow-xs">
                     <div className="relative aspect-[382/254] w-full border border-[#deb887] overflow-hidden">
                       <Image
-                        src="/images/landing/about-painting.png"
-                        alt="Từ đường dòng họ sơn thủy hữu tình"
+                        src="/images/landing/contact.png"
+                        alt="Gia đình dòng tộc sum vầy nhiều thế hệ"
                         fill
                         sizes="(max-width: 1024px) 100vw, 40vw"
                         className="object-cover"
@@ -332,270 +318,166 @@ export default function AboutView() {
                     <span className="h-[1px] flex-1 bg-gradient-to-l from-transparent via-[#caa455] to-[#caa455]" />
                   </div>
                   <p className="mt-1 text-xs text-[#8c1d1d] font-semibold tracking-wide uppercase font-sans">
-                    Tiếp nhận tâm thư – Góp ý tư liệu – Kết nối chi họ
+                    Kết nối cội nguồn – Tra cứu gia phả – Đóng góp tư liệu
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                  {/* Left Column: Office Details in Dark Jade */}
-                  <div className="lg:col-span-5 border-2 border-[#caa455] bg-[#1b3a29] text-[#fffdf7] p-5 sm:p-6 flex flex-col justify-between">
-                    <div>
-                      <h3
-                        className="text-base sm:text-lg font-bold text-[#f5ebd2] border-b border-[#caa455]/40 pb-2.5"
-                        style={{
-                          fontFamily:
-                            '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
-                        }}
-                      >
-                        Văn Phòng Ban Trị Sự Dòng Họ
-                      </h3>
+                {/* Master Contact Card in Dark Jade */}
+                <div className="border-2 border-[#caa455] bg-[#1b3a29] text-[#fffdf7] p-5 sm:p-7 md:p-8 relative shadow-sm">
+                  {/* Traditional Corner Accents */}
+                  <span className="pointer-events-none absolute top-1.5 left-1.5 size-3 border-t-2 border-l-2 border-[#caa455]" />
+                  <span className="pointer-events-none absolute top-1.5 right-1.5 size-3 border-t-2 border-r-2 border-[#caa455]" />
+                  <span className="pointer-events-none absolute bottom-1.5 left-1.5 size-3 border-b-2 border-l-2 border-[#caa455]" />
+                  <span className="pointer-events-none absolute bottom-1.5 right-1.5 size-3 border-b-2 border-r-2 border-[#caa455]" />
 
-                      <p className="mt-2.5 text-xs text-[#e8ecd8]/85 leading-relaxed font-sans">
-                        Quý con cháu, thân tộc cần liên hệ viếng từ đường, tra
-                        cứu hồ sơ thế thứ hoặc đóng góp tư liệu xin vui lòng liên
-                        hệ:
-                      </p>
+                  <div>
+                    <div className="border-b border-[#caa455]/40 pb-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                      <div>
+                        <h3
+                          className="text-base sm:text-xl font-bold text-[#f5ebd2]"
+                          style={{
+                            fontFamily:
+                              '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
+                          }}
+                        >
+                          Văn Phòng Ban Trị Sự Dòng Họ
+                        </h3>
+                        <p className="mt-1 text-xs text-[#e8ecd8]/90 font-sans">
+                          Quý con cháu, thân tộc cần liên hệ viếng từ đường, tra cứu hồ sơ thế thứ hoặc đóng góp tư liệu xin vui lòng liên hệ:
+                        </p>
+                      </div>
 
-                      <div className="mt-5 space-y-3.5 text-xs font-sans">
+                      <span className="inline-flex items-center gap-1.5 self-start sm:self-auto px-2.5 py-1 border border-[#caa455]/60 bg-[#caa455]/15 text-[11px] font-sans font-semibold text-[#caa455] shrink-0">
+                        <Clock className="size-3.5" />
+                        <span>Thứ Bảy, CN &amp; ngày Rằm, Mùng Một</span>
+                      </span>
+                    </div>
+
+                    <div className="mt-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4.5 text-xs font-sans">
+                      {/* 1. Address */}
+                      <div className="p-3.5 bg-black/20 border border-[#caa455]/30 flex flex-col justify-between">
                         <div className="flex items-start gap-2.5">
                           <MapPin className="size-4 text-[#caa455] shrink-0 mt-0.5" />
                           <div>
-                            <strong className="text-[#f5ebd2] block font-semibold">
-                              Địa chỉ Từ Đường:
+                            <strong className="text-[#f5ebd2] block font-semibold text-xs mb-1 uppercase tracking-wider text-[#caa455]">
+                              Địa chỉ Trụ sở:
                             </strong>
-                            <span className="text-[#e8ecd8]/90">
-                              Nhà Thờ Tổ Dòng Họ, Thôn Thượng, Xã Di Sản, Huyện
-                              Văn Hiến, Việt Nam
+                            <span className="text-[#e8ecd8]/95 leading-relaxed font-medium">
+                              Xã Hòa Trạch, Huyện Bố Trạch, Tỉnh Quảng Bình (47426)
                             </span>
                           </div>
                         </div>
+                      </div>
 
+                      {/* 2. Hotline */}
+                      <div className="p-3.5 bg-black/20 border border-[#caa455]/30 flex flex-col justify-between">
                         <div className="flex items-start gap-2.5">
                           <Phone className="size-4 text-[#caa455] shrink-0 mt-0.5" />
                           <div>
-                            <strong className="text-[#f5ebd2] block font-semibold">
+                            <strong className="text-[#f5ebd2] block font-semibold text-xs mb-1 uppercase tracking-wider text-[#caa455]">
                               Đường dây nóng Ban Liên Lạc:
                             </strong>
                             <a
-                              href="tel:0123456789"
-                              className="text-[#caa455] hover:underline font-bold text-sm tracking-wide"
+                              href="tel:+84799013785"
+                              className="text-[#caa455] hover:text-white hover:underline font-bold text-sm tracking-wide inline-block mt-0.5"
                             >
-                              0123.456.789
+                              +84 79 901 3785
                             </a>
                           </div>
                         </div>
+                      </div>
 
+                      {/* 3. Email */}
+                      <div className="p-3.5 bg-black/20 border border-[#caa455]/30 flex flex-col justify-between">
                         <div className="flex items-start gap-2.5">
                           <Mail className="size-4 text-[#caa455] shrink-0 mt-0.5" />
                           <div>
-                            <strong className="text-[#f5ebd2] block font-semibold">
+                            <strong className="text-[#f5ebd2] block font-semibold text-xs mb-1 uppercase tracking-wider text-[#caa455]">
                               Hòm thư điện tử:
                             </strong>
                             <a
-                              href="mailto:lienhe@giaphadongho.vn"
-                              className="text-[#caa455] hover:underline"
+                              href="mailto:huynh080104@gmail.com"
+                              className="text-[#caa455] hover:text-white hover:underline break-all inline-block mt-0.5"
                             >
-                              lienhe@giaphadongho.vn
+                              huynh080104@gmail.com
                             </a>
                           </div>
                         </div>
+                      </div>
 
+                      {/* 4. Website */}
+                      <div className="p-3.5 bg-black/20 border border-[#caa455]/30 flex flex-col justify-between">
+                        <div className="flex items-start gap-2.5">
+                          <Globe className="size-4 text-[#caa455] shrink-0 mt-0.5" />
+                          <div>
+                            <strong className="text-[#f5ebd2] block font-semibold text-xs mb-1 uppercase tracking-wider text-[#caa455]">
+                              Cổng thông tin gia phả:
+                            </strong>
+                            <a
+                              href="https://giaphaquangbinh.io.vn"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[#caa455] hover:text-white hover:underline inline-block mt-0.5 font-medium"
+                            >
+                              giaphaquangbinh.io.vn
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* 5. Online Community / Messenger */}
+                      <div className="p-3.5 bg-black/20 border border-[#caa455]/30 flex flex-col justify-between">
+                        <div className="flex items-start gap-2.5">
+                          <MessageCircle className="size-4 text-[#caa455] shrink-0 mt-0.5" />
+                          <div>
+                            <strong className="text-[#f5ebd2] block font-semibold text-xs mb-1 uppercase tracking-wider text-[#caa455]">
+                              Kênh kết nối &amp; Hỗ trợ:
+                            </strong>
+                            <span className="text-[#e8ecd8]/95 leading-relaxed inline-block mt-0.5 font-medium">
+                              Gia Phả Quảng Bình – Kết Nối Cội Nguồn
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* 6. Visiting Hours */}
+                      <div className="p-3.5 bg-black/20 border border-[#caa455]/30 flex flex-col justify-between">
                         <div className="flex items-start gap-2.5">
                           <Clock className="size-4 text-[#caa455] shrink-0 mt-0.5" />
                           <div>
-                            <strong className="text-[#f5ebd2] block font-semibold">
+                            <strong className="text-[#f5ebd2] block font-semibold text-xs mb-1 uppercase tracking-wider text-[#caa455]">
                               Thời gian tiếp tế tự &amp; viếng:
                             </strong>
-                            <span className="text-[#e8ecd8]/90">
+                            <span className="text-[#e8ecd8]/90 leading-relaxed inline-block mt-0.5">
                               Thứ Bảy, Chủ Nhật &amp; ngày rằm, mùng một âm lịch
                             </span>
                           </div>
                         </div>
                       </div>
                     </div>
+                  </div>
 
-                    <div className="mt-6 pt-3 border-t border-[#caa455]/30 flex items-center justify-between">
-                      <span className="text-[11px] text-[#caa455]/90 italic font-sans">
-                        Cội nguồn thiêng liêng
-                      </span>
+                  <div className="mt-7 pt-3.5 border-t border-[#caa455]/30 flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <span className="text-[11px] sm:text-xs text-[#caa455]/90 italic font-sans text-center sm:text-left">
+                      Cội nguồn thiêng liêng – Gìn giữ phúc đức muôn đời
+                    </span>
+
+                    <div className="flex items-center gap-2.5">
+                      <a
+                        href="tel:+84799013785"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-[#caa455] bg-[#caa455]/20 hover:bg-[#caa455] hover:text-[#1b3a29] text-xs font-bold text-[#f5ebd2] transition-colors"
+                      >
+                        <Phone className="size-3.5" />
+                        <span>Gọi trực tiếp</span>
+                      </a>
                       <Link
                         href="/dashboard"
-                        className="inline-flex items-center gap-1.5 text-xs text-[#caa455] hover:text-white font-bold transition-colors"
+                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 border border-[#8c1d1d] bg-[#8c1d1d] hover:bg-[#a62424] text-xs font-bold text-[#fffdf7] transition-colors"
                       >
                         <span>Tra cứu gia phả</span>
                         <ArrowRight className="size-3.5" />
                       </Link>
                     </div>
-                  </div>
-
-                  {/* Right Column: Contact & Contribution Form */}
-                  <div className="lg:col-span-7 border border-[#deb887] bg-[#fcf8ee] p-5 sm:p-6">
-                    <div className="border-b border-[#deb887] pb-2.5 mb-4">
-                      <h3
-                        className="text-base sm:text-lg font-bold text-[#183b28]"
-                        style={{
-                          fontFamily:
-                            '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
-                        }}
-                      >
-                        Gửi Lời Nhắn Đến Ban Trị Sự
-                      </h3>
-                      <p className="text-xs text-[#6e5849] font-sans">
-                        Đóng góp tư liệu cổ, thông báo thông tin chi cành hoặc gửi
-                        gắm tâm thư
-                      </p>
-                    </div>
-
-                    {submitted ? (
-                      <div className="p-5 border border-[#caa455] bg-[#fffdf7] text-center space-y-2.5 my-2">
-                        <div className="inline-flex items-center justify-center size-10 bg-emerald-100 text-emerald-800 border border-emerald-300">
-                          <CheckCircle2 className="size-5" />
-                        </div>
-                        <h4
-                          className="text-base font-bold text-[#183b28]"
-                          style={{
-                            fontFamily:
-                              '"SVN-Studio Brush", "Playfair Display", Georgia, serif',
-                          }}
-                        >
-                          Gửi Tâm Thư Thành Công
-                        </h4>
-                        <p className="text-xs text-[#4a3b2f] max-w-md mx-auto leading-relaxed font-sans">
-                          Lời nhắn của Quý thân tộc đã được chuyển đến Ban Thư
-                          ký Hội đồng Dòng họ. Chúng tôi sẽ liên hệ lại trong
-                          thời gian sớm nhất. Xin trân trọng cảm ơn!
-                        </p>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSubmitted(false);
-                            setFormData({
-                              fullName: "",
-                              phone: "",
-                              email: "",
-                              branch: "",
-                              content: "",
-                            });
-                          }}
-                          className="mt-1 text-xs font-bold text-[#8c1d1d] hover:underline uppercase tracking-wide cursor-pointer"
-                        >
-                          Gửi thêm lời nhắn khác
-                        </button>
-                      </div>
-                    ) : (
-                      <form onSubmit={handleSubmit} className="space-y-3.5">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          <div>
-                            <label className="block text-xs font-bold text-[#2c1a11] mb-1 font-sans">
-                              Họ và tên người gửi <span className="text-red-700">*</span>
-                            </label>
-                            <input
-                              type="text"
-                              required
-                              placeholder="Nguyễn Văn A"
-                              value={formData.fullName}
-                              onChange={(e) =>
-                                setFormData({
-                                  ...formData,
-                                  fullName: e.target.value,
-                                })
-                              }
-                              className="w-full border border-[#deb887] bg-[#fffdf7] px-3 py-1.5 text-xs sm:text-sm text-[#2c1a11] placeholder:text-[#a89687] focus:border-[#8c1d1d] focus:outline-none transition-colors"
-                            />
-                          </div>
-
-                          <div>
-                            <label className="block text-xs font-bold text-[#2c1a11] mb-1 font-sans">
-                              Số điện thoại <span className="text-red-700">*</span>
-                            </label>
-                            <input
-                              type="tel"
-                              required
-                              placeholder="0912 345 678"
-                              value={formData.phone}
-                              onChange={(e) =>
-                                setFormData({
-                                  ...formData,
-                                  phone: e.target.value,
-                                })
-                              }
-                              className="w-full border border-[#deb887] bg-[#fffdf7] px-3 py-1.5 text-xs sm:text-sm text-[#2c1a11] placeholder:text-[#a89687] focus:border-[#8c1d1d] focus:outline-none transition-colors"
-                            />
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          <div>
-                            <label className="block text-xs font-bold text-[#2c1a11] mb-1 font-sans">
-                              Thư điện tử (Email)
-                            </label>
-                            <input
-                              type="email"
-                              placeholder="nguyenvana@gmail.com"
-                              value={formData.email}
-                              onChange={(e) =>
-                                setFormData({
-                                  ...formData,
-                                  email: e.target.value,
-                                })
-                              }
-                              className="w-full border border-[#deb887] bg-[#fffdf7] px-3 py-1.5 text-xs sm:text-sm text-[#2c1a11] placeholder:text-[#a89687] focus:border-[#8c1d1d] focus:outline-none transition-colors"
-                            />
-                          </div>
-
-                          <div>
-                            <label className="block text-xs font-bold text-[#2c1a11] mb-1 font-sans">
-                              Chi họ / Ngành / Đời
-                            </label>
-                            <input
-                              type="text"
-                              placeholder="Chi 2 - Đời thứ 14..."
-                              value={formData.branch}
-                              onChange={(e) =>
-                                setFormData({
-                                  ...formData,
-                                  branch: e.target.value,
-                                })
-                              }
-                              className="w-full border border-[#deb887] bg-[#fffdf7] px-3 py-1.5 text-xs sm:text-sm text-[#2c1a11] placeholder:text-[#a89687] focus:border-[#8c1d1d] focus:outline-none transition-colors"
-                            />
-                          </div>
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-bold text-[#2c1a11] mb-1 font-sans">
-                            Nội dung tâm thư / Đóng góp tư liệu <span className="text-red-700">*</span>
-                          </label>
-                          <textarea
-                            required
-                            rows={3}
-                            placeholder="Kính gửi Ban Trị Sự, tôi muốn bổ sung thông tin gia phả chi..."
-                            value={formData.content}
-                            onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                content: e.target.value,
-                              })
-                            }
-                            className="w-full border border-[#deb887] bg-[#fffdf7] px-3 py-1.5 text-xs sm:text-sm text-[#2c1a11] placeholder:text-[#a89687] focus:border-[#8c1d1d] focus:outline-none transition-colors resize-none"
-                          />
-                        </div>
-
-                        <div className="pt-1 flex items-center justify-between gap-4">
-                          <span className="text-[11px] text-[#7a6455] italic font-sans">
-                            * Bảo mật thông tin nội bộ
-                          </span>
-
-                          <button
-                            type="submit"
-                            className="inline-flex items-center gap-1.5 border border-[#8c1d1d] bg-[#8c1d1d] hover:bg-[#a62424] text-[#fffcf5] px-5 py-2 text-xs sm:text-sm font-sans font-bold shadow-xs active:scale-[0.99] transition-all cursor-pointer"
-                          >
-                            <Send className="size-3.5" />
-                            <span>Gửi tâm thư</span>
-                          </button>
-                        </div>
-                      </form>
-                    )}
                   </div>
                 </div>
               </div>
