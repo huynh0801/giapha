@@ -23,7 +23,11 @@ export function getSafeRedirectTarget(target: string | null | undefined): string
     return "/";
   }
 
-  if (target.startsWith("/login")) {
+  if (
+    target.startsWith("/login") ||
+    target.startsWith("/admin/login") ||
+    target.startsWith("/auth")
+  ) {
     return "/";
   }
 
@@ -32,18 +36,28 @@ export function getSafeRedirectTarget(target: string | null | undefined): string
 
 export async function GET(request: Request): Promise<NextResponse> {
   const { searchParams, origin } = new URL(request.url);
-  const code = searchParams.get("code");
-  const next = searchParams.get("next");
-  const safeNext = getSafeRedirectTarget(next);
 
-  if (code) {
+  try {
+    const error = searchParams.get("error");
+    const errorDescription = searchParams.get("error_description");
+    const code = searchParams.get("code");
+    const next = searchParams.get("next");
+    const safeNext = getSafeRedirectTarget(next);
+
+    if (error || !code) {
+      if (error) {
+        console.error("OAuth provider error:", error, errorDescription);
+      }
+      return NextResponse.redirect(`${origin}/login?error=oauth_error`);
+    }
+
     const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
 
     const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
     if (exchangeError) {
       console.error("Auth callback exchangeCodeForSession error:", exchangeError);
-      return NextResponse.redirect(`${origin}/login?error=auth_callback_failed`);
+      return NextResponse.redirect(`${origin}/login?error=oauth_error`);
     }
 
     const {
@@ -53,7 +67,7 @@ export async function GET(request: Request): Promise<NextResponse> {
 
     if (userError || !user) {
       console.error("Auth callback getUser error:", userError);
-      return NextResponse.redirect(`${origin}/login?error=auth_callback_failed`);
+      return NextResponse.redirect(`${origin}/login?error=oauth_error`);
     }
 
     const { data: profile } = await supabase
@@ -84,7 +98,10 @@ export async function GET(request: Request): Promise<NextResponse> {
       updates.updated_at = new Date().toISOString();
       await supabase.from("profiles").update(updates).eq("id", user.id);
     }
-  }
 
-  return NextResponse.redirect(`${origin}${safeNext}`);
+    return NextResponse.redirect(`${origin}${safeNext}`);
+  } catch (err) {
+    console.error("Unhandled auth callback error:", err);
+    return NextResponse.redirect(`${origin}/login?error=oauth_error`);
+  }
 }

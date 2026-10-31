@@ -28,13 +28,31 @@ test("auth callback route exchanges code for session and handles security", () =
   assert.match(callbackCode, /user_metadata/);
 });
 
-test("auth callback route validates redirect target safely", () => {
+test("auth callback route validates redirect target safely and prevents auth redirect loops", () => {
   const callbackCode = read("app/auth/callback/route.ts");
   assert.match(callbackCode, /getSafeRedirectTarget/);
   assert.match(callbackCode, /startsWith\("\/"\)/);
   assert.match(callbackCode, /startsWith\("\/\/"\)/);
   assert.match(callbackCode, /includes\(":\/\/"\)/);
   assert.match(callbackCode, /startsWith\("\/login"\)/);
+  assert.match(callbackCode, /startsWith\("\/admin\/login"\)/);
+  assert.match(callbackCode, /startsWith\("\/auth"\)/);
+});
+
+test("auth callback route handles provider errors, missing code, and unhandled exceptions", () => {
+  const callbackCode = read("app/auth/callback/route.ts");
+  // Reads error and error_description
+  assert.match(callbackCode, /searchParams\.get\("error"\)/);
+  assert.match(callbackCode, /searchParams\.get\("error_description"\)/);
+  // Rejects missing code or provider error
+  assert.match(callbackCode, /if\s*\(\s*error\s*\|\|\s*!code\s*\)/);
+  // Standardized error code
+  assert.match(callbackCode, /login\?error=oauth_error/);
+  assert.doesNotMatch(callbackCode, /auth_callback_failed/);
+  // Top-level try-catch
+  assert.match(callbackCode, /try\s*\{/);
+  assert.match(callbackCode, /catch\s*\(\s*err\s*\)\s*\{/);
+  assert.match(callbackCode, /Unhandled auth callback error/);
 });
 
 test("public login page contains Google OAuth button, icon, and safe error handling", () => {
