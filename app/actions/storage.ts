@@ -100,6 +100,11 @@ export async function deleteAvatarAction(
   filePath: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    const user = await getUser();
+    if (!user) {
+      return { success: false, error: "Vui lòng đăng nhập để thực hiện thao tác này." };
+    }
+
     if (!filePath || typeof filePath !== "string") {
       return { success: true };
     }

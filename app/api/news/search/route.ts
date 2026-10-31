@@ -6,7 +6,8 @@ const ITEMS_PER_PAGE = 6;
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    const query = (searchParams.get("q") || "").trim();
+    const rawQuery = (searchParams.get("q") || "").trim();
+    const query = rawQuery.replace(/[,()"'\\%]/g, " ").trim();
     const category = (searchParams.get("category") || "").trim();
     const rawPage = parseInt(searchParams.get("page") || "1", 10);
     const requestedPage = isNaN(rawPage) || rawPage < 1 ? 1 : rawPage;

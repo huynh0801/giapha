@@ -24,9 +24,15 @@ function getText(formData: FormData, key: string) {
 
 function sanitizeBlogContent(content: string) {
   return content
-    .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, "")
-    .replace(/\son\w+="[^"]*"/gi, "")
-    .replace(/\son\w+='[^']*'/gi, "")
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+    .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, "")
+    .replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, "")
+    .replace(/<embed\b[^>]*>/gi, "")
+    .replace(/<svg\b[^<]*(?:(?!<\/svg>)<[^<]*)*<\/svg>/gi, "")
+    .replace(/\son\w+\s*=\s*(['"]).*?\1/gi, "")
+    .replace(/\son\w+\s*=\s*[^>\s]+/gi, "")
+    .replace(/href\s*=\s*(['"])\s*javascript:[^'"]*\1/gi, 'href="#"')
+    .replace(/src\s*=\s*(['"])\s*javascript:[^'"]*\1/gi, 'src=""')
     .replace(/javascript:/gi, "");
 }
 
