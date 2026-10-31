@@ -28,14 +28,56 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000")
+    process.env.NEXT_PUBLIC_SITE_URL || "https://giaphaquangbinh.io.vn"
   ),
   title: {
     default: "GIA PHẢ DÒNG HỌ",
     template: "%s | Gia Phả Dòng Họ",
   },
-  description: "Gìn giữ và lưu truyền giá trị cội nguồn, gắn kết các thế hệ dòng họ Việt Nam.",
+  description:
+    "Gìn giữ và lưu truyền giá trị cội nguồn, gắn kết các thế hệ dòng họ Việt Nam.",
+  keywords: [
+    "gia phả",
+    "gia phả dòng họ",
+    "phả hệ",
+    "cây gia phả",
+    "gia phả trực tuyến",
+    "tra cứu gia phả",
+    "lịch sử dòng họ",
+    "nhà thờ tổ",
+    "giỗ tổ",
+    "tộc ước",
+    "văn khấn",
+    "kết nối dòng họ",
+    "gia phả việt nam",
+  ],
+  authors: [
+    {
+      name: "Ban Biên Tập Gia Phả Dòng Họ",
+      url: "https://giaphaquangbinh.io.vn",
+    },
+  ],
+  creator: "Gia Phả Dòng Họ",
+  publisher: "Gia Phả Dòng Họ",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  alternates: {
+    canonical: "./",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
   applicationName: "Gia Phả Dòng Họ",
   appleWebApp: {
     capable: true,
@@ -58,11 +100,18 @@ export const metadata: Metadata = {
     ],
   },
   openGraph: {
-    title: "GIA PHẢ DÒNG HỌ",
-    description: "Gìn giữ và lưu truyền giá trị cội nguồn, gắn kết các thế hệ dòng họ.",
+    title: "GIA PHẢ DÒNG HỌ - Gìn giữ & Lưu truyền Cội Nguồn",
+    description:
+      "Gìn giữ và lưu truyền giá trị cội nguồn, gắn kết các thế hệ dòng họ Việt Nam.",
     url: "/",
     siteName: "Gia Phả Dòng Họ",
     images: [
+      {
+        url: "/images/landing/hero-banner.webp",
+        width: 2048,
+        height: 768,
+        alt: "Nền tảng Gia Phả Dòng Họ",
+      },
       {
         url: "/images/landing/logo.png",
         width: 305,
@@ -74,10 +123,11 @@ export const metadata: Metadata = {
     type: "website",
   },
   twitter: {
-    card: "summary",
-    title: "GIA PHẢ DÒNG HỌ",
-    description: "Gìn giữ và lưu truyền giá trị cội nguồn",
-    images: ["/images/landing/logo.png"],
+    card: "summary_large_image",
+    title: "GIA PHẢ DÒNG HỌ - Gìn giữ & Lưu truyền Cội Nguồn",
+    description:
+      "Gìn giữ và lưu truyền giá trị cội nguồn, gắn kết các thế hệ dòng họ Việt Nam.",
+    images: ["/images/landing/hero-banner.webp", "/images/landing/logo.png"],
   },
 };
 

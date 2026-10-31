@@ -9,9 +9,42 @@ import { BlogPost } from "@/types";
 import { getPublicSupabase } from "@/utils/supabase/queries";
 import { getCurrentUserAction } from "@/app/actions/auth";
 import { unstable_cache } from "next/cache";
+import type { Metadata } from "next";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "GIA PHẢ DÒNG HỌ - Gìn giữ & Lưu truyền Cội Nguồn",
+  description:
+    "Nền tảng số hóa gia phả, kết nối các thế hệ, tra cứu phả hệ, lịch sử dòng họ và ngày giỗ tổ tiên người Việt Nam.",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "GIA PHẢ DÒNG HỌ - Gìn giữ & Lưu truyền Cội Nguồn",
+    description:
+      "Nền tảng số hóa gia phả, kết nối các thế hệ, tra cứu phả hệ, lịch sử dòng họ và ngày giỗ tổ tiên người Việt Nam.",
+    url: "/",
+    siteName: "Gia Phả Dòng Họ",
+    images: [
+      {
+        url: "/images/landing/hero-banner.webp",
+        width: 2048,
+        height: 768,
+        alt: "Nền tảng Gia Phả Dòng Họ",
+      },
+      {
+        url: "/images/landing/logo.png",
+        width: 305,
+        height: 393,
+        alt: "Logo Gia Phả Dòng Họ",
+      },
+    ],
+    locale: "vi_VN",
+    type: "website",
+  },
+};
 
 function formatNewsDate(value: string | null) {
   if (!value) return "";
@@ -52,12 +85,12 @@ const getLatestSystemNews = unstable_cache(
             excerpt = plain.length > 150 ? plain.slice(0, 147) + "..." : plain;
           }
           return {
-          id: post.id,
-          title: post.title,
-          slug: post.slug,
-          date: formatNewsDate(post.published_at || post.created_at),
-          excerpt,
-          imageUrl: post.cover_image_url || null,
+            id: post.id,
+            title: post.title,
+            slug: post.slug,
+            date: formatNewsDate(post.published_at || post.created_at),
+            excerpt,
+            imageUrl: post.cover_image_url || null,
           };
         });
       }
@@ -79,8 +112,46 @@ export default async function GiaPhaHomePage() {
     getCurrentUserAction(),
   ]);
 
+  const websiteSchema = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://giaphaquangbinh.io.vn/#website",
+        "url": "https://giaphaquangbinh.io.vn",
+        "name": "Gia Phả Dòng Họ",
+        "description": "Gìn giữ và lưu truyền giá trị cội nguồn, gắn kết các thế hệ dòng họ Việt Nam.",
+        "inLanguage": "vi-VN",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://giaphaquangbinh.io.vn/news?q={search_term_string}",
+          "query-input": "required name=search_term_string",
+        },
+      },
+      {
+        "@type": "Organization",
+        "@id": "https://giaphaquangbinh.io.vn/#organization",
+        "name": "Gia Phả Dòng Họ",
+        "url": "https://giaphaquangbinh.io.vn",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://giaphaquangbinh.io.vn/images/landing/logo.png",
+          "width": 305,
+          "height": 393,
+        },
+        "sameAs": [],
+      },
+    ],
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-[#f5e7c7] text-[#2c1a11] selection:bg-[#8c1d1d] selection:text-white">
+      {/* Schema.org Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+      />
+
       {/* 1. Header Navigation */}
       <LandingHeader currentUser={currentUser} />
 

@@ -6,12 +6,46 @@ import LandingFooter from "@/components/landing/LandingFooter";
 import BackgroundDecor from "@/components/landing/BackgroundDecor";
 import NewsFeed from "@/components/news/NewsFeed";
 import { getCurrentUserAction } from "@/app/actions/auth";
+import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Tin tức & Hoạt động dòng họ",
-  description: "Các hoạt động, sự kiện và câu chuyện lịch sử của dòng họ",
+  description:
+    "Cập nhật các hoạt động, sự kiện, ngày giỗ tổ và các câu chuyện lịch sử vẻ vang của dòng họ.",
+  alternates: {
+    canonical: "/news",
+  },
+  openGraph: {
+    title: "Tin tức & Hoạt động dòng họ | Gia Phả Dòng Họ",
+    description:
+      "Cập nhật các hoạt động, sự kiện, ngày giỗ tổ và các câu chuyện lịch sử vẻ vang của dòng họ.",
+    url: "/news",
+    images: [
+      {
+        url: "/images/landing/hero-banner.webp",
+        width: 2048,
+        height: 768,
+        alt: "Tin tức dòng họ",
+      },
+      {
+        url: "/images/landing/logo.png",
+        width: 305,
+        height: 393,
+        alt: "Logo Gia Phả Dòng Họ",
+      },
+    ],
+    locale: "vi_VN",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Tin tức & Hoạt động dòng họ | Gia Phả Dòng Họ",
+    description:
+      "Cập nhật các hoạt động, sự kiện, ngày giỗ tổ và các câu chuyện lịch sử vẻ vang của dòng họ.",
+    images: ["/images/landing/hero-banner.webp"],
+  },
 };
 
 const ITEMS_PER_PAGE = 6;
@@ -108,8 +142,33 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
   const currentPage = Math.min(requestedPage, totalPages);
   const posts = (postsRes.data || []) as NewsPost[];
 
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Trang chủ",
+        item: "https://giaphaquangbinh.io.vn",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Tin tức & Hoạt động dòng họ",
+        item: "https://giaphaquangbinh.io.vn/news",
+      },
+    ],
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-[#f5e7c7] text-[#2c1a11]">
+      {/* Schema.org Breadcrumbs */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+
       <LandingHeader currentUser={currentUser} />
 
       <main className="relative flex-1 w-full py-8 sm:py-12 lg:py-14 overflow-hidden">

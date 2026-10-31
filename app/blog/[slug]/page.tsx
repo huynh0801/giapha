@@ -13,6 +13,7 @@ import LandingHeader from "@/components/landing/LandingHeader";
 import LandingFooter from "@/components/landing/LandingFooter";
 import BackgroundDecor from "@/components/landing/BackgroundDecor";
 import { getCurrentUserAction } from "@/app/actions/auth";
+import type { Metadata } from "next";
 import ShareArticleButton from "@/components/ShareArticleButton";
 
 // Prevent Next.js from caching this page — always fetch fresh data.
@@ -85,12 +86,12 @@ function getReadingMinutes(content: string) {
   return Math.max(1, Math.ceil(words / 220));
 }
 
-export async function generateMetadata({ params }: PageProps) {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const supabase = await getSupabase();
   const { data: post } = await supabase
     .from("blog_posts")
-    .select("title,excerpt,cover_image_url")
+    .select("title,excerpt,cover_image_url,category,published_at,updated_at,created_at")
     .eq("slug", slug)
     .eq("is_published", true)
     .maybeSingle();
@@ -101,13 +102,36 @@ export async function generateMetadata({ params }: PageProps) {
     };
   }
 
+  const imageUrl = post.cover_image_url || "/images/landing/hero-banner.webp";
+
   return {
     title: `${post.title} | Gia Phả Dòng Họ`,
     description: post.excerpt || undefined,
+    alternates: {
+      canonical: `/blog/${slug}`,
+    },
     openGraph: {
       title: post.title,
       description: post.excerpt || undefined,
-      images: [post.cover_image_url],
+      url: `/blog/${slug}`,
+      siteName: "Gia Phả Dòng Họ",
+      type: "article",
+      publishedTime: post.published_at || post.created_at,
+      modifiedTime: post.updated_at || post.published_at || post.created_at,
+      section: post.category || "Tin tức",
+      images: [
+        {
+          url: imageUrl,
+          alt: post.title,
+        },
+      ],
+      locale: "vi_VN",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.excerpt || undefined,
+      images: [imageUrl],
     },
   };
 }
@@ -151,8 +175,73 @@ export default async function BlogDetailPage({ params }: PageProps) {
     .order("published_at", { ascending: false })
     .limit(3);
 
+  const articleSchema = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.title,
+    description: post.excerpt || post.title,
+    image: post.cover_image_url
+      ? [post.cover_image_url]
+      : ["https://giaphaquangbinh.io.vn/images/landing/hero-banner.webp"],
+    datePublished: publishedDate,
+    dateModified: post.updated_at || publishedDate,
+    author: {
+      "@type": "Organization",
+      name: "Ban Biên Tập Gia Phả Dòng Họ",
+      url: "https://giaphaquangbinh.io.vn",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Gia Phả Dòng Họ",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://giaphaquangbinh.io.vn/images/landing/logo.png",
+      },
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `https://giaphaquangbinh.io.vn/blog/${slug}`,
+    },
+    articleSection: post.category || "Tin tức",
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Trang chủ",
+        item: "https://giaphaquangbinh.io.vn",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Bản tin dòng tộc",
+        item: "https://giaphaquangbinh.io.vn/news",
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: post.title,
+        item: `https://giaphaquangbinh.io.vn/blog/${slug}`,
+      },
+    ],
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-[#f5e7c7] text-[#2c1a11]">
+      {/* Schema.org Article & Breadcrumbs JSON-LD */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+
       <LandingHeader currentUser={currentUser} />
 
       <main className="relative flex-1 w-full py-8 sm:py-12 lg:py-14 overflow-hidden">
