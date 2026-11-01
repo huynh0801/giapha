@@ -102,6 +102,12 @@ export async function requestFamilyCreationAction(
   });
 
   if (error) {
+    if (error.code === "23505" || error.message?.includes("idx_family_creation_requests_user_pending")) {
+      return {
+        success: false,
+        error: "Bạn đang có một yêu cầu tạo dòng họ đang chờ xét duyệt. Vui lòng chờ phản hồi.",
+      };
+    }
     return { success: false, error: error.message };
   }
 
@@ -229,7 +235,6 @@ export async function getAdminFamilyCreationRequests(
       *,
       requester:profiles!family_creation_requests_user_id_fkey(
         full_name,
-        email,
         avatar_url
       )
     `)
@@ -239,8 +244,25 @@ export async function getAdminFamilyCreationRequests(
     query = query.eq("status", statusFilter);
   }
 
-  const { data } = await query;
+  const [{ data, error }, adminUsersRes] = await Promise.all([
+    query,
+    supabase.rpc("get_admin_users"),
+  ]);
+
+  if (error) {
+    console.error("Error fetching admin family creation requests:", error);
+    return [];
+  }
   if (!data) return [];
+
+  const emailMap = new Map<string, string>();
+  if (Array.isArray(adminUsersRes.data)) {
+    for (const u of adminUsersRes.data as Array<{ id: string; email: string }>) {
+      if (u.id && u.email) {
+        emailMap.set(u.id, u.email);
+      }
+    }
+  }
 
   return data.map((item: any) => ({
     id: item.id,
@@ -256,7 +278,7 @@ export async function getAdminFamilyCreationRequests(
     created_at: item.created_at,
     updated_at: item.updated_at,
     requester_name: item.requester?.full_name || null,
-    requester_email: item.requester?.email || null,
+    requester_email: emailMap.get(item.user_id) || null,
     requester_avatar: item.requester?.avatar_url || null,
   }));
 }

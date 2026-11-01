@@ -22,6 +22,14 @@ test("migration creates family_creation_requests table with RLS and atomic appro
   assert.match(migration, /ALTER TABLE public\.family_creation_requests ENABLE ROW LEVEL SECURITY/);
   assert.match(migration, /CREATE POLICY[\s\S]*ON public\.family_creation_requests/);
 
+  // Unique pending constraint to avoid recursion in RLS
+  assert.match(migration, /idx_family_creation_requests_user_pending/);
+  assert.doesNotMatch(
+    migration,
+    /CREATE POLICY "Users can create their own creation requests"[^;]+FROM public\.family_creation_requests/,
+    "Insert policy must not query family_creation_requests directly to avoid infinite recursion"
+  );
+
   // Atomic approval RPC
   assert.match(migration, /CREATE OR REPLACE FUNCTION public\.approve_family_creation_request/);
   assert.match(migration, /SECURITY DEFINER/);
@@ -31,4 +39,11 @@ test("migration creates family_creation_requests table with RLS and atomic appro
 
   // Rejection RPC
   assert.match(migration, /CREATE OR REPLACE FUNCTION public\.reject_family_creation_request/);
+});
+
+test("patch migration fixes RLS infinite recursion and enforces unique pending per user", () => {
+  const patch = read("supabase/migrations/20261101211500_fix_family_creation_requests_rls_recursion.sql");
+  assert.match(patch, /DROP POLICY IF EXISTS "Users can create their own creation requests"/);
+  assert.match(patch, /WITH CHECK \(auth\.uid\(\) = user_id\)/);
+  assert.match(patch, /CREATE UNIQUE INDEX IF NOT EXISTS idx_family_creation_requests_user_pending/);
 });

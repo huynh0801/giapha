@@ -28,17 +28,13 @@ ON public.family_creation_requests
 FOR SELECT
 USING (auth.uid() = user_id);
 
+CREATE UNIQUE INDEX IF NOT EXISTS idx_family_creation_requests_user_pending ON public.family_creation_requests(user_id) WHERE status = 'pending';
+
 DROP POLICY IF EXISTS "Users can create their own creation requests" ON public.family_creation_requests;
 CREATE POLICY "Users can create their own creation requests"
 ON public.family_creation_requests
 FOR INSERT
-WITH CHECK (
-    auth.uid() = user_id
-    AND NOT EXISTS (
-        SELECT 1 FROM public.family_creation_requests
-        WHERE user_id = auth.uid() AND status = 'pending'
-    )
-);
+WITH CHECK (auth.uid() = user_id);
 
 DROP POLICY IF EXISTS "Users can cancel their pending creation requests" ON public.family_creation_requests;
 CREATE POLICY "Users can cancel their pending creation requests"
