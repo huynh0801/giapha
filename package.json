@@ -14,7 +14,10 @@
     "db:push": "npx supabase db push",
     "db:push:dry": "npx supabase db push --dry-run",
     "db:migration:list": "npx supabase migration list",
-    "db:migration:new": "npx supabase migration new"
+    "db:migration:new": "npx supabase migration new",
+    "graphify": "graphify extract . && graphify cluster-only --no-label .",
+    "graphify:update": "graphify update . && graphify cluster-only --no-label .",
+    "graphify:report": "graphify extract . && graphify cluster-only --no-label . && node -e \"console.log('Graph report updated at graphify-out/GRAPH_REPORT.md')\""
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1157.0",
