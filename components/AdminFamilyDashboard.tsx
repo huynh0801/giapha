@@ -4,6 +4,7 @@ import {
   deleteFamilyAction,
   replaceFamilyAdminAction,
 } from "@/app/actions/family";
+import DeleteFamilyModal from "@/components/admin/DeleteFamilyModal";
 import { setUserFamilyMembership } from "@/app/actions/user";
 import {
   AdminUserData,
@@ -235,6 +236,8 @@ export default function AdminFamilyDashboard({
   const [pendingAction, setPendingAction] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState("");
   const [showAdminAccounts, setShowAdminAccounts] = useState(false);
+  const [familyToDelete, setFamilyToDelete] = useState<AdminFamilyRow | null>(null);
+  const [deleteModalError, setDeleteModalError] = useState<string | null>(null);
 
   const families = initialFamilies;
 
@@ -321,6 +324,37 @@ export default function AdminFamilyDashboard({
     if (!selectedFamily) return;
     formData.set("family_id", selectedFamily.id);
     runAction("membership", () => setUserFamilyMembership(formData));
+  };
+
+  const handleConfirmDelete = (
+    family: AdminFamilyRow,
+    confirmationName: string,
+  ) => {
+    setDeleteModalError(null);
+    const formData = new FormData();
+    formData.set("family_id", family.id);
+    formData.set("family_name", family.name);
+    formData.set("confirmation", confirmationName);
+
+    runAction("delete-family", async () => {
+      const result = await deleteFamilyAction(formData);
+      if (result && "error" in result && result.error) {
+        setDeleteModalError(result.error);
+        return result;
+      }
+      setFamilyToDelete(null);
+      setDeleteModalError(null);
+      if (selectedFamilyId === family.id) {
+        const remaining = families.filter((f) => f.id !== family.id);
+        setSelectedFamilyId(remaining[0]?.id || "");
+      }
+      setNotice({
+        type: "success",
+        text: `Đã xóa thành công dòng họ ${family.name}.`,
+      });
+      router.refresh();
+      return result;
+    });
   };
 
   const submitDeleteFamily = (formData: FormData) => {
@@ -547,6 +581,18 @@ export default function AdminFamilyDashboard({
                             title="Quản trị"
                           >
                             <UserCog className="size-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              setDeleteModalError(null);
+                              setFamilyToDelete(family);
+                            }}
+                            className="inline-flex items-center justify-center rounded-full border border-stone-200 bg-white p-2 text-stone-700 shadow-sm transition hover:border-red-300 hover:bg-red-50 hover:text-red-600"
+                            title={`Xóa dòng họ ${family.name}`}
+                          >
+                            <Trash2 className="size-4" />
                           </button>
                         </div>
                       </td>
@@ -854,36 +900,20 @@ export default function AdminFamilyDashboard({
                       Xóa dòng họ
                     </h3>
                     <p className="mt-1 text-xs font-semibold leading-5 text-red-700">
-                      Nhập đúng tên dòng họ để xác nhận. Dữ liệu liên quan sẽ bị
-                      xóa theo cascade của database.
+                      Xóa vĩnh viễn dòng họ và toàn bộ dữ liệu thành viên, cây gia phả, bài viết liên quan.
                     </p>
-                    <form
-                      action={submitDeleteFamily}
-                      className="mt-3 grid gap-2"
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDeleteModalError(null);
+                        setFamilyToDelete(selectedFamily);
+                      }}
+                      disabled={isBusy}
+                      className="mt-3 inline-flex items-center justify-center gap-2 rounded-2xl bg-red-600 px-4 py-3 text-sm font-black text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-red-200"
                     >
-                      <input
-                        name="confirmation"
-                        value={deleteConfirm}
-                        onChange={(event) =>
-                          setDeleteConfirm(event.target.value)
-                        }
-                        disabled={isBusy}
-                        placeholder={selectedFamily.name}
-                        className="w-full rounded-2xl border border-red-200 bg-white px-3 py-3 text-sm font-semibold text-red-950 outline-none transition focus:border-red-500 focus:ring-4 focus:ring-red-100 disabled:cursor-not-allowed disabled:opacity-60"
-                      />
-                      <button
-                        type="submit"
-                        disabled={isBusy || deleteConfirm !== selectedFamily.name}
-                        className="inline-flex items-center justify-center gap-2 rounded-2xl bg-red-600 px-4 py-3 text-sm font-black text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-red-200"
-                      >
-                        {pendingAction === "delete-family" ? (
-                          <Loader2 className="size-4 animate-spin" />
-                        ) : (
-                          <Trash2 className="size-4" />
-                        )}
-                        Xóa dòng họ
-                      </button>
-                    </form>
+                      <Trash2 className="size-4" />
+                      Xóa dòng họ này
+                    </button>
                   </div>
                 </div>
               </section>
@@ -891,6 +921,20 @@ export default function AdminFamilyDashboard({
           </div>
         )}
       </aside>
+
+      <DeleteFamilyModal
+        family={familyToDelete}
+        isOpen={familyToDelete !== null}
+        isDeleting={pendingAction === "delete-family"}
+        errorMessage={deleteModalError}
+        onClose={() => {
+          if (pendingAction !== "delete-family") {
+            setFamilyToDelete(null);
+            setDeleteModalError(null);
+          }
+        }}
+        onConfirm={handleConfirmDelete}
+      />
     </div>
   );
 }

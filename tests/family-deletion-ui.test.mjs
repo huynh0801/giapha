@@ -22,3 +22,13 @@ test("DeleteFamilyModal component is properly defined with safety confirmation",
   assert.match(modalCode, /onClose/);
   assert.match(modalCode, /onConfirm/);
 });
+
+test("AdminFamilyDashboard integrates trash button in table and triggers DeleteFamilyModal", () => {
+  const dashboardCode = read("components/AdminFamilyDashboard.tsx");
+
+  assert.match(dashboardCode, /DeleteFamilyModal/);
+  assert.match(dashboardCode, /familyToDelete/);
+  assert.match(dashboardCode, /setFamilyToDelete/);
+  assert.match(dashboardCode, /handleConfirmDelete/);
+  assert.match(dashboardCode, /title=\{`Xóa dòng họ \$\{family\.name\}`\}/);
+});
