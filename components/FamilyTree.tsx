@@ -497,6 +497,14 @@ export default function FamilyTree({
       if (rootIdValue) componentRoots.push(rootIdValue);
     }
 
+    // Also include any members from personsMap who are not children of anyone and not yet in any component
+    for (const [id] of personsMap.entries()) {
+      if (!visited.has(id) && !parentIdsByChildId.has(id)) {
+        visited.add(id);
+        componentRoots.push(id);
+      }
+    }
+
     return componentRoots;
   }, [
     adj.childrenByPersonId,

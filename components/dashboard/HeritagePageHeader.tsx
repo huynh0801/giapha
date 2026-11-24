@@ -38,6 +38,7 @@ export default function HeritagePageHeader({
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#deb887]/40 pb-3">
         <Link
           href={`/dashboard/${familySlug}`}
+          prefetch={true}
           className="group inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#7a6455] transition-colors hover:text-[#8c1d1d]"
         >
           <ArrowLeft className="size-3.5 transition-transform group-hover:-translate-x-0.5" />

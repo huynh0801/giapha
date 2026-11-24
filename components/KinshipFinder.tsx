@@ -43,6 +43,16 @@ interface Props {
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
+function normalizeVietnameseSearch(value: unknown): string {
+  return String(value ?? "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D")
+    .trim();
+}
+
 const getGenderStyle = (gender: string) => {
   if (gender === "male") return "bg-[#eaf3ed] text-[#183b28] border border-[#a3c9b2]";
   if (gender === "female") return "bg-[#fbeaea] text-[#8c1d1d] border border-[#f0bcbc]";
@@ -68,17 +78,15 @@ function PersonSelector({
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
 
-  const filtered = useMemo(
-    () =>
-      persons
-        .filter(
-          (p) =>
-            p.id !== disabledId &&
-            p.full_name.toLowerCase().includes(search.toLowerCase()),
-        )
-        .slice(0, 20),
-    [persons, disabledId, search],
-  );
+  const filtered = useMemo(() => {
+    const q = normalizeVietnameseSearch(search);
+    return persons.filter((p) => {
+      if (p.id === disabledId) return false;
+      if (!q) return true;
+      const raw = `${p.full_name} ${p.birth_year || ""} ${p.generation ? `đời ${p.generation}` : ""}`;
+      return normalizeVietnameseSearch(raw).includes(q);
+    });
+  }, [persons, disabledId, search]);
 
   return (
     <div className="w-full flex-1 min-w-0 relative">

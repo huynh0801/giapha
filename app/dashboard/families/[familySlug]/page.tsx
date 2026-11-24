@@ -1,10 +1,11 @@
 import { requestJoinFamilyAction } from "@/app/actions/join-request";
 import BackgroundDecor from "@/components/landing/BackgroundDecor";
+import ClanMapCard from "@/components/dashboard/ClanMapCard";
 import {
   HeritageBadge,
   HeritageFrame,
 } from "@/components/dashboard/HeritageUI";
-import { getSupabase, getUser } from "@/utils/supabase/queries";
+import { getCachedClanMapStats, getSupabase, getUser } from "@/utils/supabase/queries";
 import {
   ArrowLeft,
   ArrowRight,
@@ -82,19 +83,21 @@ export default async function FamilyDirectoryDetailPage({ params }: PageProps) {
 
   const returnTo = `/dashboard/families/${familySlug}`;
 
-  let primaryTreeId: string | null = null;
-  if (family.has_active_membership) {
-    const supabase = await getSupabase();
-    const { data: tree } = await supabase
-      .from("family_trees")
-      .select("id")
-      .eq("family_id", family.id)
-      .order("is_primary", { ascending: false })
-      .order("created_at", { ascending: true })
-      .limit(1)
-      .maybeSingle();
-    primaryTreeId = tree?.id || null;
-  }
+  const supabase = await getSupabase();
+  const { data: tree } = await supabase
+    .from("family_trees")
+    .select("id")
+    .eq("family_id", family.id)
+    .order("is_primary", { ascending: false })
+    .order("created_at", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+  const primaryTreeId = tree?.id || null;
+
+  const clanMapStats = await getCachedClanMapStats(
+    family.id,
+    primaryTreeId || undefined,
+  );
 
   const treeHref = primaryTreeId
     ? `/dashboard/${family.slug}/members?treeId=${primaryTreeId}&view=tree`
@@ -136,6 +139,11 @@ export default async function FamilyDirectoryDetailPage({ params }: PageProps) {
                   {visibilityLabel(family.visibility)}
                 </HeritageBadge>
 
+                <HeritageBadge variant="neutral" className="inline-flex items-center gap-1">
+                  <Users className="size-3.5" />
+                  <span>{family.member_count.toLocaleString("vi-VN")} thành viên</span>
+                </HeritageBadge>
+
                 {family.has_active_membership && (
                   <HeritageBadge variant="jade">
                     <CheckCircle2 className="size-3.5" />
@@ -157,43 +165,14 @@ export default async function FamilyDirectoryDetailPage({ params }: PageProps) {
               </p>
             </div>
 
-            {/* Member Count Stat Box */}
-            {family.has_active_membership ? (
-              <Link
-                href={treeHref}
-                title="Xem sơ đồ cây gia phả"
-                className="group shrink-0 rounded-2xl border border-[#deb887]/80 bg-gradient-to-br from-[#fffdf7] to-[#fbf7ed] p-4 sm:p-5 shadow-xs transition-all hover:-translate-y-0.5 hover:border-[#caa455] hover:shadow-md lg:w-64"
-              >
-                <div className="flex items-center justify-between">
-                  <p className="text-xs font-black uppercase tracking-wider text-[#7a6455] group-hover:text-[#8c1d1d] transition-colors">
-                    Thành viên gia phả
-                  </p>
-                  <Users className="size-4 text-[#deb887] group-hover:text-[#8c1d1d] transition-colors" />
-                </div>
-                <p className="mt-1.5 text-3xl font-black text-[#183b28] group-hover:text-[#8c1d1d] transition-colors">
-                  {family.member_count.toLocaleString("vi-VN")}
-                </p>
-                <p className="mt-2 text-xs font-bold text-[#8c1d1d] flex items-center gap-1">
-                  <span>Mở xem sơ đồ cây</span>
-                  <ArrowRight className="size-3" />
-                </p>
-              </Link>
-            ) : (
-              <div className="shrink-0 rounded-2xl border border-[#deb887]/80 bg-gradient-to-br from-[#fffdf7] to-[#fbf7ed] p-4 sm:p-5 shadow-xs lg:w-64">
-                <div className="flex items-center justify-between">
-                  <p className="text-xs font-black uppercase tracking-wider text-[#7a6455]">
-                    Thành viên gia phả
-                  </p>
-                  <Users className="size-4 text-[#deb887]" />
-                </div>
-                <p className="mt-1.5 text-3xl font-black text-[#183b28]">
-                  {family.member_count.toLocaleString("vi-VN")}
-                </p>
-                <p className="mt-2 text-xs font-medium text-[#7a6455]">
-                  Đã ghi chép trong gia phả
-                </p>
-              </div>
-            )}
+            {/* Bản Đồ Dòng Họ (thay thế ô Thành viên gia phả) */}
+            <ClanMapCard
+              counts={clanMapStats.counts}
+              totalMapped={clanMapStats.totalMapped}
+              familySlug={familySlug}
+              variant="hero"
+              className="lg:w-64 xl:w-72"
+            />
           </div>
 
           {/* 3 Information Cards */}

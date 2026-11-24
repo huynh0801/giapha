@@ -290,6 +290,51 @@ test("FamilyTree connect mode allows smooth canvas pan/zoom without branch-level
   );
 });
 
+test("findForestRoots includes unlinked members so all members appear when viewing all branches", () => {
+  const p1: Person = {
+    id: "p1", family_id: "f1", tree_id: "t1", full_name: "Cụ Tổ Nhánh 1", generation: 1, birth_year: 1900,
+    birth_month: null, birth_day: null, death_year: null, death_month: null, death_day: null,
+    death_lunar_year: null, death_lunar_month: null, death_lunar_day: null, is_deceased: true,
+    is_in_law: false, birth_order: null, other_names: null, avatar_url: null, note: null,
+    created_at: "", updated_at: "", gender: "male",
+  };
+  const p2: Person = { ...p1, id: "p2", full_name: "Con Cụ 1", generation: 2, birth_year: 1930 };
+  const pUnlinked: Person = { ...p1, id: "pUnlinked", full_name: "Thành viên độc lập", generation: 10, birth_year: 1970 };
+
+  const map = new Map<string, Person>([
+    ["p1", p1],
+    ["p2", p2],
+    ["pUnlinked", pUnlinked],
+  ]);
+
+  const rels: Relationship[] = [
+    {
+      id: "r1", family_id: "f1", tree_id: "t1", type: "biological_child",
+      person_a: "p1", person_b: "p2", created_at: "", updated_at: "",
+    },
+  ];
+
+  const roots = findForestRoots(map, rels);
+  assert.equal(roots.length, 2, "Must return both branch root and unlinked member root");
+  assert.ok(roots.some((r) => r.id === "p1"), "Branch 1 root must be present");
+  assert.ok(roots.some((r) => r.id === "pUnlinked"), "Unlinked member must be present in roots");
+});
+
+test("PersonSelector displays all members without arbitrary .slice(0, 20) cutoff", () => {
+  const personSelector = read("components/PersonSelector.tsx");
+  assert.doesNotMatch(
+    personSelector,
+    /\.slice\(0,\s*20\)/,
+    "PersonSelector must not truncate members with .slice(0, 20)",
+  );
+  assert.match(
+    personSelector,
+    /normalizeVietnameseSearch/,
+    "PersonSelector must provide diacritics-insensitive Vietnamese search",
+  );
+});
+
+
 
 
 

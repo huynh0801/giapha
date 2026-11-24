@@ -5,7 +5,7 @@ import ViewToggle, { ViewMode } from "@/components/ViewToggle";
 import HeritagePageHeader from "@/components/dashboard/HeritagePageHeader";
 import { HeritageBadge } from "@/components/dashboard/HeritageUI";
 import MemberClaimBanner from "@/components/dashboard/MemberClaimBanner";
-import { getFamilyContextBySlug, getSupabase, getUser } from "@/utils/supabase/queries";
+import { getCachedFamilyTreeData, getFamilyContextBySlug, getSupabase, getUser } from "@/utils/supabase/queries";
 import { isChildRelationshipType } from "@/utils/treeHelpers";
 import { FolderTree } from "lucide-react";
 import Link from "next/link";
@@ -36,23 +36,16 @@ export default async function FamilyMembersPage({
   const initialShowAvatar = avatar !== "hide";
   const supabase = await getSupabase();
 
-  const [user, personsRes, relsRes] = await Promise.all([
+  // Multi-tenant security guard: scoped strictly by:
+  // .eq("family_id", context.family.id)
+  // .eq("tree_id", context.tree.id)
+  const [user, treeData] = await Promise.all([
     getUser(),
-    supabase
-      .from("persons")
-      .select("*")
-      .eq("family_id", context.family.id)
-      .eq("tree_id", context.tree.id)
-      .order("birth_year", { ascending: true, nullsFirst: false }),
-    supabase
-      .from("relationships")
-      .select("*")
-      .eq("family_id", context.family.id)
-      .eq("tree_id", context.tree.id),
+    getCachedFamilyTreeData(context.family.id, context.tree.id),
   ]);
 
-  const persons = personsRes.data || [];
-  const relationships = relsRes.data || [];
+  const persons = treeData.persons;
+  const relationships = treeData.relationships;
   const personsMap = new Map(persons.map((person) => [person.id, person]));
 
   const familySettings = (context.family.settings as Record<string, unknown>) || {};
@@ -78,7 +71,7 @@ export default async function FamilyMembersPage({
       .map((rel) => rel.person_b),
   );
 
-  let finalRootId = rootId;
+  let finalRootId: string | null = rootId ?? null;
   if (!finalRootId || !personsMap.has(finalRootId)) {
     const roots = persons.filter((person) => !childIds.has(person.id));
     finalRootId = roots[0]?.id || persons[0]?.id || null;

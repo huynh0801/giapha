@@ -9,6 +9,16 @@ import DefaultAvatar from "./DefaultAvatar";
 import { FemaleIcon, MaleIcon } from "./GenderIcons";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
+function normalizeVietnameseSearch(value: unknown): string {
+  return String(value ?? "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D")
+    .trim();
+}
+
 const getGenderStyle = (gender: string) => {
   if (gender === "male") return "bg-sky-100 text-sky-600";
   if (gender === "female") return "bg-rose-100 text-rose-600";
@@ -46,12 +56,14 @@ export default function PersonSelector({
 
   const currentPerson = persons.find((p) => p.id === selectedId);
 
-  const filteredPersons = persons
-    .filter((p) => {
-      const searchStr = `${p.full_name} ${p.birth_year || ""}`.toLowerCase();
-      return searchStr.includes(searchTerm.toLowerCase());
-    })
-    .slice(0, 20);
+  const normalizedSearch = normalizeVietnameseSearch(searchTerm);
+
+  const filteredPersons = persons.filter((p) => {
+    if (!normalizedSearch) return true;
+    const rawSearchStr = `${p.full_name} ${p.birth_year || ""} ${p.generation ? `đời ${p.generation} thế hệ ${p.generation}` : ""}`;
+    const normalizedStr = normalizeVietnameseSearch(rawSearchStr);
+    return normalizedStr.includes(normalizedSearch);
+  });
 
   const handleSelect = (personId: string | null) => {
     onSelect(personId);
@@ -155,7 +167,7 @@ export default function PersonSelector({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.98 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="absolute z-50 w-full mt-2 bg-white/95 backdrop-blur-xl border border-stone-200/80 rounded-xl shadow-xl max-h-80 flex flex-col overflow-hidden ring-1 ring-black/5"
+            className="absolute z-50 w-full mt-2 bg-white/95 backdrop-blur-xl border border-stone-200/80 rounded-xl shadow-xl max-h-96 flex flex-col overflow-hidden ring-1 ring-black/5"
           >
             <div className="p-2 border-b border-stone-100/80 bg-stone-50/50 backdrop-blur-sm sticky top-0 z-10">
               <div className="relative">
@@ -163,12 +175,17 @@ export default function PersonSelector({
                 <input
                   type="text"
                   className="w-full text-stone-900 placeholder-stone-400 bg-white border border-stone-200/80 rounded-lg pl-9 pr-3 py-2 text-sm outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20 transition-all shadow-sm"
-                  placeholder="Tìm thành viên..."
+                  placeholder={`Tìm thành viên (${persons.length})...`}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   autoFocus
                 />
               </div>
+              {searchTerm.trim() && (
+                <p className="mt-1.5 px-1 text-[11px] font-semibold text-stone-400">
+                  Tìm thấy {filteredPersons.length} / {persons.length} thành viên
+                </p>
+              )}
             </div>
             <div className="overflow-y-auto flex-1 p-1.5 custom-scrollbar">
               {showAllOption && searchTerm.toLowerCase() === "" && (

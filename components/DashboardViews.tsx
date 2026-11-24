@@ -5,7 +5,8 @@ import DashboardMemberList from "@/components/DashboardMemberList";
 import RootSelector from "@/components/RootSelector";
 import { Person, Relationship } from "@/types";
 import { findForestRoots, isChildRelationshipType } from "@/utils/treeHelpers";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { saveFamilyTreeCache } from "@/utils/cache/genealogy-idb";
 import dynamic from "next/dynamic";
 
 const FamilyTree = dynamic(() => import("@/components/FamilyTree"));
@@ -38,9 +39,21 @@ export default function DashboardViews({
   canEdit = false,
   familyAdminEditExperience = false,
 }: DashboardViewsProps) {
-  const { view: currentView, rootId } = useDashboard();
+  const { view: currentView, rootId, familyId, treeId } = useDashboard();
   const [hoveredPersonId, setHoveredPersonId] = useState<string | null>(null);
   const [isTreeEditMode, setIsTreeEditMode] = useState(false);
+
+  // Persist tree & member records to IndexedDB for instant 0ms offline-first reload
+  useEffect(() => {
+    if (familyId && treeId && persons.length > 0) {
+      saveFamilyTreeCache(familyId, treeId, {
+        persons,
+        relationships,
+      }).catch(() => {
+        // Non-fatal if storage quota exceeded or in private browsing
+      });
+    }
+  }, [familyId, treeId, persons, relationships]);
 
   // Prepare map and roots for tree views
   const { personsMap, roots, defaultRootId } = useMemo(() => {

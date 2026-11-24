@@ -425,6 +425,14 @@ export function findForestRoots(
     }
   }
 
+  // Also include any members from personsMap who are not children of anyone and not yet in any component
+  for (const [id, person] of personsMap.entries()) {
+    if (!visited.has(id) && !childIds.has(id)) {
+      visited.add(id);
+      roots.push(person);
+    }
+  }
+
   roots.sort(sortPeopleForTree);
 
   if (roots.length === 0 && personsMap.size > 0) {

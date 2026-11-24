@@ -1,3 +1,5 @@
+import ClanMapCard from "@/components/dashboard/ClanMapCard";
+import ClanCalendarCard from "@/components/dashboard/ClanCalendarCard";
 import FamilyQrCard from "@/components/FamilyQrCard";
 import BackgroundDecor from "@/components/landing/BackgroundDecor";
 import {
@@ -7,7 +9,7 @@ import {
 } from "@/components/dashboard/HeritageUI";
 import { getTodayLunar } from "@/utils/dateHelpers";
 import { computeEvents } from "@/utils/eventHelpers";
-import { getFamilyContextBySlug, getSupabase, getUser } from "@/utils/supabase/queries";
+import { getCachedClanMapStats, getCachedFamilyTreeData, getFamilyContextBySlug, getSupabase, getUser } from "@/utils/supabase/queries";
 import MemberClaimBanner from "@/components/dashboard/MemberClaimBanner";
 import {
   ArrowUpRight,
@@ -102,21 +104,10 @@ export default async function FamilyDashboardPage({
   if (!context) notFound();
 
   const supabase = await getSupabase();
-  const [user, personsRes, relationshipsRes, eventsRes, adminContactsRes] =
+  const [user, treeData, eventsRes, adminContactsRes, clanMapStats] =
     await Promise.all([
       getUser(),
-      supabase
-        .from("persons")
-        .select(
-          "id, full_name, gender, birth_year, birth_month, birth_day, death_year, death_month, death_day, death_lunar_year, death_lunar_month, death_lunar_day, is_deceased, generation",
-        )
-        .eq("family_id", context.family.id)
-        .eq("tree_id", context.tree.id),
-      supabase
-        .from("relationships")
-        .select("id")
-        .eq("family_id", context.family.id)
-        .eq("tree_id", context.tree.id),
+      getCachedFamilyTreeData(context.family.id, context.tree.id),
       supabase
         .from("custom_events")
         .select("id, name, content, event_date, location, created_by")
@@ -125,10 +116,11 @@ export default async function FamilyDashboardPage({
       supabase.rpc("get_family_admin_contacts", {
         target_family_id: context.family.id,
       }),
+      getCachedClanMapStats(context.family.id, context.tree.id),
     ]);
 
-  const persons = personsRes.data || [];
-  const relationships = relationshipsRes.data || [];
+  const persons = treeData.persons;
+  const relationships = treeData.relationships;
   const customEvents = eventsRes.data || [];
   const adminContacts = (adminContactsRes.data || []) as FamilyAdminContact[];
   const upcomingEvents = computeEvents(persons, customEvents)
@@ -313,36 +305,20 @@ export default async function FamilyDashboardPage({
                     {context.family.description}
                   </p>
                 )}
+                <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[#7a6455] font-semibold">
+                  <span>Hôm nay: <strong className="text-[#183b28] capitalize">{formatDate(today)}</strong></span>
+                  <span>•</span>
+                  <span>Âm lịch: <strong className="text-[#8c1d1d]">{lunar.lunarDayStr}</strong> ({lunar.lunarYear})</span>
+                </div>
               </div>
 
-              {/* Imperial Court Calendar Tablet */}
-              <div className="rounded-2xl border-2 border-[#deb887] bg-gradient-to-br from-[#fffdf7] via-[#fbf7ed] to-[#f6eedf] p-4.5 sm:p-5 shadow-xs shrink-0 lg:w-76">
-                <div className="flex items-center justify-between border-b border-[#deb887]/50 pb-2 mb-2.5">
-                  <p className="text-xs font-black uppercase tracking-wider text-[#8c1d1d]">
-                    Thời khắc gia tộc
-                  </p>
-                  <HeritageBadge variant="amber" className="text-[10px] px-2 py-0.5">
-                    Hôm nay
-                  </HeritageBadge>
-                </div>
-                <p className="text-base sm:text-lg font-bold text-[#183b28] capitalize">
-                  {formatDate(today)}
-                </p>
-                <div className="mt-2.5 pt-2.5 border-t border-[#deb887]/40 space-y-1">
-                  <p className="text-xs font-semibold text-[#7a6455] flex items-center justify-between">
-                    <span>Âm lịch:</span>
-                    <span className="font-bold text-[#8c1d1d]">
-                      {lunar.lunarDayStr}
-                    </span>
-                  </p>
-                  <p className="text-xs font-semibold text-[#7a6455] flex items-center justify-between">
-                    <span>Năm:</span>
-                    <span className="font-bold text-[#183b28]">
-                      {lunar.lunarYear}
-                    </span>
-                  </p>
-                </div>
-              </div>
+              {/* Bản Đồ Dòng Họ (Replaced Thời khắc gia tộc) */}
+              <ClanMapCard
+                counts={clanMapStats.counts}
+                totalMapped={clanMapStats.totalMapped}
+                familySlug={familySlug}
+                variant="hero"
+              />
             </div>
           </HeritageFrame>
         </section>
@@ -403,6 +379,7 @@ export default async function FamilyDashboardPage({
                 </HeritageBadge>
                 <Link
                   href={`${base}/admins`}
+                  prefetch={true}
                   className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#deb887] bg-[#fffdf7] px-4 py-2 text-xs sm:text-sm font-black text-[#5c4a3e] shadow-xs transition hover:bg-[#f5e7c7]/60 hover:text-[#8c1d1d]"
                 >
                   <UserCog className="size-4 text-[#8c1d1d]" />
@@ -459,6 +436,7 @@ export default async function FamilyDashboardPage({
           </HeritageFrame>
         </section>
 
+
         {/* QR Card if Editor/Admin */}
         {context.canEdit && (
           <section className="mb-8">
@@ -510,49 +488,16 @@ export default async function FamilyDashboardPage({
           </section>
         )}
 
-        {/* Upcoming Events Section (Framed with Heritage Frame) */}
-        {upcomingEvents.length > 0 && (
-          <section className="mb-8">
-            <HeritageFrame cornerColor="#8c1d1d">
-              <div className="mb-4 flex items-center justify-between border-b border-[#deb887]/50 pb-3">
-                <div className="flex items-center gap-2.5">
-                  <CalendarDays className="size-5 text-[#8c1d1d]" />
-                  <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#183b28]">
-                    Sự kiện & Giỗ chạp sắp tới (30 ngày)
-                  </h2>
-                </div>
-                <HeritageBadge variant="amber">
-                  {upcomingEvents.length} sự kiện
-                </HeritageBadge>
-              </div>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                {upcomingEvents.map((event, index) => (
-                  <div
-                    key={`${event.personId || "event"}-${index}`}
-                    className="group relative rounded-2xl border-2 border-[#deb887]/80 bg-gradient-to-br from-[#fffdf7] to-[#fbf7ed] p-4.5 shadow-xs transition-all hover:border-[#caa455] hover:shadow-sm"
-                  >
-                    <span className="pointer-events-none absolute top-1.5 right-1.5 size-2 border-t-2 border-r-2 border-[#deb887] opacity-60 group-hover:border-[#8c1d1d] group-hover:opacity-100 transition-colors" />
-                    <p className="font-bold text-base text-[#183b28] group-hover:text-[#8c1d1d] transition-colors">
-                      {event.personName}
-                    </p>
-                    <div className="mt-2.5 flex items-center justify-between">
-                      <span className="text-xs font-bold text-[#7a6455]">
-                        {event.content || "Ngày kỵ nhật"}
-                      </span>
-                      <HeritageBadge
-                        variant={event.daysUntil === 0 ? "crimson" : "amber"}
-                      >
-                        {event.daysUntil === 0
-                          ? "Hôm nay"
-                          : `${event.daysUntil} ngày nữa`}
-                      </HeritageBadge>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </HeritageFrame>
-          </section>
-        )}
+        {/* Hệ Thống Lịch Vạn Niên & Sự Kiện Dòng Họ */}
+        <section className="mb-10">
+          <ClanCalendarCard
+            persons={persons}
+            customEvents={customEvents}
+            familySlug={familySlug}
+            treeId={context.tree.id}
+            canEdit={context.canEdit}
+          />
+        </section>
       </main>
     </div>
   );
@@ -562,6 +507,7 @@ function FeatureCard({ feature }: { feature: Feature }) {
   return (
     <Link
       href={feature.href}
+      prefetch={true}
       className="group relative flex flex-col justify-between rounded-2xl border-2 border-[#deb887]/80 bg-gradient-to-br from-[#fffdf7] via-[#fdfbf6] to-[#f6eedf] p-5 shadow-[0_4px_16px_rgba(44,26,17,0.05)] transition-all duration-300 hover:-translate-y-1.5 hover:border-[#8c1d1d] hover:shadow-[0_14px_30px_rgba(140,29,29,0.12)] overflow-hidden"
     >
       {/* 4 Traditional Corner Brackets with hover animation */}

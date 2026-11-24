@@ -7,12 +7,13 @@ import LandingFooter from "@/components/landing/LandingFooter";
 import type { LandingNewsItem } from "@/components/landing/types";
 import { BlogPost } from "@/types";
 import { getPublicSupabase } from "@/utils/supabase/queries";
-import { getCurrentUserAction } from "@/app/actions/auth";
 import { unstable_cache } from "next/cache";
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const dynamic = "force-dynamic";
+// Revalidate landing page cache at Edge CDN every 120s (ISR).
+// Serves static HTML in ~20-30ms, background revalidates automatically.
+export const revalidate = 120;
 
 export const metadata: Metadata = {
   title: "GIA PHẢ DÒNG HỌ - Gìn giữ & Lưu truyền Cội Nguồn",
@@ -107,10 +108,7 @@ const getLatestSystemNews = unstable_cache(
 );
 
 export default async function GiaPhaHomePage() {
-  const [newsItems, currentUser] = await Promise.all([
-    getLatestSystemNews(),
-    getCurrentUserAction(),
-  ]);
+  const newsItems = await getLatestSystemNews();
 
   const websiteSchema = {
     "@context": "https://schema.org",
@@ -153,7 +151,7 @@ export default async function GiaPhaHomePage() {
       />
 
       {/* 1. Header Navigation */}
-      <LandingHeader currentUser={currentUser} />
+      <LandingHeader />
 
       <main className="flex-1 flex flex-col">
         {/* 2. Hero Section */}
