@@ -3,6 +3,7 @@
 import { getProfile, getSupabase } from "@/utils/supabase/queries";
 import { uploadStorageImage } from "@/utils/storage";
 import { revalidatePath } from "next/cache";
+import { isFamilyApprovalRequired } from "@/app/actions/system-settings";
 
 export interface FamilyCreationRequest {
   id: string;
@@ -31,9 +32,9 @@ function getText(formData: FormData, key: string): string {
 }
 
 export async function requestFamilyCreationAction(
-  _prevState: { success: boolean; error?: string; message?: string },
+  _prevState: { success: boolean; error?: string; message?: string; redirectUrl?: string; slug?: string },
   formData: FormData,
-): Promise<{ success: boolean; error?: string; message?: string }> {
+): Promise<{ success: boolean; error?: string; message?: string; redirectUrl?: string; slug?: string }> {
   const profile = await getProfile();
   if (!profile || !profile.is_active) {
     return { success: false, error: "Vui lòng đăng nhập để gửi yêu cầu." };
@@ -53,21 +54,6 @@ export async function requestFamilyCreationAction(
   }
 
   const supabase = await getSupabase();
-
-  // Kiểm tra chống spam: Không gửi nhiều yêu cầu pending cùng lúc
-  const { data: existingPending } = await supabase
-    .from("family_creation_requests")
-    .select("id")
-    .eq("user_id", profile.id)
-    .eq("status", "pending")
-    .maybeSingle();
-
-  if (existingPending) {
-    return {
-      success: false,
-      error: "Bạn đang có một yêu cầu tạo dòng họ đang chờ xét duyệt. Vui lòng chờ phản hồi.",
-    };
-  }
 
   // Xử lý logo nếu có upload
   let logoUrl: string | null = null;
@@ -89,6 +75,58 @@ export async function requestFamilyCreationAction(
     if (uploadResult.success && uploadResult.publicUrl) {
       logoUrl = uploadResult.publicUrl;
     }
+  }
+
+  const approvalRequired = await isFamilyApprovalRequired();
+
+  // NẾU TẮT DUYỆT: Gọi RPC tạo dòng họ trực tiếp
+  if (!approvalRequired) {
+    const { data: directData, error: directError } = await supabase.rpc("create_family_direct", {
+      p_family_name: familyName,
+      p_family_slug: null,
+      p_description: description || null,
+      p_origin_location: originLocation || null,
+      p_phone_contact: phoneContact,
+      p_logo_url: logoUrl,
+    });
+
+    if (directError) {
+      return { success: false, error: directError.message };
+    }
+
+    if (directData && typeof directData === "object" && "success" in directData && !directData.success) {
+      return { success: false, error: String(directData.error || "Không thể tạo dòng họ.") };
+    }
+
+    const slug = directData && typeof directData === "object" && "slug" in directData ? String(directData.slug) : "";
+
+    revalidatePath("/dashboard");
+    revalidatePath("/admin/families");
+    if (slug) {
+      revalidatePath(`/dashboard/${slug}`);
+    }
+
+    return {
+      success: true,
+      message: `Tạo dòng họ "${familyName}" thành công!`,
+      redirectUrl: slug ? `/dashboard/${slug}` : "/dashboard",
+      slug,
+    };
+  }
+
+  // NẾU BẬT DUYỆT: Kiểm tra chống spam không gửi nhiều yêu cầu pending cùng lúc
+  const { data: existingPending } = await supabase
+    .from("family_creation_requests")
+    .select("id")
+    .eq("user_id", profile.id)
+    .eq("status", "pending")
+    .maybeSingle();
+
+  if (existingPending) {
+    return {
+      success: false,
+      error: "Bạn đang có một yêu cầu tạo dòng họ đang chờ xét duyệt. Vui lòng chờ phản hồi.",
+    };
   }
 
   const { error } = await supabase.from("family_creation_requests").insert({
