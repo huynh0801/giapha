@@ -38,10 +38,10 @@ export function ProvinceMap({
         viewBox={VN_MAP_VIEWBOX}
         role="img"
         aria-label="Bản đồ phân bố dòng họ Việt Nam"
-        className={className}
+        className={`${className} outline-none focus:outline-none`}
         onClick={() => onSelect?.(null)}
       >
-        <g className="transition-colors duration-200">
+        <g className="transition-colors duration-200 outline-none">
           {VN_MAP_PROVINCES.map((p) => {
             const count = counts[p.code] ?? 0;
             // Square root scaling ensures provinces with fewer members still have visible tint
@@ -82,8 +82,11 @@ export function ProvinceMap({
                 tabIndex={0}
                 aria-label={`${p.name}: ${count} ${unit}`}
                 aria-pressed={isSel}
+                className="outline-none focus:outline-none focus-visible:outline-none select-none"
                 onMouseEnter={() => setHoveredCode(p.code)}
                 onMouseLeave={() => setHoveredCode(null)}
+                onFocus={() => setHoveredCode(p.code)}
+                onBlur={() => setHoveredCode(null)}
                 onClick={(e) => {
                   e.stopPropagation();
                   onSelect?.(isSel ? null : p.code);
@@ -101,6 +104,8 @@ export function ProvinceMap({
                   strokeWidth,
                   strokeLinejoin: "round",
                   cursor: "pointer",
+                  outline: "none",
+                  WebkitTapHighlightColor: "transparent",
                   transition: "fill-opacity 0.2s, stroke 0.2s, stroke-width 0.2s",
                 }}
               >

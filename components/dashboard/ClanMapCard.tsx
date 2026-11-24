@@ -84,7 +84,7 @@ export function ClanMapCard({
             setIsExpanded(!isExpanded);
           }
         }}
-        className="flex cursor-pointer select-none items-center justify-between border-b border-[#deb887]/20 px-5 py-3.5 transition-colors hover:bg-white/5"
+        className="flex cursor-pointer select-none items-center justify-between border-b border-[#deb887]/20 px-5 py-3.5 transition-colors hover:bg-white/5 outline-none focus:outline-none"
       >
         <div className="flex items-center gap-2.5">
           <div className="flex size-7 items-center justify-center rounded-lg border border-[#caa455]/40 bg-[#caa455]/10 text-[#caa455]">
@@ -181,7 +181,7 @@ export function ClanMapCard({
                               setSelectedCode(isSelected ? null : prov.code);
                             }
                           }}
-                          className={`flex cursor-pointer items-center justify-between rounded-lg px-2.5 py-1.5 transition-all ${
+                          className={`flex cursor-pointer items-center justify-between rounded-lg px-2.5 py-1.5 transition-all outline-none focus:outline-none ${
                             isSelected
                               ? "bg-[#caa455]/20 border border-[#caa455]"
                               : "hover:bg-white/5"

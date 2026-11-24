@@ -24,12 +24,15 @@ test("Clan Map Paths & Province Normalization", async (t) => {
   const compContent = fs.readFileSync(provinceMapFile, "utf-8");
   assert.match(compContent, /export function ProvinceMap/);
   assert.match(compContent, /viewBox=\{VN_MAP_VIEWBOX\}/);
+  assert.match(compContent, /outline-none/, "ProvinceMap must prevent browser focus bounding box");
+  assert.match(compContent, /outline:\s*["']none["']/, "ProvinceMap path style must have outline: none");
 
   const cardContent = fs.readFileSync(clanMapCardFile, "utf-8");
   assert.match(cardContent, /export function ClanMapCard/);
   assert.match(cardContent, /Bản đồ dòng họ/);
   assert.match(cardContent, /Con cháu nhiều nhất ở/);
   assert.match(cardContent, /variant === "hero"/);
+  assert.match(cardContent, /outline-none/, "ClanMapCard must prevent focus outlines on interactive items");
 
   // Check queries.ts integration
   const queriesFile = path.resolve("utils/supabase/queries.ts");
