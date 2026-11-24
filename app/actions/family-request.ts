@@ -302,7 +302,11 @@ export async function getAdminFamilyCreationRequests(
     }
   }
 
-  return data.map((item: any) => ({
+  type RequestWithRequester = FamilyCreationRequest & {
+    requester?: { full_name?: string | null; avatar_url?: string | null } | null;
+  };
+
+  return (data as unknown as RequestWithRequester[]).map((item) => ({
     id: item.id,
     user_id: item.user_id,
     family_name: item.family_name,
