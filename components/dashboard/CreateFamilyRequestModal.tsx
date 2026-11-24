@@ -18,9 +18,13 @@ import { useRouter } from "next/navigation";
 
 interface Props {
   isLoggedIn?: boolean;
+  approvalRequired?: boolean;
 }
 
-export default function CreateFamilyRequestModal({ isLoggedIn = false }: Props) {
+export default function CreateFamilyRequestModal({
+  isLoggedIn = false,
+  approvalRequired = true,
+}: Props) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -60,6 +64,9 @@ export default function CreateFamilyRequestModal({ isLoggedIn = false }: Props) 
       } else {
         setIsOpen(false);
         setLogoPreview(null);
+        if (result.redirectUrl) {
+          router.push(result.redirectUrl);
+        }
       }
     });
   };
@@ -72,7 +79,7 @@ export default function CreateFamilyRequestModal({ isLoggedIn = false }: Props) 
         className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#8c1d1d] hover:bg-[#6e1616] text-white text-xs sm:text-sm font-bold shadow-sm transition-all cursor-pointer shrink-0"
       >
         <PlusCircle className="size-4" />
-        <span>Xin Tạo Dòng Họ Mới</span>
+        <span>{approvalRequired ? "Xin Tạo Dòng Họ Mới" : "Tạo Dòng Họ Mới"}</span>
       </button>
 
       {/* Modal yêu cầu đăng nhập nếu chưa đăng nhập */}
@@ -138,10 +145,12 @@ export default function CreateFamilyRequestModal({ isLoggedIn = false }: Props) 
                 Khởi Tạo Cội Nguồn
               </span>
               <h2 className="text-lg sm:text-xl font-black text-[#183b28] mt-0.5">
-                Đăng Ký Tạo Gia Tộc Mới
+                {approvalRequired ? "Đăng Ký Tạo Gia Tộc Mới" : "Khởi Tạo Gia Tộc Mới"}
               </h2>
               <p className="text-xs text-[#5c4a3e] mt-0.5">
-                Gửi thông tin dòng họ của bạn để Ban Quản Trị xét duyệt và cấp không gian gia phả.
+                {approvalRequired
+                  ? "Gửi thông tin dòng họ của bạn để Ban Quản Trị xét duyệt và cấp không gian gia phả."
+                  : "Điền thông tin dòng họ của bạn để bắt đầu khởi tạo không gian gia tộc và cây gia phả ngay lập tức."}
               </p>
             </div>
 
@@ -260,7 +269,7 @@ export default function CreateFamilyRequestModal({ isLoggedIn = false }: Props) 
                   className="flex-1 py-2 rounded-xl bg-[#8c1d1d] hover:bg-[#6e1616] text-white text-xs font-bold uppercase tracking-wider transition-all disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer shadow-sm"
                 >
                   {isPending && <Loader2 className="size-3.5 animate-spin" />}
-                  <span>Gửi Yêu Cầu</span>
+                  <span>{approvalRequired ? "Gửi Yêu Cầu" : "Khởi Tạo Ngay"}</span>
                 </button>
               </div>
             </form>

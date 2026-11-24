@@ -1,5 +1,6 @@
 import { requestJoinFamilyAction } from "@/app/actions/join-request";
 import { getUserActiveFamilyCreationRequest } from "@/app/actions/family-request";
+import { isFamilyApprovalRequired } from "@/app/actions/system-settings";
 import CreateFamilyRequestModal from "@/components/dashboard/CreateFamilyRequestModal";
 import FamilyRequestStatusCard from "@/components/dashboard/FamilyRequestStatusCard";
 import BackgroundDecor from "@/components/landing/BackgroundDecor";
@@ -127,11 +128,12 @@ export default async function DashboardFamilySwitcherPage({
     Number.parseInt(resolvedSearchParams?.page || "1", 10) || 1,
   );
 
-  const [profile, families, directory, activeRequest] = await Promise.all([
+  const [profile, families, directory, activeRequest, approvalRequired] = await Promise.all([
     getProfile(),
     getAccessibleFamilies(),
     getFamilyDirectory(q, visibility, currentPage),
     getUserActiveFamilyCreationRequest(),
+    isFamilyApprovalRequired(),
   ]);
 
   const isSystemAdmin = profile?.is_active && profile.role === "system_admin";
@@ -187,7 +189,10 @@ export default async function DashboardFamilySwitcherPage({
               </HeritageBadge>
             )}
           </div>
-          <CreateFamilyRequestModal isLoggedIn={Boolean(profile?.is_active)} />
+          <CreateFamilyRequestModal
+            isLoggedIn={Boolean(profile?.is_active)}
+            approvalRequired={approvalRequired}
+          />
         </div>
           {families.length === 0 ? (
             <div className="rounded-2xl border-2 border-dashed border-[#deb887]/80 bg-[#fffdf7] p-8 text-center">
@@ -196,7 +201,7 @@ export default async function DashboardFamilySwitcherPage({
               </div>
               <h3 className="text-base font-bold text-[#183b28]">Bạn chưa tham gia dòng họ nào</h3>
               <p className="text-xs text-[#5c4a3e] mt-1 max-w-md mx-auto">
-                Bạn có thể bấm nút "Xin Tạo Dòng Họ Mới" ở trên để gửi hồ sơ thành lập dòng họ của mình, hoặc tìm kiếm trong Danh bạ bên dưới để xin gia nhập.
+                Bạn có thể bấm nút {approvalRequired ? '"Xin Tạo Dòng Họ Mới"' : '"Tạo Dòng Họ Mới"'} ở trên để {approvalRequired ? "gửi hồ sơ thành lập dòng họ của mình" : "khởi tạo dòng họ của mình"}, hoặc tìm kiếm trong Danh bạ bên dưới để xin gia nhập.
               </p>
             </div>
           ) : (
