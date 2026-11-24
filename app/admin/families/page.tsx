@@ -1,8 +1,10 @@
 import AdminFamilyCreateForm from "@/components/AdminFamilyCreateForm";
 import AdminFamilyRequestsList from "@/components/admin/AdminFamilyRequestsList";
+import FamilyApprovalToggle from "@/components/admin/FamilyApprovalToggle";
 import AdminShell from "@/components/AdminShell";
 import LogoutButton from "@/components/LogoutButton";
 import { getAdminFamilyCreationRequests } from "@/app/actions/family-request";
+import { isFamilyApprovalRequired } from "@/app/actions/system-settings";
 import { AdminUserData } from "@/types";
 import { getProfile, getSupabase, getUser } from "@/utils/supabase/queries";
 import {
@@ -76,9 +78,10 @@ export default async function AdminFamiliesPage({ searchParams }: PageProps) {
   const currentTab = resolvedParams?.tab || "requests";
 
   const supabase = await getSupabase();
-  const [usersResult, creationRequests] = await Promise.all([
+  const [usersResult, creationRequests, isApprovalRequired] = await Promise.all([
     supabase.rpc("get_admin_users"),
     getAdminFamilyCreationRequests(),
+    isFamilyApprovalRequired(),
   ]);
 
   const { data: users, error: usersError } = usersResult;
@@ -109,6 +112,9 @@ export default async function AdminFamiliesPage({ searchParams }: PageProps) {
       }
     >
       <div className="space-y-6">
+        {/* Toggle Switch phê duyệt dòng họ */}
+        <FamilyApprovalToggle initialEnabled={isApprovalRequired} />
+
         {/* Navigation Tabs */}
         <div className="flex border-b border-stone-200 gap-2">
           <Link
