@@ -32,6 +32,11 @@ export function ProvinceMap({
   const values = Object.values(counts);
   const max = Math.max(1, ...(values.length > 0 ? values : [1]));
 
+  const activeCode = hoveredCode || selected;
+  const activeProvince = activeCode
+    ? VN_MAP_PROVINCES.find((p) => p.code === activeCode)
+    : null;
+
   return (
     <div className="relative w-full flex items-center justify-center">
       <svg
@@ -118,14 +123,12 @@ export function ProvinceMap({
         </g>
       </svg>
 
-      {/* Floating Tooltip when hovering over a province */}
-      {hoveredCode && (
-        <div className="pointer-events-none absolute bottom-1 left-1 z-20 rounded-xl border border-[#deb887] bg-[#1e1b18]/95 px-3 py-1.5 text-xs text-[#f5eee6] shadow-md backdrop-blur-xs">
-          <p className="font-bold text-[#f59e0b]">
-            {VN_MAP_PROVINCES.find((p) => p.code === hoveredCode)?.name}
-          </p>
+      {/* Floating Info Badge in Top-Right Corner (avoids overlapping Vietnam map geometry) */}
+      {activeCode && activeProvince && (
+        <div className="pointer-events-none absolute top-2 right-2 z-20 rounded-xl border border-[#deb887] bg-[#1e1b18]/95 px-3 py-1.5 text-xs text-[#f5eee6] shadow-md backdrop-blur-xs animate-fadeIn">
+          <p className="font-bold text-[#f59e0b]">{activeProvince.name}</p>
           <p className="text-[11px] text-[#d6ccc2]">
-            {(counts[hoveredCode] ?? 0).toLocaleString("vi-VN")} {unit}
+            {(counts[activeCode] ?? 0).toLocaleString("vi-VN")} {unit}
           </p>
         </div>
       )}

@@ -26,6 +26,8 @@ test("Clan Map Paths & Province Normalization", async (t) => {
   assert.match(compContent, /viewBox=\{VN_MAP_VIEWBOX\}/);
   assert.match(compContent, /outline-none/, "ProvinceMap must prevent browser focus bounding box");
   assert.match(compContent, /outline:\s*["']none["']/, "ProvinceMap path style must have outline: none");
+  assert.match(compContent, /top-2\s+right-2/, "ProvinceMap tooltip must be in top-right corner to not overlap map");
+  assert.doesNotMatch(compContent, /bottom-1\s+left-1/, "ProvinceMap must not position tooltip at bottom-left over Mekong delta");
 
   const cardContent = fs.readFileSync(clanMapCardFile, "utf-8");
   assert.match(cardContent, /export function ClanMapCard/);
