@@ -25,6 +25,8 @@ export interface Profile {
   password_changed_at: string | null;
   avatar_url?: string | null;
   phone_number?: string | null;
+  occupation?: string | null;
+  current_residence?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -34,6 +36,8 @@ export interface AdminUserData {
   full_name: string | null;
   email: string;
   phone_number?: string | null;
+  occupation?: string | null;
+  current_residence?: string | null;
   role: PlatformRole;
   is_active: boolean;
   must_change_password: boolean;
