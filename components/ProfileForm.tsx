@@ -141,13 +141,37 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
     }
   };
 
-  // Handle GPS location detection
+  // Helper: Fallback to IP Geolocation when GPS is denied or unavailable on PC
+  const fallbackToIpLocation = async (initialReason?: string) => {
+    try {
+      const res = await fetch("https://ipwho.is/?lang=vi");
+      if (!res.ok) throw new Error("Network error");
+      const data = await res.json();
+      if (data && data.success) {
+        const parts = [data.city, data.region, data.country].filter(Boolean);
+        const uniqueParts = Array.from(new Set(parts));
+        const detectedAddr = uniqueParts.join(", ");
+        setCurrentResidence(detectedAddr);
+        setProfileMsg({
+          type: "success",
+          text: `Đã xác định vị trí thành công (qua mạng IP): ${detectedAddr}`,
+        });
+        return;
+      }
+    } catch (ipErr) {
+      console.error("IP Geolocation fallback error:", ipErr);
+    }
+    setProfileMsg({
+      type: "error",
+      text: initialReason || "Không thể lấy vị trí hiện tại. Vui lòng nhập tay địa chỉ.",
+    });
+  };
+
+  // Handle GPS location detection with automatic IP fallback
   const handleDetectLocation = () => {
     if (typeof window === "undefined" || !navigator.geolocation) {
-      setProfileMsg({
-        type: "error",
-        text: "Trình duyệt của bạn không hỗ trợ định vị GPS.",
-      });
+      setIsLocating(true);
+      void fallbackToIpLocation().finally(() => setIsLocating(false));
       return;
     }
 
@@ -180,25 +204,21 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
           }
         } catch (err) {
           console.error("GPS Reverse Geocode Error:", err);
-          setProfileMsg({
-            type: "error",
-            text: "Đã lấy tọa độ GPS nhưng không thể chuyển đổi địa chỉ. Bạn có thể nhập tay.",
-          });
+          await fallbackToIpLocation("Đã lấy tọa độ GPS nhưng không thể chuyển đổi địa chỉ.");
         } finally {
           setIsLocating(false);
         }
       },
-      (error) => {
-        setIsLocating(false);
-        let msg = "Không thể lấy vị trí hiện tại qua GPS.";
-        if (error.code === error.PERMISSION_DENIED) {
-          msg = "Quyền truy cập vị trí bị từ chối. Vui lòng cấp quyền trong cài đặt trình duyệt.";
-        } else if (error.code === error.TIMEOUT) {
+      async (error) => {
+        let msg = "Quyền GPS bị từ chối hoặc máy tính chưa bật định vị.";
+        if (error.code === error.TIMEOUT) {
           msg = "Yêu cầu định vị GPS đã hết thời gian chờ.";
         }
-        setProfileMsg({ type: "error", text: msg });
+        // Fallback tự động sang IP Geolocation để người dùng luôn có vị trí
+        await fallbackToIpLocation(msg);
+        setIsLocating(false);
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }
     );
   };
 
