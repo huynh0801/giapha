@@ -144,11 +144,18 @@ const initialProfile = {
      - Icon: `Briefcase` (từ `lucide-react`)
      - Input text: `placeholder="Ví dụ: Kỹ sư, Giáo viên, Bác sĩ..."`
      - State binding: `occupation`
-  2. **Nơi ở hiện tại**:
+  2. **Nơi ở hiện tại & Định vị GPS:**
      - Nhãn: `NƠI Ở HIỆN TẠI`
      - Icon: `MapPin` (từ `lucide-react`)
      - Input text: `placeholder="Ví dụ: Ba Đình, Hà Nội..."`
      - State binding: `currentResidence`
+     - **Nút định vị GPS ("Lấy vị trí hiện tại"):**
+       - Tích hợp nút icon `Navigation` / `LocateFixed` ngay cạnh hoặc bên phải ô nhập nơi ở.
+       - Khi nhấn, kích hoạt `navigator.geolocation.getCurrentPosition`.
+       - Hiển thị trạng thái đang định vị (`isLocating` với spinner).
+       - Reverse geocode tọa độ sang địa chỉ tiếng Việt rõ ràng thông qua OpenStreetMap Nominatim API (`accept-language=vi`).
+       - Tự động điền chuỗi địa chỉ xác định được vào ô nhập `Nơi ở hiện tại` để người dùng có thể xem lại hoặc tinh chỉnh nếu muốn.
+       - Xử lý lỗi thân thiện nếu người dùng từ chối cấp quyền vị trí hoặc thiết bị không hỗ trợ GPS.
 - Trong hàm `handleSaveProfile`:
   - `formData.append("occupation", occupation.trim());`
   - `formData.append("current_residence", currentResidence.trim());`
@@ -161,7 +168,7 @@ const initialProfile = {
 
 1. **Unit / Integration Tests (`tests/user-profile.test.mjs`):**
    - Kiểm tra `updateUserProfileFull` xử lý `occupation` và `current_residence`.
-   - Kiểm tra `ProfileForm.tsx` có render input và icon cho `Nghề nghiệp` (`Briefcase`) và `Nơi ở hiện tại` (`MapPin`).
+   - Kiểm tra `ProfileForm.tsx` có render input và icon cho `Nghề nghiệp` (`Briefcase`) và `Nơi ở hiện tại` (`MapPin`), cùng nút định vị GPS.
    - Kiểm tra `app/profile/page.tsx` truyền đúng `occupation` và `currentResidence` sang form.
 2. **Kiểm tra cú pháp & Build:**
    - Chạy lệnh test tự động: `node --test tests/user-profile.test.mjs`.
