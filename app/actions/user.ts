@@ -2,6 +2,7 @@
 
 import { UserRole } from "@/types";
 import {
+  getAdminSupabase,
   getFamilyContextById,
   getProfile,
   getSupabase,
@@ -262,6 +263,8 @@ export async function setUserFamilyMembership(formData: FormData) {
 export async function updateUserProfileFull(formData: FormData) {
   const fullName = readTrimmed(formData, "full_name");
   const phoneNumber = readTrimmed(formData, "phone_number");
+  const occupation = readTrimmed(formData, "occupation");
+  const currentResidence = readTrimmed(formData, "current_residence");
   const avatarUrl = readTrimmed(formData, "avatar_url");
 
   const user = await getUser();
@@ -277,6 +280,8 @@ export async function updateUserProfileFull(formData: FormData) {
   const updateData: Record<string, unknown> = {
     full_name: fullName,
     phone_number: phoneNumber || null,
+    occupation: occupation || null,
+    current_residence: currentResidence || null,
     updated_at: new Date().toISOString(),
   };
 
@@ -291,6 +296,50 @@ export async function updateUserProfileFull(formData: FormData) {
 
   if (error) {
     return { error: error.message };
+  }
+
+  // Tự động đồng bộ sang hồ sơ thành viên cây gia phả nếu đã liên kết
+  try {
+    const adminSupabase = getAdminSupabase() || supabase;
+    const { data: families } = await adminSupabase
+      .from("families")
+      .select("id, slug, settings");
+
+    if (families) {
+      for (const fam of families) {
+        const settings = fam.settings as Record<string, unknown> | null;
+        const memberLinks = settings?.member_links as Record<string, string> | undefined;
+        const personId = memberLinks?.[user.id];
+        if (personId) {
+          const { data: tree } = await adminSupabase
+            .from("trees")
+            .select("id")
+            .eq("family_id", fam.id)
+            .maybeSingle();
+
+          if (tree?.id) {
+            await adminSupabase.from("person_details_private").upsert(
+              {
+                person_id: personId,
+                family_id: fam.id,
+                tree_id: tree.id,
+                phone_number: phoneNumber || null,
+                occupation: occupation || null,
+                current_residence: currentResidence || null,
+              },
+              { onConflict: "person_id,family_id,tree_id" }
+            );
+
+            if (fam.slug) {
+              revalidatePath(`/dashboard/${fam.slug}`);
+              revalidatePath(`/dashboard/${fam.slug}/members`);
+            }
+          }
+        }
+      }
+    }
+  } catch (syncErr) {
+    console.warn("Failed to sync profile to genealogy member:", syncErr);
   }
 
   revalidatePath("/profile");

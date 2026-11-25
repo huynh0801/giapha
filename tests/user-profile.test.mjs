@@ -21,6 +21,8 @@ test("user actions export updateUserProfileFull and changeAnyUserPassword", () =
   assert.match(actions, /full_name/);
   assert.match(actions, /phone_number/);
   assert.match(actions, /avatar_url/);
+  assert.match(actions, /occupation/);
+  assert.match(actions, /current_residence/);
   assert.match(actions, /current_password/);
   assert.match(actions, /new_password/);
 });
