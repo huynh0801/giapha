@@ -41,6 +41,8 @@ export default async function ProfilePage() {
     id: user.id,
     fullName: profile.full_name || "",
     phoneNumber: profile.phone_number || "",
+    occupation: profile.occupation || "",
+    currentResidence: profile.current_residence || "",
     email: user.email || "",
     role: profile.role,
     avatarUrl: profile.avatar_url || null,

@@ -5,11 +5,15 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   AlertCircle,
+  Briefcase,
   Camera,
   CheckCircle2,
   KeyRound,
+  Loader2,
+  LocateFixed,
   Lock,
   Mail,
+  MapPin,
   Phone,
   Save,
   ShieldCheck,
@@ -26,6 +30,8 @@ interface ProfileFormProps {
     id: string;
     fullName: string;
     phoneNumber: string;
+    occupation?: string | null;
+    currentResidence?: string | null;
     email: string;
     role: "system_admin" | "member";
     avatarUrl: string | null;
@@ -40,6 +46,11 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
   // Profile fields state
   const [fullName, setFullName] = useState(initialProfile.fullName);
   const [phoneNumber, setPhoneNumber] = useState(initialProfile.phoneNumber);
+  const [occupation, setOccupation] = useState(initialProfile.occupation || "");
+  const [currentResidence, setCurrentResidence] = useState(
+    initialProfile.currentResidence || ""
+  );
+  const [isLocating, setIsLocating] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(
     initialProfile.avatarUrl,
   );
@@ -107,6 +118,8 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
       const saveFormData = new FormData();
       saveFormData.append("full_name", fullName);
       saveFormData.append("phone_number", phoneNumber);
+      saveFormData.append("occupation", occupation);
+      saveFormData.append("current_residence", currentResidence);
       saveFormData.append("avatar_url", res.publicUrl);
 
       const saveRes = await updateUserProfileFull(saveFormData);
@@ -128,6 +141,67 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
     }
   };
 
+  // Handle GPS location detection
+  const handleDetectLocation = () => {
+    if (typeof window === "undefined" || !navigator.geolocation) {
+      setProfileMsg({
+        type: "error",
+        text: "Trình duyệt của bạn không hỗ trợ định vị GPS.",
+      });
+      return;
+    }
+
+    setIsLocating(true);
+    setProfileMsg(null);
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude } = position.coords;
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}&accept-language=vi`
+          );
+          if (!res.ok) {
+            throw new Error("Không thể kết nối máy chủ dịch vụ bản đồ.");
+          }
+          const data = await res.json();
+          if (data && data.display_name) {
+            setCurrentResidence(data.display_name);
+            setProfileMsg({
+              type: "success",
+              text: "Đã xác định vị trí hiện tại thành công qua GPS!",
+            });
+          } else {
+            setCurrentResidence(`Tọa độ: ${latitude.toFixed(5)}, ${longitude.toFixed(5)}`);
+            setProfileMsg({
+              type: "success",
+              text: "Đã nhận diện tọa độ GPS thành công!",
+            });
+          }
+        } catch (err) {
+          console.error("GPS Reverse Geocode Error:", err);
+          setProfileMsg({
+            type: "error",
+            text: "Đã lấy tọa độ GPS nhưng không thể chuyển đổi địa chỉ. Bạn có thể nhập tay.",
+          });
+        } finally {
+          setIsLocating(false);
+        }
+      },
+      (error) => {
+        setIsLocating(false);
+        let msg = "Không thể lấy vị trí hiện tại qua GPS.";
+        if (error.code === error.PERMISSION_DENIED) {
+          msg = "Quyền truy cập vị trí bị từ chối. Vui lòng cấp quyền trong cài đặt trình duyệt.";
+        } else if (error.code === error.TIMEOUT) {
+          msg = "Yêu cầu định vị GPS đã hết thời gian chờ.";
+        }
+        setProfileMsg({ type: "error", text: msg });
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+    );
+  };
+
   // Handle saving general profile
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -143,6 +217,8 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
       const formData = new FormData();
       formData.append("full_name", fullName.trim());
       formData.append("phone_number", phoneNumber.trim());
+      formData.append("occupation", occupation.trim());
+      formData.append("current_residence", currentResidence.trim());
       if (avatarUrl) {
         formData.append("avatar_url", avatarUrl);
       }
@@ -392,6 +468,75 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
                   placeholder="Ví dụ: 0912345678"
                   className="w-full rounded-xl border border-[#d8cbbb] bg-white py-2.5 pl-10 pr-3.5 text-sm font-semibold text-[#2c1a11] outline-none transition focus:border-[#800000] focus:ring-2 focus:ring-[#800000]/10"
                 />
+              </div>
+            </div>
+
+            <div>
+              <label
+                htmlFor="occupation"
+                className="block text-xs font-bold uppercase tracking-wider text-[#5c4a3e] mb-1.5"
+              >
+                Nghề nghiệp
+              </label>
+              <div className="relative">
+                <Briefcase className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-stone-400" />
+                <input
+                  id="occupation"
+                  type="text"
+                  value={occupation}
+                  onChange={(e) => setOccupation(e.target.value)}
+                  placeholder="Ví dụ: Kỹ sư, Bác sĩ, Giáo viên..."
+                  className="w-full rounded-xl border border-[#d8cbbb] bg-white py-2.5 pl-10 pr-3.5 text-sm font-semibold text-[#2c1a11] outline-none transition focus:border-[#800000] focus:ring-2 focus:ring-[#800000]/10"
+                />
+              </div>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label
+                  htmlFor="current_residence"
+                  className="block text-xs font-bold uppercase tracking-wider text-[#5c4a3e]"
+                >
+                  Nơi ở hiện tại
+                </label>
+                <button
+                  type="button"
+                  onClick={handleDetectLocation}
+                  disabled={isLocating}
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-[#800000] hover:text-[#a62424] transition disabled:opacity-50 cursor-pointer"
+                  title="Sử dụng GPS để định vị địa chỉ hiện tại"
+                >
+                  {isLocating ? (
+                    <Loader2 className="size-3.5 animate-spin" />
+                  ) : (
+                    <LocateFixed className="size-3.5" />
+                  )}
+                  <span>{isLocating ? "Đang định vị..." : "Lấy vị trí GPS"}</span>
+                </button>
+              </div>
+              <div className="relative">
+                <MapPin className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-stone-400" />
+                <input
+                  id="current_residence"
+                  type="text"
+                  value={currentResidence}
+                  onChange={(e) => setCurrentResidence(e.target.value)}
+                  placeholder="Ví dụ: Ba Đình, Hà Nội..."
+                  className="w-full rounded-xl border border-[#d8cbbb] bg-white py-2.5 pl-10 pr-10 text-sm font-semibold text-[#2c1a11] outline-none transition focus:border-[#800000] focus:ring-2 focus:ring-[#800000]/10"
+                />
+                <button
+                  type="button"
+                  onClick={handleDetectLocation}
+                  disabled={isLocating}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-stone-400 hover:text-[#800000] transition rounded-lg hover:bg-amber-50 cursor-pointer"
+                  title="Định vị vị trí hiện tại"
+                >
+                  {isLocating ? (
+                    <Loader2 className="size-4 animate-spin text-[#800000]" />
+                  ) : (
+                    <LocateFixed className="size-4" />
+                  )}
+                </button>
               </div>
             </div>
 
