@@ -26,7 +26,7 @@
 - Consumes: `Profile`, `AdminUserData` trong `types/index.ts`
 - Produces: `occupation?: string | null; current_residence?: string | null;` trên `Profile` và `AdminUserData`
 
-- [ ] **Step 1: Tạo migration SQL thêm 2 cột vào bảng `profiles`**
+- [x] **Step 1: Tạo migration SQL thêm 2 cột vào bảng `profiles`**
   Tạo file `supabase/migrations/20261125200000_add_profile_occupation_residence.sql`:
   ```sql
   ALTER TABLE public.profiles
@@ -37,13 +37,13 @@
   COMMENT ON COLUMN public.profiles.current_residence IS 'Địa chỉ hoặc nơi ở hiện tại của người dùng';
   ```
 
-- [ ] **Step 2: Cập nhật type `Profile` và `AdminUserData` trong `types/index.ts`**
+- [x] **Step 2: Cập nhật type `Profile` và `AdminUserData` trong `types/index.ts`**
   Thêm `occupation?: string | null;` và `current_residence?: string | null;` vào interface `Profile` và `AdminUserData`.
 
-- [ ] **Step 3: Kiểm tra tính tương thích TypeScript**
+- [x] **Step 3: Kiểm tra tính tương thích TypeScript**
   Chạy `npx tsc --noEmit` để đảm bảo không có xung đột type.
 
-- [ ] **Step 4: Commit thay đổi Task 1**
+- [x] **Step 4: Commit thay đổi Task 1**
   `git add supabase/migrations types/index.ts && git commit -m "feat(profile): add occupation and current_residence to db schema and types"`
 
 ---
@@ -58,10 +58,10 @@
 - Consumes: `formData.get("occupation")`, `formData.get("current_residence")`
 - Produces: `updateUserProfileFull` nhận và lưu 2 trường mới vào `profiles`, đồng thời đồng bộ vào `person_details_private` nếu có liên kết `member_links`.
 
-- [ ] **Step 1: Viết test mở rộng trong `tests/user-profile.test.mjs`**
+- [x] **Step 1: Viết test mở rộng trong `tests/user-profile.test.mjs`**
   Thêm kiểm tra assertion cho `occupation` và `current_residence` trong file `app/actions/user.ts`.
 
-- [ ] **Step 2: Cập nhật `updateUserProfileFull` trong `app/actions/user.ts`**
+- [x] **Step 2: Cập nhật `updateUserProfileFull` trong `app/actions/user.ts`**
   - Trích xuất `occupation = readTrimmed(formData, "occupation");` và `current_residence = readTrimmed(formData, "current_residence");`.
   - Cập nhật vào đối tượng `updateData` ghi vào bảng `profiles`.
   - Thêm logic tìm các dòng họ mà người dùng có liên kết:
@@ -102,10 +102,10 @@
     ```
   - Thêm revalidate các đường dẫn `/dashboard`.
 
-- [ ] **Step 3: Chạy test xác nhận logic Server Action**
+- [x] **Step 3: Chạy test xác nhận logic Server Action**
   Chạy `node --test tests/user-profile.test.mjs`.
 
-- [ ] **Step 4: Commit thay đổi Task 2**
+- [x] **Step 4: Commit thay đổi Task 2**
   `git add app/actions/user.ts tests/user-profile.test.mjs && git commit -m "feat(profile): handle occupation and residence in updateUserProfileFull with genealogy sync"`
 
 ---
@@ -120,10 +120,10 @@
 - Consumes: `initialProfile.occupation`, `initialProfile.currentResidence`
 - Produces: Ô nhập Nghề nghiệp, Nơi ở hiện tại, Nút định vị GPS kèm hàm `handleDetectLocation`
 
-- [ ] **Step 1: Cập nhật `app/profile/page.tsx` truyền dữ liệu ban đầu**
+- [x] **Step 1: Cập nhật `app/profile/page.tsx` truyền dữ liệu ban đầu**
   Bổ sung `occupation: profile.occupation || ""` và `currentResidence: profile.current_residence || ""` vào `initialProfile`.
 
-- [ ] **Step 2: Cập nhật `ProfileFormProps` và khởi tạo state trong `components/ProfileForm.tsx`**
+- [x] **Step 2: Cập nhật `ProfileFormProps` và khởi tạo state trong `components/ProfileForm.tsx`**
   - Mở rộng `initialProfile`:
     ```typescript
     occupation?: string | null;
@@ -136,7 +136,7 @@
     const [isLocating, setIsLocating] = useState(false);
     ```
 
-- [ ] **Step 3: Xây dựng hàm định vị GPS `handleDetectLocation`**
+- [x] **Step 3: Xây dựng hàm định vị GPS `handleDetectLocation`**
   ```typescript
   const handleDetectLocation = () => {
     if (!navigator.geolocation) {
@@ -193,7 +193,7 @@
   };
   ```
 
-- [ ] **Step 4: Render 2 ô nhập liệu và nút GPS trong Form**
+- [x] **Step 4: Render 2 ô nhập liệu và nút GPS trong Form**
   - Ô **Nghề nghiệp**: Icon `Briefcase`, input text `value={occupation}`.
   - Ô **Nơi ở hiện tại**: Icon `MapPin`, input text `value={currentResidence}`, kèm nút icon `LocateFixed` (hoặc `Navigation`) với tooltip / nhãn "Định vị GPS".
   - Trong `handleSaveProfile`:
@@ -203,7 +203,7 @@
     `saveFormData.append("occupation", occupation);`
     `saveFormData.append("current_residence", currentResidence);`
 
-- [ ] **Step 5: Commit thay đổi Task 3**
+- [x] **Step 5: Commit thay đổi Task 3**
   `git add components/ProfileForm.tsx app/profile/page.tsx && git commit -m "feat(profile): add occupation, residence inputs and gps geolocation button"`
 
 ---
@@ -213,17 +213,17 @@
 **Files:**
 - Modify: `tests/user-profile.test.mjs`
 
-- [ ] **Step 1: Cập nhật `tests/user-profile.test.mjs`**
+- [x] **Step 1: Cập nhật `tests/user-profile.test.mjs`**
   Đảm bảo test kiểm tra:
   - Form có chứa `Briefcase`, `MapPin`, `LocateFixed` hoặc `handleDetectLocation`.
   - Có các nhãn `Nghề nghiệp`, `Nơi ở hiện tại`.
   - Kiểm tra `updateUserProfileFull` nhận đúng các trường mới.
 
-- [ ] **Step 2: Chạy bộ kiểm thử tự động**
+- [x] **Step 2: Chạy bộ kiểm thử tự động**
   Chạy `node --test tests/user-profile.test.mjs`.
 
-- [ ] **Step 3: Chạy TypeScript check**
+- [x] **Step 3: Chạy TypeScript check**
   Chạy `npx tsc --noEmit` để đảm bảo không có lỗi type.
 
-- [ ] **Step 4: Commit và hoàn tất**
+- [x] **Step 4: Commit và hoàn tất**
   `git add tests/user-profile.test.mjs && git commit -m "test(profile): update tests to cover occupation, residence and gps location"`
