@@ -36,12 +36,20 @@ test("ProfileForm component contains required fields and integration", () => {
   assert.match(form, /Bảo mật & Đổi mật khẩu/);
   assert.match(form, /Họ và tên/);
   assert.match(form, /Số điện thoại/);
+  assert.match(form, /Nghề nghiệp/);
+  assert.match(form, /Nơi ở hiện tại/);
+  assert.match(form, /handleDetectLocation/);
+  assert.match(form, /Briefcase/);
+  assert.match(form, /MapPin/);
+  assert.match(form, /LocateFixed/);
 });
 
 test("profile page integrates header, form, families list, and footer", () => {
   const page = read("app/profile/page.tsx");
   assert.match(page, /LandingHeader/);
   assert.match(page, /ProfileForm/);
+  assert.match(page, /occupation/);
+  assert.match(page, /currentResidence/);
   assert.match(page, /LandingFooter/);
   assert.match(page, /getAccessibleFamilies/);
   assert.match(page, /redirect\("\/login\?next=\/profile"\)/);
